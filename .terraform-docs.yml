@@ -1,0 +1,13 @@
+---
+formatter: markdown table
+
+output:
+  file: terraform.md
+  mode: inject
+
+# .terraform.lock.hcl is gitignored, so reading it in pre-commit (where it
+# exists locally) but not in CI (where it doesn't) produces inconsistent
+# provider-version values in the doc. Disable it everywhere so the doc
+# only shows the constraint patterns from required_providers.
+settings:
+  lockfile: false

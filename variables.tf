@@ -67,16 +67,10 @@ variable "terraform_admin_private_key_path" {
   default     = "generated-output/terraform_admin_private_key.pem"
 }
 
-variable "terraform_admin_public_key_path" {
-  description = "Path where the Terraform admin public key will be saved"
-  type        = string
-  default     = "generated-output/terraform_admin_public_key.pem"
-}
-
 # ==============================================================================
-# External Secrets — admin/ holds these for `infra/` to push into the
-# `terraform` GitLab project's CI/CD variables. Manually rotated by editing
-# this stack's tfvars (or env vars) and re-applying admin/ + infra/.
+# External Secrets — admin/ holds these and pushes them to the `terraform`
+# GitLab project's CI/CD variables (via the gitlab/repo module call below).
+# Manually rotated by editing this stack's tfvars (or env vars) and re-applying.
 # ==============================================================================
 
 variable "cloudflare_api_token" {
@@ -130,9 +124,4 @@ variable "alarm_email" {
   type        = string
 }
 
-variable "admin_secrets_bundle_path" {
-  description = "Path where the admin secrets bundle JSON is written"
-  type        = string
-  default     = "generated-output/admin_secrets.json"
-}
 

@@ -80,48 +80,14 @@ resource "oci_identity_api_key" "terraform_admin" {
   key_value = tls_private_key.terraform_admin.public_key_pem
 }
 
-# Customer Secret Key for S3-compatible access (for S3 backend)
-resource "oci_identity_customer_secret_key" "terraform_admin" {
-  user_id      = oci_identity_user.terraform_admin.id
-  display_name = "terraform-admin-s3-key"
-}
-
-# Save admin private key to disk
+# PEM written to disk because the workload repo's OCI provider auths via
+# OCI_PRIVATE_KEY_PATH (env var → file path) — the .envrc below points
+# at this exact file. Provider 8.x can also take the literal PEM via
+# OCI_PRIVATE_KEY, but multi-line env vars are flaky across shells; the
+# file path is single-line and bulletproof.
 resource "local_sensitive_file" "terraform_admin_private_key" {
   content         = tls_private_key.terraform_admin.private_key_pem
   filename        = var.terraform_admin_private_key_path
-  file_permission = "0600"
-}
-
-# Save admin public key to disk
-resource "local_file" "terraform_admin_public_key" {
-  content         = tls_private_key.terraform_admin.public_key_pem
-  filename        = var.terraform_admin_public_key_path
-  file_permission = "0644"
-}
-
-# Generate OCI config file for terraform-admin user
-resource "local_file" "oci_config" {
-  content         = <<-EOT
-  [DEFAULT]
-  user=${oci_identity_user.terraform_admin.id}
-  fingerprint=${oci_identity_api_key.terraform_admin.fingerprint}
-  key_file=${abspath(var.terraform_admin_private_key_path)}
-  tenancy=${var.oci_tenancy_ocid}
-  region=${var.oci_region}
-  EOT
-  filename        = "generated-output/oci_config"
-  file_permission = "0600"
-}
-
-# Generate AWS credentials file for S3 backend (using Customer Secret Key)
-resource "local_sensitive_file" "aws_credentials" {
-  content         = <<-EOT
-[default]
-aws_access_key_id = ${oci_identity_customer_secret_key.terraform_admin.id}
-aws_secret_access_key = ${oci_identity_customer_secret_key.terraform_admin.key}
-EOT
-  filename        = "generated-output/aws_credentials"
   file_permission = "0600"
 }
 
@@ -190,19 +156,14 @@ resource "oci_identity_policy" "admin_kms_object_storage" {
 }
 
 # ==============================================================================
-# Secrets bundle — JSON file that infra/ reads to populate the `terraform`
-# GitLab project's CI/CD variables. Multi-line content (oci_config, .pem) is
-# base64-encoded so it survives GitLab's masked single-line env_var format;
-# single-line tokens are stored plain. Consumers in CI base64-decode the
-# *_B64 keys back to disk.
+# Values pushed to the `terraform` GitLab project as CI/CD variables, AND
+# exported from .envrc for local dev. PEM goes via OCI_API_KEY_B64
+# (base64-encoded, single-line) — multi-line PEMs through env vars are
+# unreliable across shells, so CI's before_script decodes it to disk and
+# uses OCI_PRIVATE_KEY_PATH instead.
 # ==============================================================================
 
 locals {
-  # Values pushed to the `terraform` GitLab project as CI/CD variables.
-  # PEM goes via OCI_API_KEY_B64 (base64-encoded, single-line) — multi-line
-  # PEMs through env vars are unreliable across shells, so CI's
-  # before_script materializes the .pem to disk and uses
-  # OCI_PRIVATE_KEY_PATH instead.
   admin_secrets_bundle = {
     # OCI auth — short single-line values native env vars OK
     OCI_TENANCY_OCID = var.oci_tenancy_ocid
@@ -234,12 +195,6 @@ locals {
 
     GITHUB_BOT_TOKEN = var.bot_github_token
   }
-}
-
-resource "local_sensitive_file" "admin_secrets_bundle" {
-  filename        = var.admin_secrets_bundle_path
-  content         = jsonencode(local.admin_secrets_bundle)
-  file_permission = "0600"
 }
 
 # Local-dev convenience: drop a .envrc next to the secrets bundle that
