@@ -1,0 +1,79 @@
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.9 |
+| <a name="requirement_gitlab"></a> [gitlab](#requirement\_gitlab) | ~> 18.2 |
+| <a name="requirement_local"></a> [local](#requirement\_local) | ~> 2.0 |
+| <a name="requirement_oci"></a> [oci](#requirement\_oci) | ~> 8.0 |
+| <a name="requirement_tls"></a> [tls](#requirement\_tls) | ~> 4.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_gitlab"></a> [gitlab](#provider\_gitlab) | ~> 18.2 |
+| <a name="provider_local"></a> [local](#provider\_local) | ~> 2.0 |
+| <a name="provider_oci"></a> [oci](#provider\_oci) | ~> 8.0 |
+| <a name="provider_tls"></a> [tls](#provider\_tls) | ~> 4.0 |
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://gitlab.com/tnoff-projects/terraform-modules.git//gitlab/repo | b7b699cd886c0d29c8aac66337381d6a8939495a |
+| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://gitlab.com/tnoff-projects/terraform-modules.git//oci/object-storage-bucket | 0611b7d8e4409a930c6b9dfa021076784249b520 |
+| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://gitlab.com/tnoff-projects/terraform-modules.git//oci/secret-vault | 0611b7d8e4409a930c6b9dfa021076784249b520 |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [local_file.oci_config](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file) | resource |
+| [local_file.terraform_admin_public_key](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file) | resource |
+| [local_sensitive_file.admin_secrets_bundle](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
+| [local_sensitive_file.aws_credentials](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
+| [local_sensitive_file.envrc](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
+| [local_sensitive_file.terraform_admin_private_key](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
+| [oci_identity_api_key.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
+| [oci_identity_customer_secret_key.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_customer_secret_key) | resource |
+| [oci_identity_group.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
+| [oci_identity_policy.admin_kms_object_storage](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
+| [oci_identity_policy.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
+| [oci_identity_user.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
+| [oci_identity_user_group_membership.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user_group_membership) | resource |
+| [tls_private_key.terraform_admin](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
+| [gitlab_group.personal](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/data-sources/group) | data source |
+| [oci_identity_tenancy.current](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_tenancy) | data source |
+| [oci_objectstorage_namespace.this](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/objectstorage_namespace) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_admin_secrets_bundle_path"></a> [admin\_secrets\_bundle\_path](#input\_admin\_secrets\_bundle\_path) | Path where the admin secrets bundle JSON is written | `string` | `"../generated-output/admin_secrets.json"` | no |
+| <a name="input_alarm_email"></a> [alarm\_email](#input\_alarm\_email) | Email address for OCI alarm notifications | `string` | n/a | yes |
+| <a name="input_bot_github_token"></a> [bot\_github\_token](#input\_bot\_github\_token) | GitHub personal access token used by Renovate | `string` | n/a | yes |
+| <a name="input_cloudflare_account_id"></a> [cloudflare\_account\_id](#input\_cloudflare\_account\_id) | Cloudflare account identifier (not secret) | `string` | n/a | yes |
+| <a name="input_cloudflare_api_token"></a> [cloudflare\_api\_token](#input\_cloudflare\_api\_token) | Cloudflare account API token | `string` | n/a | yes |
+| <a name="input_config_file_profile"></a> [config\_file\_profile](#input\_config\_file\_profile) | Profile name in ~/.oci/config file | `string` | `"DEFAULT"` | no |
+| <a name="input_discord_token"></a> [discord\_token](#input\_discord\_token) | Discord bot token | `string` | n/a | yes |
+| <a name="input_github_token"></a> [github\_token](#input\_github\_token) | GitHub personal access token (admin) | `string` | n/a | yes |
+| <a name="input_gitlab_api_key"></a> [gitlab\_api\_key](#input\_gitlab\_api\_key) | GitLab personal access token for admin user | `string` | n/a | yes |
+| <a name="input_gitlab_bot_api_key"></a> [gitlab\_bot\_api\_key](#input\_gitlab\_bot\_api\_key) | GitLab personal access token for bot user | `string` | n/a | yes |
+| <a name="input_oci_region"></a> [oci\_region](#input\_oci\_region) | OCI region | `string` | `"us-ashburn-1"` | no |
+| <a name="input_oci_tenancy_ocid"></a> [oci\_tenancy\_ocid](#input\_oci\_tenancy\_ocid) | OCID of the tenancy (all resources created in root compartment) | `string` | n/a | yes |
+| <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | SSH public key for OKE worker nodes | `string` | n/a | yes |
+| <a name="input_state_bucket_prefix"></a> [state\_bucket\_prefix](#input\_state\_bucket\_prefix) | Prefix for state bucket names | `string` | `"terraform-state"` | no |
+| <a name="input_terraform_admin_group_name"></a> [terraform\_admin\_group\_name](#input\_terraform\_admin\_group\_name) | Name of the Terraform admin group | `string` | `"terraform-administrators"` | no |
+| <a name="input_terraform_admin_private_key_path"></a> [terraform\_admin\_private\_key\_path](#input\_terraform\_admin\_private\_key\_path) | Path where the Terraform admin private key will be saved | `string` | `"../generated-output/terraform_admin_private_key.pem"` | no |
+| <a name="input_terraform_admin_public_key_path"></a> [terraform\_admin\_public\_key\_path](#input\_terraform\_admin\_public\_key\_path) | Path where the Terraform admin public key will be saved | `string` | `"../generated-output/terraform_admin_public_key.pem"` | no |
+| <a name="input_terraform_admin_user_name"></a> [terraform\_admin\_user\_name](#input\_terraform\_admin\_user\_name) | Name of the Terraform admin user for infrastructure management | `string` | `"terraform-admin"` | no |
+| <a name="input_vault_name"></a> [vault\_name](#input\_vault\_name) | Name prefix for the vault and KMS key | `string` | `"terraform-state"` | no |
+| <a name="input_workspaces"></a> [workspaces](#input\_workspaces) | List of workspace names to create state buckets for (admin state stays local) | `list(string)` | <pre>[<br/>  "discord",<br/>  "infra",<br/>  "oci",<br/>  "apps",<br/>  "dns"<br/>]</pre> | no |
+
+## Outputs
+
+No outputs.
+<!-- END_TF_DOCS -->
