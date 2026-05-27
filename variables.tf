@@ -36,7 +36,7 @@ variable "state_bucket_prefix" {
 variable "workspaces" {
   description = "List of workspace names to create state buckets for (admin state stays local)"
   type        = list(string)
-  default     = ["discord", "infra", "oci", "apps", "dns"]
+  default     = ["discord", "infra", "oci", "oci-alarms", "apps", "dns"]
 }
 
 variable "vault_name" {
