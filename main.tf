@@ -190,6 +190,7 @@ locals {
     TF_VAR_github_token          = var.github_token
     TF_VAR_gitlab_api_key        = var.gitlab_api_key
     TF_VAR_gitlab_bot_api_key    = var.gitlab_bot_api_key
+    TF_VAR_mcp_gitlab_token      = var.mcp_gitlab_token
     TF_VAR_ssh_public_key        = var.ssh_public_key
     TF_VAR_alarm_email           = var.alarm_email
 
@@ -267,6 +268,7 @@ locals {
     TF_VAR_github_token          = var.github_token
     TF_VAR_gitlab_api_key        = var.gitlab_api_key
     TF_VAR_gitlab_bot_api_key    = var.gitlab_bot_api_key
+    TF_VAR_mcp_gitlab_token      = var.mcp_gitlab_token
     TF_VAR_ssh_public_key        = var.ssh_public_key
     TF_VAR_alarm_email           = var.alarm_email
 
