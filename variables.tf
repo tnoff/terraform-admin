@@ -114,6 +114,12 @@ variable "gitlab_bot_api_key" {
   sensitive   = true
 }
 
+variable "mcp_gitlab_token" {
+  description = "GitLab personal access token consumed by the in-cluster mcp-gitlab pod (read_api scope)"
+  type        = string
+  sensitive   = true
+}
+
 variable "ssh_public_key" {
   description = "SSH public key for OKE worker nodes"
   type        = string
