@@ -68,6 +68,28 @@ variable "terraform_admin_private_key_path" {
 }
 
 # ==============================================================================
+# Optional Variables - MCP Readonly User
+# ==============================================================================
+
+variable "mcp_readonly_user_name" {
+  description = "Name of the tenancy-wide read-only user backing the local OCI MCP server"
+  type        = string
+  default     = "mcp-readonly-bot"
+}
+
+variable "mcp_readonly_group_name" {
+  description = "Name of the tenancy-wide read-only group backing the local OCI MCP server"
+  type        = string
+  default     = "mcp-readonly-bot"
+}
+
+variable "mcp_readonly_private_key_path" {
+  description = "Path where the MCP read-only user's API key PEM will be written"
+  type        = string
+  default     = "generated-output/mcp_readonly_api_key.pem"
+}
+
+# ==============================================================================
 # External Secrets — admin/ holds these and pushes them to the `terraform`
 # GitLab project's CI/CD variables (via the gitlab/repo module call below).
 # Manually rotated by editing this stack's tfvars (or env vars) and re-applying.
