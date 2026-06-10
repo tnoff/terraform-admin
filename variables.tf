@@ -148,18 +148,6 @@ variable "secret_age_tracker_gitlab_token" {
   sensitive   = true
 }
 
-variable "layer1_rotation_dates" {
-  description = "Operator-maintained map of layer-1 admin tfvar name → last-rotated YYYY-MM-DD. Read by the secret-age-tracker CronJob via a terraform-managed ConfigMap in the security-scanner ns. Update the matching entry in the same commit that rotates the secret. Defaults seed each entry to today's date; rotate-and-bump promptly so the report isn't lying."
-  type        = map(string)
-  default = {
-    ssh_public_key     = "2026-06-10"
-    github_token       = "2026-06-10"
-    bot_github_token   = "2026-06-10"
-    gitlab_api_key     = "2026-06-10"
-    gitlab_bot_api_key = "2026-06-10"
-  }
-}
-
 variable "ssh_public_key" {
   description = "SSH public key for OKE worker nodes"
   type        = string
