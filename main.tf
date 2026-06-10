@@ -280,6 +280,18 @@ locals {
     TF_VAR_ssh_public_key        = var.ssh_public_key
     TF_VAR_alarm_email           = var.alarm_email
 
+    # Consumed by the apps/ stack to materialize the
+    # `secret-age-tracker-gitlab-token` k8s Secret in the security-scanner
+    # ns. Folded into the oke-security-scanner image per
+    # docs/projects/secret-age-tracker.md.
+    TF_VAR_secret_age_tracker_gitlab_token = var.secret_age_tracker_gitlab_token
+
+    # HCL-stringified map(string) so terraform's TF_VAR_* env-var
+    # mechanism can hydrate the complex variable in the apps/ stack
+    # (which writes it into the `layer-1-rotation-ledger` ConfigMap).
+    # See https://developer.hashicorp.com/terraform/cli/config/environment-variables#tf_var_name
+    TF_VAR_layer1_rotation_dates = "{ ${join(", ", [for k, v in var.layer1_rotation_dates : "${k} = \"${v}\""])} }"
+
     GITHUB_BOT_TOKEN = var.bot_github_token
   }
 }
@@ -358,6 +370,11 @@ locals {
     TF_VAR_ssh_public_key        = var.ssh_public_key
     TF_VAR_alarm_email           = var.alarm_email
 
+    # See admin_secrets_bundle for the rationale on these two — same
+    # values, different consumer (CI vs local .envrc).
+    TF_VAR_secret_age_tracker_gitlab_token = var.secret_age_tracker_gitlab_token
+    TF_VAR_layer1_rotation_dates           = "{ ${join(", ", [for k, v in var.layer1_rotation_dates : "${k} = \"${v}\""])} }"
+
     GITHUB_BOT_TOKEN = var.bot_github_token
   }
 
@@ -367,6 +384,10 @@ locals {
     "TF_VAR_alarm_email",
     "TF_VAR_ssh_public_key",
     "TF_VAR_cloudflare_account_id",
+    # HCL-stringified map with `=` and quotes — GitLab masking rejects
+    # values containing `"`, so this can't be masked. Contents are
+    # operator-maintained dates (no secret material), safe to expose.
+    "TF_VAR_layer1_rotation_dates",
   ]
 
   terraform_weekly_schedule = {
