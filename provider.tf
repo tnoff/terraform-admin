@@ -18,6 +18,13 @@ terraform {
       source  = "gitlabhq/gitlab"
       version = "~> 18.2"
     }
+    # Captures last-rotated timestamps for layer-1 admin tfvars via the
+    # terraform_data/time_static pair pattern. See rotation-tracking.tf
+    # and docs/projects/secret-age-tracker.md.
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.13"
+    }
   }
 
   # Use local backend since we're creating the remote backend

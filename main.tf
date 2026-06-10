@@ -280,6 +280,27 @@ locals {
     TF_VAR_ssh_public_key        = var.ssh_public_key
     TF_VAR_alarm_email           = var.alarm_email
 
+    # Consumed by the apps/ stack to materialize the
+    # `secret-age-tracker-gitlab-token` k8s Secret in the security-scanner
+    # ns. Folded into the oke-security-scanner image per
+    # docs/projects/secret-age-tracker.md.
+    TF_VAR_secret_age_tracker_gitlab_token = var.secret_age_tracker_gitlab_token
+
+    # Auto-captured rotation timestamps — see rotation-tracking.tf.
+    # Each `time_static.<var>_rotated_at.rfc3339` is fresh when the
+    # underlying tfvar value's sha256 changes, and pinned otherwise.
+    # The apps/ stack reads these and writes the
+    # `layer-1-rotation-ledger` ConfigMap from them.
+    TF_VAR_discord_token_rotated_at                   = time_static.discord_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
+    TF_VAR_github_token_rotated_at                    = time_static.github_token_rotated_at.rfc3339
+    TF_VAR_bot_github_token_rotated_at                = time_static.bot_github_token_rotated_at.rfc3339
+    TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
+    TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
+    TF_VAR_mcp_gitlab_token_rotated_at                = time_static.mcp_gitlab_token_rotated_at.rfc3339
+    TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
+    TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
+
     GITHUB_BOT_TOKEN = var.bot_github_token
   }
 }
@@ -358,6 +379,20 @@ locals {
     TF_VAR_ssh_public_key        = var.ssh_public_key
     TF_VAR_alarm_email           = var.alarm_email
 
+    # See admin_secrets_bundle for the rationale on the rotated_at
+    # values — same source, different consumer (CI vs local .envrc).
+    TF_VAR_secret_age_tracker_gitlab_token = var.secret_age_tracker_gitlab_token
+
+    TF_VAR_discord_token_rotated_at                   = time_static.discord_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
+    TF_VAR_github_token_rotated_at                    = time_static.github_token_rotated_at.rfc3339
+    TF_VAR_bot_github_token_rotated_at                = time_static.bot_github_token_rotated_at.rfc3339
+    TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
+    TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
+    TF_VAR_mcp_gitlab_token_rotated_at                = time_static.mcp_gitlab_token_rotated_at.rfc3339
+    TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
+    TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
+
     GITHUB_BOT_TOKEN = var.bot_github_token
   }
 
@@ -367,6 +402,18 @@ locals {
     "TF_VAR_alarm_email",
     "TF_VAR_ssh_public_key",
     "TF_VAR_cloudflare_account_id",
+    # rotated_at timestamps are RFC3339 strings containing `:` which
+    # GitLab masking rejects. Contents are non-secret apply timestamps,
+    # safe to expose.
+    "TF_VAR_discord_token_rotated_at",
+    "TF_VAR_cloudflare_api_token_rotated_at",
+    "TF_VAR_github_token_rotated_at",
+    "TF_VAR_bot_github_token_rotated_at",
+    "TF_VAR_gitlab_api_key_rotated_at",
+    "TF_VAR_gitlab_bot_api_key_rotated_at",
+    "TF_VAR_mcp_gitlab_token_rotated_at",
+    "TF_VAR_ssh_public_key_rotated_at",
+    "TF_VAR_secret_age_tracker_gitlab_token_rotated_at",
   ]
 
   terraform_weekly_schedule = {
