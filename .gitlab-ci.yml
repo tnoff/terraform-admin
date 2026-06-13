@@ -1,0 +1,17 @@
+include:
+  - project: 'tnoff-projects/github-workflows'
+    ref: 3dc971c41a156e3e17ce1824fb27c5b731b17433
+    file: '/gitlab/renovate.yml'
+
+stages:
+  - renovate
+
+default:
+  tags:
+    - self-hosted
+
+renovate:
+  extends: .renovate
+  stage: renovate
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
