@@ -420,7 +420,7 @@ locals {
     weekly = {
       description = "Weekly Workflow Run"
       ref         = "refs/heads/main"
-      cron        = "0 0 * * *" # Once a week on sunday
+      cron        = "0 0 * * 0" # Once a week on sunday
       active      = true
     }
   }
