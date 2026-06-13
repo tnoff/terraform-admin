@@ -15,7 +15,7 @@ data "oci_objectstorage_namespace" "this" {
 # ==============================================================================
 
 module "terraform_state_vault" {
-  source = "git::https://gitlab.com/tnoff-projects/terraform-modules.git//oci/secret-vault?ref=0611b7d8e4409a930c6b9dfa021076784249b520"
+  source = "git::https://gitlab.com/tnoff-projects/terraform-modules.git//oci/secret-vault?ref=92e27611d98672beef2008225e6a065bd2b6f2de"
 
   compartment_ocid    = var.oci_tenancy_ocid
   display_name        = var.vault_name
@@ -32,7 +32,7 @@ module "terraform_state_vault" {
 # ==============================================================================
 
 module "terraform_state_buckets" {
-  source                          = "git::https://gitlab.com/tnoff-projects/terraform-modules.git//oci/object-storage-bucket?ref=0611b7d8e4409a930c6b9dfa021076784249b520"
+  source                          = "git::https://gitlab.com/tnoff-projects/terraform-modules.git//oci/object-storage-bucket?ref=92e27611d98672beef2008225e6a065bd2b6f2de"
   for_each                        = toset(var.workspaces)
   compartment_ocid                = var.oci_tenancy_ocid
   kms_key_ocid                    = module.terraform_state_vault.kms_key.id
@@ -427,7 +427,7 @@ locals {
 }
 
 module "terraform_gitlab" {
-  source           = "git::https://gitlab.com/tnoff-projects/terraform-modules.git//gitlab/repo?ref=b7b699cd886c0d29c8aac66337381d6a8939495a"
+  source           = "git::https://gitlab.com/tnoff-projects/terraform-modules.git//gitlab/repo?ref=92e27611d98672beef2008225e6a065bd2b6f2de"
   name             = "terraform"
   namespace_id     = data.gitlab_group.personal.id
   visibility_level = "private"
