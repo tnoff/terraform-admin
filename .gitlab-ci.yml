@@ -1,6 +1,6 @@
 include:
   - project: 'tnoff-projects/github-workflows'
-    ref: 3dc971c41a156e3e17ce1824fb27c5b731b17433
+    ref: c3e8e55214cddced785b232cbee75d6c5e45ec81
     file: '/gitlab/renovate.yml'
 
 stages:
