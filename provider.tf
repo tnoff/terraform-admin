@@ -16,7 +16,7 @@ terraform {
     }
     gitlab = {
       source  = "gitlabhq/gitlab"
-      version = "~> 18.2"
+      version = "~> 19.0"
     }
     # Captures last-rotated timestamps for layer-1 admin tfvars via the
     # terraform_data/time_static pair pattern. See rotation-tracking.tf
@@ -27,9 +27,11 @@ terraform {
     }
   }
 
-  # Use local backend since we're creating the remote backend
+  # Use local backend since we're creating the remote backend.
+  # State lives outside the repo tree so it can't be committed or wiped
+  # by `git clean`; it holds secrets (OCI keys, GitLab token material).
   backend "local" {
-    path = "terraform.tfstate"
+    path = "/home/tnorth/.local/state/terraform-admin/terraform.tfstate"
   }
 }
 
