@@ -20,12 +20,19 @@ Bootstrap Terraform configuration for the OCI tenancy that hosts everything else
 
 ## Bootstrap pattern
 
-This repo uses **local state** (stored in `terraform.tfstate`) because it
-creates the remote state backend that everything else uses. Standard
-chicken-and-egg pattern for IaC.
+This repo uses **local state** because it creates the remote state backend that
+everything else uses. Standard chicken-and-egg pattern for IaC.
 
-State file is gitignored — keep a backup somewhere. Losing it means losing the
-ability to manage the IAM user / KMS key / state buckets cleanly.
+State lives outside the repo tree at
+`~/.local/state/terraform-admin/terraform.tfstate` (configured in
+[provider.tf](provider.tf)) so it can't be committed or wiped by `git clean`.
+That directory is a symlink to `~/Dropbox/Terraform-Backup/`, so state is
+continuously backed up to Dropbox — losing the local disk no longer means
+losing the state. See [Security notes](#security-notes) for the tradeoff this
+carries.
+
+Losing the state entirely means losing the ability to manage the IAM user /
+KMS key / state buckets cleanly.
 
 ## Workload-repo handoff
 
@@ -82,8 +89,17 @@ are sensitive — do not commit.
 
 ## Security notes
 
-- `terraform.tfstate` is gitignored. It holds the unencrypted admin private
+- The state file is gitignored and kept outside the repo at
+  `~/.local/state/terraform-admin/`. It holds the **unencrypted** admin private
   key and all sensitive `TF_VAR_*` values pushed to GitLab.
+- ⚠️ That state directory is symlinked to `~/Dropbox/Terraform-Backup/`, so the
+  plaintext secrets above are synced to Dropbox. This is a deliberate
+  convenience-vs-exposure tradeoff for a single-user personal setup: the
+  secrets now leave the machine to a third-party cloud provider (which keeps
+  version history even after deletion). Acceptable here only because it's a
+  personal tenancy; do not replicate for shared/production state. Prefer an
+  encrypted sync (e.g. git-crypt, restic, or an encrypted volume) if the
+  Dropbox account is not otherwise trusted with these credentials.
 - State buckets have versioning enabled. Old versions archive after 30 days
   and are deleted after 90.
 - KMS encryption is applied to every state bucket via the `terraform-state`
