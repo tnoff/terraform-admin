@@ -1,12 +1,12 @@
 include:
   - project: 'tnoff-projects/github-workflows'
-    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
+    ref: d2e202541fa95315bf2b99cb60705fe1fb9ff3a7
     file: '/gitlab/renovate.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
+    ref: d2e202541fa95315bf2b99cb60705fe1fb9ff3a7
     file: '/gitlab/discord-notify.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
+    ref: d2e202541fa95315bf2b99cb60705fe1fb9ff3a7
     file: '/gitlab/branch-cleanup.yml'
 
 stages:
