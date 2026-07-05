@@ -39,7 +39,7 @@ branch-cleanup:
 # Discord failure notifications for the scheduled jobs — the only pipelines
 # this repo runs in CI (the terraform stacks themselves apply locally). Fires
 # via the group-level DISCORD_BUILD_FAILURE_WEBHOOK.
-notify-renovate-failure:
+"notify:renovate-failure":
   extends: .discord-notify
   stage: renovate
   needs: [renovate]
@@ -51,7 +51,7 @@ notify-renovate-failure:
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: on_failure
 
-notify-cleanup-failure:
+"notify:cleanup-failure":
   extends: .discord-notify
   stage: renovate
   needs: [branch-cleanup]
