@@ -36,7 +36,11 @@ variable "state_bucket_prefix" {
 variable "workspaces" {
   description = "List of workspace names to create state buckets for (admin state stays local)"
   type        = list(string)
-  default     = ["discord", "infra", "oci", "oci-alarms", "apps", "dns"]
+  # Order mirrors the apply layering (oci/infra foundation -> bootstrap ->
+  # apps/dns). `bootstrap` is the operator-run cluster-foundation stack
+  # (terraform/bootstrap) — its backend is terraform-state-bootstrap, and
+  # this list also drives the objectstorage KMS-use policy below.
+  default = ["discord", "infra", "oci", "oci-alarms", "bootstrap", "apps", "dns"]
 }
 
 variable "vault_name" {
