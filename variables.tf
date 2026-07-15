@@ -140,12 +140,6 @@ variable "gitlab_bot_api_key" {
   sensitive   = true
 }
 
-variable "mcp_gitlab_token" {
-  description = "GitLab personal access token consumed by the in-cluster mcp-gitlab pod (read_api scope)"
-  type        = string
-  sensitive   = true
-}
-
 variable "secret_age_tracker_gitlab_token" {
   description = "GitLab personal access token consumed by the secret-age-tracker CronJob (read_api scope). Used to blame docker-apps SealedSecret YAMLs and list PAT expiries. Folded into the oke-security-scanner image per docs/projects/secret-age-tracker.md."
   type        = string
