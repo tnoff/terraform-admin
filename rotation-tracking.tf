@@ -94,18 +94,6 @@ resource "time_static" "gitlab_bot_api_key_rotated_at" {
   }
 }
 
-# mcp-gitlab PAT — reaches the cluster via the mcp-gitlab Secret in the
-# monitoring namespace. Belt-and-suspenders alongside the k8s annotation
-# hatch on that Secret (different signal, can drift independently).
-resource "terraform_data" "mcp_gitlab_token_version" {
-  triggers_replace = [sha256(var.mcp_gitlab_token)]
-}
-resource "time_static" "mcp_gitlab_token_rotated_at" {
-  triggers = {
-    version = terraform_data.mcp_gitlab_token_version.id
-  }
-}
-
 # OKE worker-node SSH public key. Not a secret per se (just authorized_keys),
 # but operator-rotated and worth knowing the last touch.
 resource "terraform_data" "ssh_public_key_version" {

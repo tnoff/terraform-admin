@@ -54,7 +54,6 @@
 | [terraform_data.github_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_bot_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
-| [terraform_data.mcp_gitlab_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.secret_age_tracker_gitlab_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.ssh_public_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [time_static.bot_github_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
@@ -63,7 +62,6 @@
 | [time_static.github_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_bot_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
-| [time_static.mcp_gitlab_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.secret_age_tracker_gitlab_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.ssh_public_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [tls_private_key.mcp_readonly](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
@@ -85,7 +83,6 @@
 | <a name="input_github_token"></a> [github\_token](#input\_github\_token) | GitHub personal access token (admin) | `string` | n/a | yes |
 | <a name="input_gitlab_api_key"></a> [gitlab\_api\_key](#input\_gitlab\_api\_key) | GitLab personal access token for admin user | `string` | n/a | yes |
 | <a name="input_gitlab_bot_api_key"></a> [gitlab\_bot\_api\_key](#input\_gitlab\_bot\_api\_key) | GitLab personal access token for bot user | `string` | n/a | yes |
-| <a name="input_mcp_gitlab_token"></a> [mcp\_gitlab\_token](#input\_mcp\_gitlab\_token) | GitLab personal access token consumed by the in-cluster mcp-gitlab pod (read\_api scope) | `string` | n/a | yes |
 | <a name="input_mcp_readonly_group_name"></a> [mcp\_readonly\_group\_name](#input\_mcp\_readonly\_group\_name) | Name of the tenancy-wide read-only group backing the local OCI MCP server | `string` | `"mcp-readonly-bot"` | no |
 | <a name="input_mcp_readonly_private_key_path"></a> [mcp\_readonly\_private\_key\_path](#input\_mcp\_readonly\_private\_key\_path) | Path where the MCP read-only user's API key PEM will be written | `string` | `"generated-output/mcp_readonly_api_key.pem"` | no |
 | <a name="input_mcp_readonly_user_name"></a> [mcp\_readonly\_user\_name](#input\_mcp\_readonly\_user\_name) | Name of the tenancy-wide read-only user backing the local OCI MCP server | `string` | `"mcp-readonly-bot"` | no |

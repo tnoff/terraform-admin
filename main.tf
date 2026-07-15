@@ -276,7 +276,6 @@ locals {
     TF_VAR_github_token          = var.github_token
     TF_VAR_gitlab_api_key        = var.gitlab_api_key
     TF_VAR_gitlab_bot_api_key    = var.gitlab_bot_api_key
-    TF_VAR_mcp_gitlab_token      = var.mcp_gitlab_token
     TF_VAR_ssh_public_key        = var.ssh_public_key
     TF_VAR_alarm_email           = var.alarm_email
 
@@ -305,7 +304,6 @@ locals {
     TF_VAR_bot_github_token_rotated_at                = time_static.bot_github_token_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
-    TF_VAR_mcp_gitlab_token_rotated_at                = time_static.mcp_gitlab_token_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
 
@@ -383,7 +381,6 @@ locals {
     TF_VAR_github_token          = var.github_token
     TF_VAR_gitlab_api_key        = var.gitlab_api_key
     TF_VAR_gitlab_bot_api_key    = var.gitlab_bot_api_key
-    TF_VAR_mcp_gitlab_token      = var.mcp_gitlab_token
     TF_VAR_ssh_public_key        = var.ssh_public_key
     TF_VAR_alarm_email           = var.alarm_email
 
@@ -397,7 +394,6 @@ locals {
     TF_VAR_bot_github_token_rotated_at                = time_static.bot_github_token_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
-    TF_VAR_mcp_gitlab_token_rotated_at                = time_static.mcp_gitlab_token_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
 
@@ -419,7 +415,6 @@ locals {
     "TF_VAR_bot_github_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_bot_api_key_rotated_at",
-    "TF_VAR_mcp_gitlab_token_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
     "TF_VAR_secret_age_tracker_gitlab_token_rotated_at",
   ]
