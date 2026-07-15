@@ -280,6 +280,14 @@ locals {
     TF_VAR_ssh_public_key        = var.ssh_public_key
     TF_VAR_alarm_email           = var.alarm_email
 
+    # Sealed-secrets controller key (base64, single-line). Local .envrc ONLY —
+    # deliberately absent from terraform_ci_vars below so the master key never
+    # lands in the `terraform` GitLab CI variables. Consumed by the operator-run
+    # bootstrap stack to seed the controller key on a green-field start. See
+    # docs/projects/sealed-secrets-key-bootstrap.md.
+    TF_VAR_sealed_secrets_tls_crt_b64 = var.sealed_secrets_tls_crt_b64
+    TF_VAR_sealed_secrets_tls_key_b64 = var.sealed_secrets_tls_key_b64
+
     # Consumed by the apps/ stack to materialize the
     # `secret-age-tracker-gitlab-token` k8s Secret in the security-scanner
     # ns. Folded into the oke-security-scanner image per
