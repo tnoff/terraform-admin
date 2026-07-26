@@ -293,6 +293,11 @@ locals {
     # docs/projects/secret-age-tracker.md.
     TF_VAR_secret_age_tracker_gitlab_token = var.secret_age_tracker_gitlab_token
 
+    # Consumed by the apps/ stack to materialize the `gcpe-gitlab-token` k8s
+    # Secret in the monitoring ns (gitlab-ci-pipelines-exporter). Same shape as
+    # secret_age_tracker_gitlab_token. See docs/projects/gitlab-ci-metrics.md.
+    TF_VAR_gcpe_gitlab_token = var.gcpe_gitlab_token
+
     # Auto-captured rotation timestamps — see rotation-tracking.tf.
     # Each `time_static.<var>_rotated_at.rfc3339` is fresh when the
     # underlying tfvar value's sha256 changes, and pinned otherwise.
@@ -306,6 +311,7 @@ locals {
     TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
+    TF_VAR_gcpe_gitlab_token_rotated_at               = time_static.gcpe_gitlab_token_rotated_at.rfc3339
 
     GITHUB_BOT_TOKEN = var.bot_github_token
   }
@@ -387,6 +393,7 @@ locals {
     # See admin_secrets_bundle for the rationale on the rotated_at
     # values — same source, different consumer (CI vs local .envrc).
     TF_VAR_secret_age_tracker_gitlab_token = var.secret_age_tracker_gitlab_token
+    TF_VAR_gcpe_gitlab_token               = var.gcpe_gitlab_token
 
     TF_VAR_discord_token_rotated_at                   = time_static.discord_token_rotated_at.rfc3339
     TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
@@ -396,6 +403,7 @@ locals {
     TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
+    TF_VAR_gcpe_gitlab_token_rotated_at               = time_static.gcpe_gitlab_token_rotated_at.rfc3339
 
     GITHUB_BOT_TOKEN = var.bot_github_token
   }
@@ -417,6 +425,7 @@ locals {
     "TF_VAR_gitlab_bot_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
     "TF_VAR_secret_age_tracker_gitlab_token_rotated_at",
+    "TF_VAR_gcpe_gitlab_token_rotated_at",
   ]
 
   terraform_weekly_schedule = {
