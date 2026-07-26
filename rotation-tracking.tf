@@ -116,3 +116,15 @@ resource "time_static" "secret_age_tracker_gitlab_token_rotated_at" {
     version = terraform_data.secret_age_tracker_gitlab_token_version.id
   }
 }
+
+# GCPE (gitlab-ci-pipelines-exporter) read_api PAT — rendered into the
+# gcpe-gitlab-token k8s Secret in the monitoring ns by apps/. Same shape as
+# secret_age_tracker_gitlab_token above. See docs/projects/gitlab-ci-metrics.md.
+resource "terraform_data" "gcpe_gitlab_token_version" {
+  triggers_replace = [sha256(var.gcpe_gitlab_token)]
+}
+resource "time_static" "gcpe_gitlab_token_rotated_at" {
+  triggers = {
+    version = terraform_data.gcpe_gitlab_token_version.id
+  }
+}

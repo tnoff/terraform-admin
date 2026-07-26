@@ -25,9 +25,9 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://gitlab.com/tnoff-projects/terraform-modules.git//gitlab/repo | f77e71e9cb38f8461fb5029827b72c907dc32d56 |
-| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://gitlab.com/tnoff-projects/terraform-modules.git//oci/object-storage-bucket | f77e71e9cb38f8461fb5029827b72c907dc32d56 |
-| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://gitlab.com/tnoff-projects/terraform-modules.git//oci/secret-vault | f77e71e9cb38f8461fb5029827b72c907dc32d56 |
+| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://gitlab.com/tnoff-projects/terraform-modules.git//gitlab/repo | e030c559d5f34b0d07587a242479433e070deaad |
+| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://gitlab.com/tnoff-projects/terraform-modules.git//oci/object-storage-bucket | e030c559d5f34b0d07587a242479433e070deaad |
+| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://gitlab.com/tnoff-projects/terraform-modules.git//oci/secret-vault | e030c559d5f34b0d07587a242479433e070deaad |
 
 ## Resources
 
@@ -51,6 +51,7 @@
 | [terraform_data.bot_github_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.cloudflare_api_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.discord_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
+| [terraform_data.gcpe_gitlab_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.github_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_bot_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
@@ -59,6 +60,7 @@
 | [time_static.bot_github_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.cloudflare_api_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.discord_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
+| [time_static.gcpe_gitlab_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.github_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_bot_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
@@ -80,6 +82,7 @@
 | <a name="input_cloudflare_api_token"></a> [cloudflare\_api\_token](#input\_cloudflare\_api\_token) | Cloudflare account API token | `string` | n/a | yes |
 | <a name="input_config_file_profile"></a> [config\_file\_profile](#input\_config\_file\_profile) | Profile name in ~/.oci/config file | `string` | `"DEFAULT"` | no |
 | <a name="input_discord_token"></a> [discord\_token](#input\_discord\_token) | Discord bot token | `string` | n/a | yes |
+| <a name="input_gcpe_gitlab_token"></a> [gcpe\_gitlab\_token](#input\_gcpe\_gitlab\_token) | GitLab personal access token (read\_api scope) for gitlab-ci-pipelines-exporter (GCPE). Rendered into the gcpe-gitlab-token k8s Secret in the monitoring ns by the apps/ stack. Manual PAT (gitlab.com Free tier can't mint group access tokens) — same shape as secret\_age\_tracker\_gitlab\_token. See docs/projects/gitlab-ci-metrics.md. | `string` | n/a | yes |
 | <a name="input_github_token"></a> [github\_token](#input\_github\_token) | GitHub personal access token (admin) | `string` | n/a | yes |
 | <a name="input_gitlab_api_key"></a> [gitlab\_api\_key](#input\_gitlab\_api\_key) | GitLab personal access token for admin user | `string` | n/a | yes |
 | <a name="input_gitlab_bot_api_key"></a> [gitlab\_bot\_api\_key](#input\_gitlab\_bot\_api\_key) | GitLab personal access token for bot user | `string` | n/a | yes |
