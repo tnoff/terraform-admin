@@ -30,6 +30,15 @@ default:
 renovate:
   extends: .renovate
   stage: renovate
+  # The shared .renovate template defaults GITHUB_COM_TOKEN to $GITHUB_COM_TOKEN,
+  # which is defined at no scope for this project, so GitLab expands it to an
+  # empty string. Renovate presents that empty token to github.com, is rejected
+  # (401), and its terraform manager falls back to anonymous github.com for the
+  # release lookups it must do for a .tf repo (hashicorp/terraform core +
+  # providers). Point it at the group-level GITHUB_BOT_TOKEN instead — the same
+  # override the other tnoff-projects repos already carry.
+  variables:
+    GITHUB_COM_TOKEN: $GITHUB_BOT_TOKEN
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
