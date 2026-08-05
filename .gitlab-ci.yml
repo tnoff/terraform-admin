@@ -37,8 +37,20 @@ renovate:
   # release lookups it must do for a .tf repo (hashicorp/terraform core +
   # providers). Point it at the group-level GITHUB_BOT_TOKEN instead — the same
   # override the other tnoff-projects repos already carry.
+  # Raise this job's build-container memory ceiling above the runner default of
+  # 1500Mi. Renovate's terraform lockfile updateArtifacts fetches and unzips
+  # EVERY platform build of a provider to compute its h1: hash — oracle/oci
+  # ships 13 platform zips at ~65MiB each — and the build container is SIGKILLed
+  # (exit 137) partway through. The Kubernetes executor's attach strategy does
+  # not detect a dead build container, so the job then emits nothing and burns
+  # its whole timeout: job 15713578774 did 125s of work, sat dead for 56min, and
+  # failed on job_execution_timeout.
+  #
+  # Requires memory_limit_overwrite_max_allowed on the runner (docker-apps!924);
+  # this variable is inert until that is merged and the runner config reloads.
   variables:
     GITHUB_COM_TOKEN: $GITHUB_BOT_TOKEN
+    KUBERNETES_MEMORY_LIMIT: 3Gi
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
