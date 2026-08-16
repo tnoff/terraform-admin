@@ -23,7 +23,7 @@ terraform {
     # and docs/projects/secret-age-tracker.md.
     time = {
       source  = "hashicorp/time"
-      version = "~> 0.13"
+      version = "~> 0.14"
     }
   }
 
