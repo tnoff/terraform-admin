@@ -432,8 +432,16 @@ locals {
     weekly = {
       description = "Weekly Workflow Run"
       ref         = "refs/heads/main"
-      cron        = "0 0 * * 0" # Once a week on sunday
-      active      = true
+      # Sun 12:00, not Sun 00:00. terraform-admin's own weekly schedule also
+      # fires at Sunday midnight, so the two used to start together on a ci
+      # pool that scales to zero -- the cold-start pile-up behind the
+      # runner_system_failure cluster in docs/projects/gitlab-ci-metrics.md.
+      # infra/repos.tf staggers its own fleet by md5(name) for the same
+      # reason; this project is not in that list (it is managed here), so the
+      # slot is picked by hand. Sun 12:00 is empty: the nearest neighbours are
+      # github-workflows at Sun 06:09 and discord-bot at Mon 04:24.
+      cron   = "0 12 * * 0"
+      active = true
     }
   }
 }
@@ -443,6 +451,18 @@ module "terraform_gitlab" {
   name             = "terraform"
   namespace_id     = data.gitlab_group.personal.id
   visibility_level = "private"
+
+  # The module defaults to "enabled", which is what this project has been
+  # running. Every repo in infra/repos.tf was set to "disabled" on 2026-07-25;
+  # this one missed that sweep only because it is managed here rather than
+  # there. With it enabled, a newer pipeline on a ref cancels an older pending
+  # one -- and canceled is not failed, so `retry:` never re-runs it and the
+  # Grafana gitlab-ci-job-failure alert never fires (GCPE only reads the latest
+  # pipeline per ref, so it cannot see the cancelled one either). That matters
+  # most here: this is the repo whose main pipelines run apply:*, so a silently
+  # cancelled pipeline is an apply that never happened. See
+  # docs/findings/2026-07-24-ci-bump-pipeline-autocancel-no-retry.md.
+  auto_cancel_pending_pipelines = "disabled"
 
   schedules = local.terraform_weekly_schedule
 
