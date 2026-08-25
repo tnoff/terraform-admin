@@ -274,10 +274,17 @@ locals {
     TF_VAR_cloudflare_account_id = var.cloudflare_account_id
     TF_VAR_discord_token         = var.discord_token
     TF_VAR_github_token          = var.github_token
-    TF_VAR_gitlab_api_key        = var.gitlab_api_key
-    TF_VAR_gitlab_bot_api_key    = var.gitlab_bot_api_key
-    TF_VAR_ssh_public_key        = var.ssh_public_key
-    TF_VAR_alarm_email           = var.alarm_email
+
+    # Consumed by terraform/infra as GitHub Actions secrets on each repo that
+    # has flipped to GitHub-canonical. bot_github_token was previously exported
+    # only as GITHUB_BOT_TOKEN (Renovate's release-notes lookup on GitLab), so
+    # infra/ had no way to reference it as a terraform input until now.
+    TF_VAR_bot_github_token     = var.bot_github_token
+    TF_VAR_github_actions_token = var.github_actions_token
+    TF_VAR_gitlab_api_key       = var.gitlab_api_key
+    TF_VAR_gitlab_bot_api_key   = var.gitlab_bot_api_key
+    TF_VAR_ssh_public_key       = var.ssh_public_key
+    TF_VAR_alarm_email          = var.alarm_email
 
     # Sealed-secrets controller key (base64, single-line). Local .envrc ONLY —
     # deliberately absent from terraform_ci_vars below so the master key never
@@ -307,6 +314,7 @@ locals {
     TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
     TF_VAR_github_token_rotated_at                    = time_static.github_token_rotated_at.rfc3339
     TF_VAR_bot_github_token_rotated_at                = time_static.bot_github_token_rotated_at.rfc3339
+    TF_VAR_github_actions_token_rotated_at            = time_static.github_actions_token_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
@@ -385,10 +393,17 @@ locals {
     TF_VAR_cloudflare_account_id = var.cloudflare_account_id
     TF_VAR_discord_token         = var.discord_token
     TF_VAR_github_token          = var.github_token
-    TF_VAR_gitlab_api_key        = var.gitlab_api_key
-    TF_VAR_gitlab_bot_api_key    = var.gitlab_bot_api_key
-    TF_VAR_ssh_public_key        = var.ssh_public_key
-    TF_VAR_alarm_email           = var.alarm_email
+
+    # Consumed by terraform/infra as GitHub Actions secrets on each repo that
+    # has flipped to GitHub-canonical. bot_github_token was previously exported
+    # only as GITHUB_BOT_TOKEN (Renovate's release-notes lookup on GitLab), so
+    # infra/ had no way to reference it as a terraform input until now.
+    TF_VAR_bot_github_token     = var.bot_github_token
+    TF_VAR_github_actions_token = var.github_actions_token
+    TF_VAR_gitlab_api_key       = var.gitlab_api_key
+    TF_VAR_gitlab_bot_api_key   = var.gitlab_bot_api_key
+    TF_VAR_ssh_public_key       = var.ssh_public_key
+    TF_VAR_alarm_email          = var.alarm_email
 
     # See admin_secrets_bundle for the rationale on the rotated_at
     # values — same source, different consumer (CI vs local .envrc).
@@ -399,6 +414,7 @@ locals {
     TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
     TF_VAR_github_token_rotated_at                    = time_static.github_token_rotated_at.rfc3339
     TF_VAR_bot_github_token_rotated_at                = time_static.bot_github_token_rotated_at.rfc3339
+    TF_VAR_github_actions_token_rotated_at            = time_static.github_actions_token_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
@@ -421,6 +437,7 @@ locals {
     "TF_VAR_cloudflare_api_token_rotated_at",
     "TF_VAR_github_token_rotated_at",
     "TF_VAR_bot_github_token_rotated_at",
+    "TF_VAR_github_actions_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_bot_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",

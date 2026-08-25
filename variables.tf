@@ -128,6 +128,21 @@ variable "bot_github_token" {
   sensitive   = true
 }
 
+variable "github_actions_token" {
+  description = <<-EOT
+    GitHub PAT for @tnoff, used by GitHub Actions on repos that have flipped
+    to GitHub-canonical. Needs `repo` scope.
+
+    Deliberately separate from github_token, which is the push-mirror
+    credential and is retired repo-by-repo as the migration proceeds.
+    Deliberately NOT the same identity as bot_github_token: this is what
+    renovate-auto-approve approves Renovate's own PRs with, and GitHub
+    refuses to let a PR author approve their own PR.
+  EOT
+  type        = string
+  sensitive   = true
+}
+
 variable "gitlab_api_key" {
   description = "GitLab personal access token for admin user"
   type        = string
