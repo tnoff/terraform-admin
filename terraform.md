@@ -25,9 +25,9 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://gitlab.com/tnoff-projects/terraform-modules.git//gitlab/repo | 5efe3ae961db666520646ca4f0ac6933ddeb585a |
-| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://gitlab.com/tnoff-projects/terraform-modules.git//oci/object-storage-bucket | 5efe3ae961db666520646ca4f0ac6933ddeb585a |
-| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://gitlab.com/tnoff-projects/terraform-modules.git//oci/secret-vault | 5efe3ae961db666520646ca4f0ac6933ddeb585a |
+| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://github.com/tnoff/terraform-modules.git//gitlab/repo | 5efe3ae961db666520646ca4f0ac6933ddeb585a |
+| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | 5efe3ae961db666520646ca4f0ac6933ddeb585a |
+| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault | 5efe3ae961db666520646ca4f0ac6933ddeb585a |
 
 ## Resources
 
