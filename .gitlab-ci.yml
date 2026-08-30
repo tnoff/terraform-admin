@@ -1,9 +1,9 @@
 include:
   - project: 'tnoff-projects/github-workflows'
-    ref: 5dbcb394d4ab09c9137b021dc3dde2563b5fd94c
+    ref: e410a65c9ab14c946834ad194d9ddef5a3bc611f
     file: '/gitlab/renovate.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: 5dbcb394d4ab09c9137b021dc3dde2563b5fd94c
+    ref: e410a65c9ab14c946834ad194d9ddef5a3bc611f
     file: '/gitlab/branch-cleanup.yml'
 
 stages:
