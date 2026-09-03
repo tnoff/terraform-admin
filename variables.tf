@@ -143,6 +143,17 @@ variable "github_actions_token" {
   sensitive   = true
 }
 
+variable "ci_app_id" {
+  type        = number
+  description = "App ID of the tnoff-ci GitHub App. Exported so terraform/infra can name it as a ruleset bypass actor (actor_type Integration) and mint installation tokens in CI, replacing the human admin PAT that assemble-changelog needs to push to a protected default branch. Not a secret."
+}
+
+variable "ci_app_private_key_b64" {
+  type        = string
+  description = "Base64 of the tnoff-ci GitHub App private key PEM, single line. Base64 rather than the raw PEM for the same reason OCI_API_KEY_B64 is: GitLab can only mask a single-line value, so a multi-line PEM would have to travel through CI unmasked. Produce with `base64 -w0 tnoff-ci.private-key.pem`; terraform/infra base64decodes it when writing the Actions secret."
+  sensitive   = true
+}
+
 variable "gitlab_api_key" {
   description = "GitLab personal access token for admin user"
   type        = string
