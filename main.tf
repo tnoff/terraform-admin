@@ -281,10 +281,19 @@ locals {
     # infra/ had no way to reference it as a terraform input until now.
     TF_VAR_bot_github_token     = var.bot_github_token
     TF_VAR_github_actions_token = var.github_actions_token
-    TF_VAR_gitlab_api_key       = var.gitlab_api_key
-    TF_VAR_gitlab_bot_api_key   = var.gitlab_bot_api_key
-    TF_VAR_ssh_public_key       = var.ssh_public_key
-    TF_VAR_alarm_email          = var.alarm_email
+
+    # tnoff-ci GitHub App. Replaces github_actions_token as the identity CI
+    # pushes with: assemble-changelog pushes straight to a protected `main`, so
+    # its token must be a ruleset bypass actor, and today that means an admin
+    # PAT sitting in 16 repos with a bypass over every rule. An App is
+    # contents+workflows write only, issues 1-hour tokens, and -- unlike
+    # GITHUB_TOKEN -- its pushes still trigger the follow-up run that cuts the tag.
+    TF_VAR_ci_app_id              = var.ci_app_id
+    TF_VAR_ci_app_private_key_b64 = var.ci_app_private_key_b64
+    TF_VAR_gitlab_api_key         = var.gitlab_api_key
+    TF_VAR_gitlab_bot_api_key     = var.gitlab_bot_api_key
+    TF_VAR_ssh_public_key         = var.ssh_public_key
+    TF_VAR_alarm_email            = var.alarm_email
 
     # Sealed-secrets controller key (base64, single-line). Local .envrc ONLY —
     # deliberately absent from terraform_ci_vars below so the master key never
@@ -320,6 +329,7 @@ locals {
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
     TF_VAR_gcpe_gitlab_token_rotated_at               = time_static.gcpe_gitlab_token_rotated_at.rfc3339
+    TF_VAR_ci_app_private_key_rotated_at              = time_static.ci_app_private_key_rotated_at.rfc3339
 
     GITHUB_BOT_TOKEN = var.bot_github_token
   }
@@ -400,10 +410,19 @@ locals {
     # infra/ had no way to reference it as a terraform input until now.
     TF_VAR_bot_github_token     = var.bot_github_token
     TF_VAR_github_actions_token = var.github_actions_token
-    TF_VAR_gitlab_api_key       = var.gitlab_api_key
-    TF_VAR_gitlab_bot_api_key   = var.gitlab_bot_api_key
-    TF_VAR_ssh_public_key       = var.ssh_public_key
-    TF_VAR_alarm_email          = var.alarm_email
+
+    # tnoff-ci GitHub App. Replaces github_actions_token as the identity CI
+    # pushes with: assemble-changelog pushes straight to a protected `main`, so
+    # its token must be a ruleset bypass actor, and today that means an admin
+    # PAT sitting in 16 repos with a bypass over every rule. An App is
+    # contents+workflows write only, issues 1-hour tokens, and -- unlike
+    # GITHUB_TOKEN -- its pushes still trigger the follow-up run that cuts the tag.
+    TF_VAR_ci_app_id              = var.ci_app_id
+    TF_VAR_ci_app_private_key_b64 = var.ci_app_private_key_b64
+    TF_VAR_gitlab_api_key         = var.gitlab_api_key
+    TF_VAR_gitlab_bot_api_key     = var.gitlab_bot_api_key
+    TF_VAR_ssh_public_key         = var.ssh_public_key
+    TF_VAR_alarm_email            = var.alarm_email
 
     # See admin_secrets_bundle for the rationale on the rotated_at
     # values — same source, different consumer (CI vs local .envrc).
@@ -420,6 +439,7 @@ locals {
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
     TF_VAR_gcpe_gitlab_token_rotated_at               = time_static.gcpe_gitlab_token_rotated_at.rfc3339
+    TF_VAR_ci_app_private_key_rotated_at              = time_static.ci_app_private_key_rotated_at.rfc3339
 
     GITHUB_BOT_TOKEN = var.bot_github_token
   }
@@ -443,6 +463,11 @@ locals {
     "TF_VAR_ssh_public_key_rotated_at",
     "TF_VAR_secret_age_tracker_gitlab_token_rotated_at",
     "TF_VAR_gcpe_gitlab_token_rotated_at",
+    "TF_VAR_ci_app_private_key_rotated_at",
+    # 7 characters. GitLab masking requires at least 8, so masking this is
+    # rejected outright -- and an App ID is public to anyone who can see the
+    # app, so there is nothing to protect.
+    "TF_VAR_ci_app_id",
   ]
 
   terraform_weekly_schedule = {

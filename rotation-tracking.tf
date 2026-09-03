@@ -140,3 +140,17 @@ resource "time_static" "gcpe_gitlab_token_rotated_at" {
     version = terraform_data.gcpe_gitlab_token_version.id
   }
 }
+
+# tnoff-ci GitHub App private key. Operator-rotated like the PATs above: an
+# App key is regenerated from the App's settings page, so nothing here can
+# derive its age. Tracked because it is the credential that will replace
+# github_actions_token in CI -- an untracked replacement would take a
+# long-lived secret off the age report rather than onto it.
+resource "terraform_data" "ci_app_private_key_version" {
+  triggers_replace = [sha256(var.ci_app_private_key_b64)]
+}
+resource "time_static" "ci_app_private_key_rotated_at" {
+  triggers = {
+    version = terraform_data.ci_app_private_key_version.id
+  }
+}
