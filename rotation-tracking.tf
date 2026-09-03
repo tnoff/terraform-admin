@@ -74,18 +74,6 @@ resource "time_static" "bot_github_token_rotated_at" {
   }
 }
 
-# GitHub Actions PAT (@tnoff) — used as GIT_PUSH_TOKEN and APPROVAL_TOKEN in
-# the Actions secrets terraform/infra pushes to each GitHub-canonical repo.
-# Same shape as github_token.
-resource "terraform_data" "github_actions_token_version" {
-  triggers_replace = [sha256(var.github_actions_token)]
-}
-resource "time_static" "github_actions_token_rotated_at" {
-  triggers = {
-    version = terraform_data.github_actions_token_version.id
-  }
-}
-
 # GitLab admin PAT — used by terraform-admin's gitlab provider.
 resource "terraform_data" "gitlab_api_key_version" {
   triggers_replace = [sha256(var.gitlab_api_key)]
@@ -144,7 +132,8 @@ resource "time_static" "gcpe_gitlab_token_rotated_at" {
 # tnoff-ci GitHub App private key. Operator-rotated like the PATs above: an
 # App key is regenerated from the App's settings page, so nothing here can
 # derive its age. Tracked because it is the credential that will replace
-# github_actions_token in CI -- an untracked replacement would take a
+# the admin PAT that used to sign CI pushes -- an untracked replacement
+# would take a
 # long-lived secret off the age report rather than onto it.
 resource "terraform_data" "ci_app_private_key_version" {
   triggers_replace = [sha256(var.ci_app_private_key_b64)]

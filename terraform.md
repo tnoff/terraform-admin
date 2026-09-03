@@ -53,7 +53,6 @@
 | [terraform_data.cloudflare_api_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.discord_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gcpe_gitlab_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
-| [terraform_data.github_actions_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.github_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_bot_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
@@ -64,7 +63,6 @@
 | [time_static.cloudflare_api_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.discord_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gcpe_gitlab_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
-| [time_static.github_actions_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.github_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_bot_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
@@ -90,7 +88,6 @@
 | <a name="input_config_file_profile"></a> [config\_file\_profile](#input\_config\_file\_profile) | Profile name in ~/.oci/config file | `string` | `"DEFAULT"` | no |
 | <a name="input_discord_token"></a> [discord\_token](#input\_discord\_token) | Discord bot token | `string` | n/a | yes |
 | <a name="input_gcpe_gitlab_token"></a> [gcpe\_gitlab\_token](#input\_gcpe\_gitlab\_token) | GitLab personal access token (read\_api scope) for gitlab-ci-pipelines-exporter (GCPE). Rendered into the gcpe-gitlab-token k8s Secret in the monitoring ns by the apps/ stack. Manual PAT (gitlab.com Free tier can't mint group access tokens) — same shape as secret\_age\_tracker\_gitlab\_token. See docs/projects/gitlab-ci-metrics.md. | `string` | n/a | yes |
-| <a name="input_github_actions_token"></a> [github\_actions\_token](#input\_github\_actions\_token) | GitHub PAT for @tnoff, used by GitHub Actions on repos that have flipped<br/>to GitHub-canonical. Needs `repo` scope.<br/><br/>Deliberately separate from github\_token, which is the push-mirror<br/>credential and is retired repo-by-repo as the migration proceeds.<br/>Deliberately NOT the same identity as bot\_github\_token: this is what<br/>renovate-auto-approve approves Renovate's own PRs with, and GitHub<br/>refuses to let a PR author approve their own PR. | `string` | n/a | yes |
 | <a name="input_github_token"></a> [github\_token](#input\_github\_token) | GitHub personal access token (admin) | `string` | n/a | yes |
 | <a name="input_gitlab_api_key"></a> [gitlab\_api\_key](#input\_gitlab\_api\_key) | GitLab personal access token for admin user | `string` | n/a | yes |
 | <a name="input_gitlab_bot_api_key"></a> [gitlab\_bot\_api\_key](#input\_gitlab\_bot\_api\_key) | GitLab personal access token for bot user | `string` | n/a | yes |

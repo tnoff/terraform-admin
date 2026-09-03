@@ -128,21 +128,6 @@ variable "bot_github_token" {
   sensitive   = true
 }
 
-variable "github_actions_token" {
-  description = <<-EOT
-    GitHub PAT for @tnoff, used by GitHub Actions on repos that have flipped
-    to GitHub-canonical. Needs `repo` scope.
-
-    Deliberately separate from github_token, which is the push-mirror
-    credential and is retired repo-by-repo as the migration proceeds.
-    Deliberately NOT the same identity as bot_github_token: this is what
-    renovate-auto-approve approves Renovate's own PRs with, and GitHub
-    refuses to let a PR author approve their own PR.
-  EOT
-  type        = string
-  sensitive   = true
-}
-
 variable "ci_app_id" {
   type        = number
   description = "App ID of the tnoff-ci GitHub App. Exported so terraform/infra can name it as a ruleset bypass actor (actor_type Integration) and mint installation tokens in CI, replacing the human admin PAT that assemble-changelog needs to push to a protected default branch. Not a secret."
