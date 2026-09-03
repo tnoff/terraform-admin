@@ -279,11 +279,11 @@ locals {
     # has flipped to GitHub-canonical. bot_github_token was previously exported
     # only as GITHUB_BOT_TOKEN (Renovate's release-notes lookup on GitLab), so
     # infra/ had no way to reference it as a terraform input until now.
-    TF_VAR_bot_github_token     = var.bot_github_token
-    TF_VAR_github_actions_token = var.github_actions_token
+    TF_VAR_bot_github_token = var.bot_github_token
 
-    # tnoff-ci GitHub App. Replaces github_actions_token as the identity CI
-    # pushes with: assemble-changelog pushes straight to a protected `main`, so
+    # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
+    # PAT that used to be here: assemble-changelog pushes straight to a
+    # protected `main`, so
     # its token must be a ruleset bypass actor, and today that means an admin
     # PAT sitting in 16 repos with a bypass over every rule. An App is
     # contents+workflows write only, issues 1-hour tokens, and -- unlike
@@ -324,7 +324,6 @@ locals {
     TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
     TF_VAR_github_token_rotated_at                    = time_static.github_token_rotated_at.rfc3339
     TF_VAR_bot_github_token_rotated_at                = time_static.bot_github_token_rotated_at.rfc3339
-    TF_VAR_github_actions_token_rotated_at            = time_static.github_actions_token_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
@@ -409,11 +408,11 @@ locals {
     # has flipped to GitHub-canonical. bot_github_token was previously exported
     # only as GITHUB_BOT_TOKEN (Renovate's release-notes lookup on GitLab), so
     # infra/ had no way to reference it as a terraform input until now.
-    TF_VAR_bot_github_token     = var.bot_github_token
-    TF_VAR_github_actions_token = var.github_actions_token
+    TF_VAR_bot_github_token = var.bot_github_token
 
-    # tnoff-ci GitHub App. Replaces github_actions_token as the identity CI
-    # pushes with: assemble-changelog pushes straight to a protected `main`, so
+    # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
+    # PAT that used to be here: assemble-changelog pushes straight to a
+    # protected `main`, so
     # its token must be a ruleset bypass actor, and today that means an admin
     # PAT sitting in 16 repos with a bypass over every rule. An App is
     # contents+workflows write only, issues 1-hour tokens, and -- unlike
@@ -435,7 +434,6 @@ locals {
     TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
     TF_VAR_github_token_rotated_at                    = time_static.github_token_rotated_at.rfc3339
     TF_VAR_bot_github_token_rotated_at                = time_static.bot_github_token_rotated_at.rfc3339
-    TF_VAR_github_actions_token_rotated_at            = time_static.github_actions_token_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
@@ -459,7 +457,6 @@ locals {
     "TF_VAR_cloudflare_api_token_rotated_at",
     "TF_VAR_github_token_rotated_at",
     "TF_VAR_bot_github_token_rotated_at",
-    "TF_VAR_github_actions_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_bot_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
