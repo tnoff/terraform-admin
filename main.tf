@@ -304,6 +304,14 @@ locals {
     TF_VAR_sealed_secrets_tls_crt_b64 = var.sealed_secrets_tls_crt_b64
     TF_VAR_sealed_secrets_tls_key_b64 = var.sealed_secrets_tls_key_b64
 
+    # tnoff-flux App -- Flux's read credential for docker-apps, phase 7. Local
+    # .envrc ONLY, same reasoning as the sealed-secrets key above: consumed by
+    # the operator-run bootstrap stack, and nothing in CI has any use for it.
+    # See variables.tf for why this is a separate App from tnoff-ci.
+    TF_VAR_flux_app_id              = var.flux_app_id
+    TF_VAR_flux_app_installation_id = var.flux_app_installation_id
+    TF_VAR_flux_app_private_key_b64 = var.flux_app_private_key_b64
+
     # Consumed by the apps/ stack to materialize the
     # `secret-age-tracker-gitlab-token` k8s Secret in the security-scanner
     # ns. Folded into the oke-security-scanner image per
