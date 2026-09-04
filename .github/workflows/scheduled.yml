@@ -1,0 +1,51 @@
+name: Scheduled
+
+# Replaces the GitLab weekly pipeline schedule (id 4288746, Sun 00:00),
+# deactivated when this repo flipped. Slot moved off midnight deliberately:
+# terraform-admin's old schedule and the `terraform` project's fired together on
+# a ci pool that scaled to zero, which is the cold-start pile-up behind the
+# runner_system_failure cluster in docs/projects/gitlab-ci-metrics.md. That pool
+# is irrelevant now, but keeping the stagger costs nothing.
+
+on:
+  schedule:
+    - cron: '23 2 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # GitHub-hosted, and that is the whole point of the runner decision for this
+  # repo. The GitLab job carried two workarounds that only existed because it
+  # ran self-hosted, and neither is ported:
+  #
+  #   KUBERNETES_MEMORY_LIMIT: 3Gi   Renovate's terraform lockfile
+  #     updateArtifacts fetches and unzips EVERY platform build of a provider to
+  #     compute its h1: hash -- oracle/oci ships 13 zips at ~65MiB -- and the
+  #     1500Mi build container was SIGKILLed partway through. The Kubernetes
+  #     executor does not notice a dead build container, so the job then emitted
+  #     nothing and burned its whole timeout: 396 of this repo's 433 CI minutes
+  #     went to four runs that died that way. A hosted runner has 16GB.
+  #
+  #   GITHUB_COM_TOKEN               On GitLab, Renovate needed a separate
+  #     github.com token purely for release-note lookups, and an undefined
+  #     variable expanding to an empty string caused a long outage. On GitHub the
+  #     platform token covers changelogs -- verified 2026-09-03 against repos
+  #     outside the App's installation (tox-dev/tox, open-telemetry).
+  renovate:
+    name: Renovate
+    uses: tnoff/github-workflows/.github/workflows/renovate.yml@8579e03b50ee081f47dd1989b79c6a057ee35867
+    secrets:
+      app_client_id: ${{ secrets.CI_APP_CLIENT_ID }}
+      app_private_key: ${{ secrets.CI_APP_PRIVATE_KEY }}
+
+  branch-cleanup:
+    name: Branch cleanup
+    permissions:
+      contents: write
+      pull-requests: read
+    uses: tnoff/github-workflows/.github/workflows/branch-cleanup.yml@8579e03b50ee081f47dd1989b79c6a057ee35867
+    with:
+      age_days: 30
+      dry_run: false

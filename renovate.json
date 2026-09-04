@@ -1,5 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["gitlab>tnoff-projects/github-workflows//renovate/default"],
-  "enabledManagers": ["terraform", "pre-commit", "gitlabci", "custom.regex"]
+  "extends": [
+    "github>tnoff/github-workflows//renovate/default-github"
+  ],
+  "enabledManagers": [
+    "terraform",
+    "pre-commit",
+    "github-actions",
+    "custom.regex"
+  ]
 }
