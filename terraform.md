@@ -4,9 +4,10 @@
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.9 |
+| <a name="requirement_github"></a> [github](#requirement\_github) | ~> 6.0 |
 | <a name="requirement_gitlab"></a> [gitlab](#requirement\_gitlab) | ~> 19.0 |
 | <a name="requirement_local"></a> [local](#requirement\_local) | ~> 2.0 |
-| <a name="requirement_oci"></a> [oci](#requirement\_oci) | ~> 8.0 |
+| <a name="requirement_oci"></a> [oci](#requirement\_oci) | ~> 9.0 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | ~> 0.14 |
 | <a name="requirement_tls"></a> [tls](#requirement\_tls) | ~> 4.0 |
 
@@ -14,9 +15,10 @@
 
 | Name | Version |
 |------|---------|
+| <a name="provider_github"></a> [github](#provider\_github) | ~> 6.0 |
 | <a name="provider_gitlab"></a> [gitlab](#provider\_gitlab) | ~> 19.0 |
 | <a name="provider_local"></a> [local](#provider\_local) | ~> 2.0 |
-| <a name="provider_oci"></a> [oci](#provider\_oci) | ~> 8.0 |
+| <a name="provider_oci"></a> [oci](#provider\_oci) | ~> 9.0 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 | <a name="provider_time"></a> [time](#provider\_time) | ~> 0.14 |
 | <a name="provider_tls"></a> [tls](#provider\_tls) | ~> 4.0 |
@@ -25,14 +27,16 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://github.com/tnoff/terraform-modules.git//gitlab/repo | 5efe3ae961db666520646ca4f0ac6933ddeb585a |
-| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | 5efe3ae961db666520646ca4f0ac6933ddeb585a |
-| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault | 5efe3ae961db666520646ca4f0ac6933ddeb585a |
+| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://github.com/tnoff/terraform-modules.git//gitlab/repo | 4cbebdd95c017db8b3a55e461adac21733000ecd |
+| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | 4cbebdd95c017db8b3a55e461adac21733000ecd |
+| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault | 4cbebdd95c017db8b3a55e461adac21733000ecd |
 
 ## Resources
 
 | Name | Type |
 |------|------|
+| [github_actions_secret.terraform](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_secret) | resource |
+| [github_actions_variable.terraform](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_variable) | resource |
 | [local_sensitive_file.envrc](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
 | [local_sensitive_file.mcp_readonly_oci_config](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
 | [local_sensitive_file.mcp_readonly_private_key](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
