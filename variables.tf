@@ -128,6 +128,39 @@ variable "bot_github_token" {
   sensitive   = true
 }
 
+# ==============================================================================
+# tnoff-flux GitHub App -- Flux's read credential for docker-apps.
+#
+# Separate from tnoff-ci on purpose. Flux needs Contents:read on ONE repo and
+# holds its credential in-cluster forever; tnoff-ci carries Contents AND
+# Workflows WRITE across the whole fleet, so reusing it would turn an
+# in-cluster Secret compromise into fleet-wide write access.
+#
+# Flux authenticates as the App natively (FluxInstance sync.provider = "github",
+# supported since Flux 2.5 and verified against the installed 2.9.1 CRD enum).
+# source-controller mints and refreshes its own hourly installation tokens from
+# the App private key, so unlike a fine-grained PAT there is nothing that
+# expires and stops reconciliation silently.
+#
+# All three are consumed by the operator-run bootstrap stack via the local
+# .envrc ONLY -- deliberately absent from terraform_ci_vars, the same treatment
+# the sealed-secrets controller key gets. Nothing in CI needs them.
+variable "flux_app_id" {
+  type        = number
+  description = "App ID of the tnoff-flux GitHub App. Not a secret. From https://github.com/settings/apps/tnoff-flux."
+}
+
+variable "flux_app_installation_id" {
+  type        = number
+  description = "Installation ID of the tnoff-flux App on tnoff/docker-apps -- the trailing number in https://github.com/settings/installations/<id>. Not a secret. Flux accepts githubAppInstallationOwner instead, but the ID has been supported since 2.5 and the owner form is newer, so the ID is the safer pin."
+}
+
+variable "flux_app_private_key_b64" {
+  type        = string
+  sensitive   = true
+  description = "Base64 of the tnoff-flux App private key PEM, single line. Base64 for the same reason ci_app_private_key_b64 is: a multi-line PEM does not survive a shell round-trip cleanly. Produce with `base64 -w0 tnoff-flux.*.private-key.pem`. Set in admin/terraform.tfvars (gitignored); bootstrap base64decodes it into the Secret."
+}
+
 variable "ci_app_id" {
   type        = number
   description = "App ID of the tnoff-ci GitHub App. Exported so terraform/infra can name it as a ruleset bypass actor (actor_type Integration) and mint installation tokens in CI, replacing the human admin PAT that assemble-changelog needs to push to a protected default branch. Not a secret."
