@@ -143,3 +143,28 @@ resource "time_static" "ci_app_private_key_rotated_at" {
     version = terraform_data.ci_app_private_key_version.id
   }
 }
+
+# tnoff-flux GitHub App private key. Same operator-rotated shape as the
+# tnoff-ci key above, and tracked for the same reason that comment gives: an
+# untracked long-lived credential is one that has left the age report rather
+# than joined it.
+#
+# It was very nearly left untracked on the argument that an App private key has
+# no expiry, so a countdown would never fire. That confuses the two things the
+# tracker does. It reports AGE, not just time-to-expiry -- which is exactly the
+# signal a credential with no expiry needs, because nothing else will ever
+# prompt you to rotate it. The sealed-secrets controller key is the precedent:
+# no expiry either, and it carries a deliberate rotate-before date.
+#
+# This one is Flux's read credential for docker-apps, held in-cluster and used
+# unattended every 60s. Rotating means generating a new key in the App's
+# settings, updating flux_app_private_key_b64, and re-applying admin then
+# bootstrap; the sha256 trigger below restamps the date automatically.
+resource "terraform_data" "flux_app_private_key_version" {
+  triggers_replace = [sha256(var.flux_app_private_key_b64)]
+}
+resource "time_static" "flux_app_private_key_rotated_at" {
+  triggers = {
+    version = terraform_data.flux_app_private_key_version.id
+  }
+}
