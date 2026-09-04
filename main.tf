@@ -520,6 +520,92 @@ module "terraform_gitlab" {
 }
 
 # ==============================================================================
+# The same credentials, on GitHub.
+#
+# tnoff/terraform runs its plan/apply on GitHub Actions now, so every value in
+# local.terraform_ci_vars needs a second home. This is the GitHub half of
+# module.terraform_gitlab's pipeline_variables -- one map, two consumers -- and
+# it lives here for the reason stated above that module: admin already owns
+# these values, and having infra/ relay them would only add a bootstrap-window
+# hop. infra/ owns the *repository*; admin owns what CI is allowed to know.
+#
+# Secret vs variable is NOT the GitLab masked/unmasked split, and reusing
+# local.terraform_ci_vars_unmasked here would be wrong. That list exists
+# because GitLab can only mask a single-line value of >=8 characters with no
+# '@' -- a platform constraint, not a judgement about sensitivity.
+# TF_VAR_alarm_email is on it purely because of the '@'. GitHub has no such
+# limit, so the default here is secret, and the exceptions are the values that
+# are genuinely public:
+#
+#   ssh_public_key      the public half of a keypair
+#   cloudflare_account_id  an identifier, not a credential
+#   ci_app_id / client_id  visible to anyone who can see the App
+#   *_rotated_at        apply timestamps, and the ones apps/ reads to compute
+#                       secret ages -- see project_secret_age_tracking
+#
+# Keeping those as variables is not cosmetic: GitHub redacts every occurrence
+# of a secret value in logs, so making a 7-character App ID a secret would
+# blank that digit string wherever it appeared, and masking the rotated_at
+# timestamps would turn every plan diff that touches them into `***`.
+locals {
+  terraform_github_public = [
+    "TF_VAR_ssh_public_key",
+    "TF_VAR_cloudflare_account_id",
+    "TF_VAR_ci_app_id",
+    "TF_VAR_ci_app_client_id",
+    "TF_VAR_discord_token_rotated_at",
+    "TF_VAR_cloudflare_api_token_rotated_at",
+    "TF_VAR_github_token_rotated_at",
+    "TF_VAR_bot_github_token_rotated_at",
+    "TF_VAR_gitlab_api_key_rotated_at",
+    "TF_VAR_gitlab_bot_api_key_rotated_at",
+    "TF_VAR_ssh_public_key_rotated_at",
+    "TF_VAR_secret_age_tracker_gitlab_token_rotated_at",
+    "TF_VAR_gcpe_gitlab_token_rotated_at",
+    "TF_VAR_ci_app_private_key_rotated_at",
+  ]
+
+  # GITHUB_BOT_TOKEN does not cross over, for two independent reasons: GitHub
+  # rejects any secret or variable name beginning with GITHUB_, and the job
+  # that needed it does not exist here. On GitLab, Renovate required a separate
+  # github.com token purely for release-note lookups; on GitHub the platform
+  # token covers changelogs. See terraform-admin/.github/workflows/scheduled.yml.
+  terraform_github_excluded = ["GITHUB_BOT_TOKEN"]
+
+  terraform_github_secrets = {
+    for key, value in local.terraform_ci_vars : key => value
+    if !contains(local.terraform_github_excluded, key)
+    && !contains(local.terraform_github_public, key)
+  }
+
+  terraform_github_variables = {
+    for key, value in local.terraform_ci_vars : key => value
+    if !contains(local.terraform_github_excluded, key)
+    && contains(local.terraform_github_public, key)
+  }
+}
+
+# The repository itself is created by terraform/infra (module.terraform_repo);
+# only its Actions credentials are owned here. That split is deliberate but it
+# does mean an ordering constraint: infra/ must have applied once before this
+# resource can find the repo.
+resource "github_actions_secret" "terraform" {
+  for_each = local.terraform_github_secrets
+
+  repository      = "terraform"
+  secret_name     = each.key
+  plaintext_value = each.value
+}
+
+resource "github_actions_variable" "terraform" {
+  for_each = local.terraform_github_variables
+
+  repository    = "terraform"
+  variable_name = each.key
+  value         = each.value
+}
+
+# ==============================================================================
 # State migration: lift orphan root-level resources into the
 # terraform_state_buckets module they conceptually belong to. The infra bucket
 # and all four lifecycle policies were left at root from a prior partial
