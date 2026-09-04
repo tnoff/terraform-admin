@@ -312,6 +312,11 @@ locals {
     TF_VAR_flux_app_installation_id = var.flux_app_installation_id
     TF_VAR_flux_app_private_key_b64 = var.flux_app_private_key_b64
 
+    # Stamped by the sha256 trigger in rotation-tracking.tf, and annotated onto
+    # the flux-system-github-app Secret so the age report covers Flux's
+    # credential like every other long-lived secret.
+    TF_VAR_flux_app_private_key_rotated_at = time_static.flux_app_private_key_rotated_at.rfc3339
+
     # Consumed by the apps/ stack to materialize the
     # `secret-age-tracker-gitlab-token` k8s Secret in the security-scanner
     # ns. Folded into the oke-security-scanner image per
