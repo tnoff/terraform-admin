@@ -484,8 +484,28 @@ locals {
       # reason; this project is not in that list (it is managed here), so the
       # slot is picked by hand. Sun 12:00 is empty: the nearest neighbours are
       # github-workflows at Sun 06:09 and discord-bot at Mon 04:24.
-      cron   = "0 12 * * 0"
-      active = true
+      cron = "0 12 * * 0"
+
+      # Deactivated 2026-09-04: this project is GitHub-canonical now, and its
+      # renovate + branch-cleanup run from .github/workflows/scheduled.yml on
+      # the same Sunday slot.
+      #
+      # What this does and does not prevent, because the two are easy to
+      # conflate. A SCHEDULED pipeline here runs renovate and branch-cleanup
+      # only: every apply job carries `$CI_PIPELINE_SOURCE != "schedule"`, so
+      # the schedule cannot apply anything. Deactivating it therefore stops
+      # noise -- a second Renovate opening MRs against a frozen copy of a repo
+      # nobody reads -- not an apply race.
+      #
+      # The apply path is a PUSH to this project's default branch, which is
+      # what happened on 2026-09-04 (pipeline 2819231963, source=push, 05:55)
+      # and applied two commits GitHub never had. Nothing here closes that;
+      # only nobody pushing does, until the project goes read-only.
+      #
+      # Kept rather than deleted so the slot and its staggering rationale
+      # survive; flipping this back to true is all it takes to run GitLab CI
+      # again if the migration ever needs backing out.
+      active = false
     }
   }
 }
