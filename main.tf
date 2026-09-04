@@ -288,13 +288,20 @@ locals {
     # PAT sitting in 16 repos with a bypass over every rule. An App is
     # contents+workflows write only, issues 1-hour tokens, and -- unlike
     # GITHUB_TOKEN -- its pushes still trigger the follow-up run that cuts the tag.
-    TF_VAR_ci_app_id              = var.ci_app_id
-    TF_VAR_ci_app_client_id       = var.ci_app_client_id
-    TF_VAR_ci_app_private_key_b64 = var.ci_app_private_key_b64
-    TF_VAR_gitlab_api_key         = var.gitlab_api_key
-    TF_VAR_gitlab_bot_api_key     = var.gitlab_bot_api_key
-    TF_VAR_ssh_public_key         = var.ssh_public_key
-    TF_VAR_alarm_email            = var.alarm_email
+    TF_VAR_ci_app_id        = var.ci_app_id
+    TF_VAR_ci_app_client_id = var.ci_app_client_id
+
+    # ARC (Actions Runner Controller). A second app on purpose -- see
+    # var.arc_app_id. terraform/apps renders these into the k8s Secret the
+    # controller reads.
+    TF_VAR_arc_app_id              = var.arc_app_id
+    TF_VAR_arc_app_installation_id = var.arc_app_installation_id
+    TF_VAR_arc_app_private_key_b64 = var.arc_app_private_key_b64
+    TF_VAR_ci_app_private_key_b64  = var.ci_app_private_key_b64
+    TF_VAR_gitlab_api_key          = var.gitlab_api_key
+    TF_VAR_gitlab_bot_api_key      = var.gitlab_bot_api_key
+    TF_VAR_ssh_public_key          = var.ssh_public_key
+    TF_VAR_alarm_email             = var.alarm_email
 
     # Sealed-secrets controller key (base64, single-line). Local .envrc ONLY —
     # deliberately absent from terraform_ci_vars below so the master key never
@@ -330,6 +337,7 @@ locals {
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
     TF_VAR_gcpe_gitlab_token_rotated_at               = time_static.gcpe_gitlab_token_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at              = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_arc_app_private_key_rotated_at             = time_static.arc_app_private_key_rotated_at.rfc3339
 
     GITHUB_BOT_TOKEN = var.bot_github_token
   }
@@ -417,13 +425,20 @@ locals {
     # PAT sitting in 16 repos with a bypass over every rule. An App is
     # contents+workflows write only, issues 1-hour tokens, and -- unlike
     # GITHUB_TOKEN -- its pushes still trigger the follow-up run that cuts the tag.
-    TF_VAR_ci_app_id              = var.ci_app_id
-    TF_VAR_ci_app_client_id       = var.ci_app_client_id
-    TF_VAR_ci_app_private_key_b64 = var.ci_app_private_key_b64
-    TF_VAR_gitlab_api_key         = var.gitlab_api_key
-    TF_VAR_gitlab_bot_api_key     = var.gitlab_bot_api_key
-    TF_VAR_ssh_public_key         = var.ssh_public_key
-    TF_VAR_alarm_email            = var.alarm_email
+    TF_VAR_ci_app_id        = var.ci_app_id
+    TF_VAR_ci_app_client_id = var.ci_app_client_id
+
+    # ARC (Actions Runner Controller). A second app on purpose -- see
+    # var.arc_app_id. terraform/apps renders these into the k8s Secret the
+    # controller reads.
+    TF_VAR_arc_app_id              = var.arc_app_id
+    TF_VAR_arc_app_installation_id = var.arc_app_installation_id
+    TF_VAR_arc_app_private_key_b64 = var.arc_app_private_key_b64
+    TF_VAR_ci_app_private_key_b64  = var.ci_app_private_key_b64
+    TF_VAR_gitlab_api_key          = var.gitlab_api_key
+    TF_VAR_gitlab_bot_api_key      = var.gitlab_bot_api_key
+    TF_VAR_ssh_public_key          = var.ssh_public_key
+    TF_VAR_alarm_email             = var.alarm_email
 
     # See admin_secrets_bundle for the rationale on the rotated_at
     # values — same source, different consumer (CI vs local .envrc).
@@ -440,6 +455,7 @@ locals {
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
     TF_VAR_gcpe_gitlab_token_rotated_at               = time_static.gcpe_gitlab_token_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at              = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_arc_app_private_key_rotated_at             = time_static.arc_app_private_key_rotated_at.rfc3339
 
     GITHUB_BOT_TOKEN = var.bot_github_token
   }
@@ -470,6 +486,10 @@ locals {
     # Not a secret either, and masking a non-secret only makes CI logs
     # harder to read.
     "TF_VAR_ci_app_client_id",
+    # Neither ARC id is a secret; the private key is, and stays masked.
+    "TF_VAR_arc_app_id",
+    "TF_VAR_arc_app_installation_id",
+    "TF_VAR_arc_app_private_key_rotated_at",
   ]
 
   terraform_weekly_schedule = {

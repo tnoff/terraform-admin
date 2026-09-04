@@ -6,7 +6,7 @@
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.9 |
 | <a name="requirement_gitlab"></a> [gitlab](#requirement\_gitlab) | ~> 19.0 |
 | <a name="requirement_local"></a> [local](#requirement\_local) | ~> 2.0 |
-| <a name="requirement_oci"></a> [oci](#requirement\_oci) | ~> 8.0 |
+| <a name="requirement_oci"></a> [oci](#requirement\_oci) | ~> 9.0 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | ~> 0.14 |
 | <a name="requirement_tls"></a> [tls](#requirement\_tls) | ~> 4.0 |
 
@@ -16,7 +16,7 @@
 |------|---------|
 | <a name="provider_gitlab"></a> [gitlab](#provider\_gitlab) | ~> 19.0 |
 | <a name="provider_local"></a> [local](#provider\_local) | ~> 2.0 |
-| <a name="provider_oci"></a> [oci](#provider\_oci) | ~> 8.0 |
+| <a name="provider_oci"></a> [oci](#provider\_oci) | ~> 9.0 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 | <a name="provider_time"></a> [time](#provider\_time) | ~> 0.14 |
 | <a name="provider_tls"></a> [tls](#provider\_tls) | ~> 4.0 |
@@ -25,9 +25,9 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://github.com/tnoff/terraform-modules.git//gitlab/repo | 5efe3ae961db666520646ca4f0ac6933ddeb585a |
-| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | 5efe3ae961db666520646ca4f0ac6933ddeb585a |
-| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault | 5efe3ae961db666520646ca4f0ac6933ddeb585a |
+| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://github.com/tnoff/terraform-modules.git//gitlab/repo | 4cbebdd95c017db8b3a55e461adac21733000ecd |
+| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | 4cbebdd95c017db8b3a55e461adac21733000ecd |
+| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault | 4cbebdd95c017db8b3a55e461adac21733000ecd |
 
 ## Resources
 
@@ -48,6 +48,7 @@
 | [oci_identity_user.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
 | [oci_identity_user_group_membership.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user_group_membership) | resource |
 | [oci_identity_user_group_membership.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user_group_membership) | resource |
+| [terraform_data.arc_app_private_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.bot_github_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.ci_app_private_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.cloudflare_api_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
@@ -58,6 +59,7 @@
 | [terraform_data.gitlab_bot_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.secret_age_tracker_gitlab_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.ssh_public_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
+| [time_static.arc_app_private_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.bot_github_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.ci_app_private_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.cloudflare_api_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
@@ -79,6 +81,9 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_alarm_email"></a> [alarm\_email](#input\_alarm\_email) | Email address for OCI alarm notifications | `string` | n/a | yes |
+| <a name="input_arc_app_id"></a> [arc\_app\_id](#input\_arc\_app\_id) | App ID of the ARC GitHub App. Deliberately a SECOND app, not tnoff-ci: Actions Runner Controller needs administration:write to register self-hosted runners, which is the permission to change repository settings. tnoff-ci is contents+workflows only and every workflow can mint a token from it; keeping runner registration in a separate app means no workflow can reach that permission. Not a secret. | `number` | n/a | yes |
+| <a name="input_arc_app_installation_id"></a> [arc\_app\_installation\_id](#input\_arc\_app\_installation\_id) | Installation ID of the ARC GitHub App on this account. Distinct from the App ID: ARC authenticates as a specific installation and needs both. Read from the installation URL, or GET /app/installations when authenticated as the app. Not a secret. | `number` | n/a | yes |
+| <a name="input_arc_app_private_key_b64"></a> [arc\_app\_private\_key\_b64](#input\_arc\_app\_private\_key\_b64) | Base64 of the ARC GitHub App private key PEM, single line. Base64 for the same reason as ci\_app\_private\_key\_b64: GitLab masks only single-line values, so a raw multi-line PEM would cross CI unmasked. Produce with `base64 -w0`. terraform/apps base64decodes it into the k8s Secret ARC reads. | `string` | n/a | yes |
 | <a name="input_bot_github_token"></a> [bot\_github\_token](#input\_bot\_github\_token) | GitHub personal access token used by Renovate | `string` | n/a | yes |
 | <a name="input_ci_app_client_id"></a> [ci\_app\_client\_id](#input\_ci\_app\_client\_id) | Client ID of the tnoff-ci GitHub App (Iv23li... form). Distinct from ci\_app\_id: actions/create-github-app-token deprecated its `app-id` input in favour of `client-id`, while the ruleset bypass actor still keys on the numeric App ID. Both are needed. Not a secret. | `string` | n/a | yes |
 | <a name="input_ci_app_id"></a> [ci\_app\_id](#input\_ci\_app\_id) | App ID of the tnoff-ci GitHub App. Exported so terraform/infra can name it as a ruleset bypass actor (actor\_type Integration) and mint installation tokens in CI, replacing the human admin PAT that assemble-changelog needs to push to a protected default branch. Not a secret. | `number` | n/a | yes |

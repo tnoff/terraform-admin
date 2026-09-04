@@ -143,3 +143,17 @@ resource "time_static" "ci_app_private_key_rotated_at" {
     version = terraform_data.ci_app_private_key_version.id
   }
 }
+
+# ARC GitHub App private key. Operator-rotated like the tnoff-ci key: an App key
+# is regenerated from the App's settings page, so nothing here can derive its
+# age. This one guards the most privileged CI path in the fleet -- the runner
+# that applies terraform against OCI and the cluster -- so leaving it off the age
+# report would be the worst place to have a blind spot.
+resource "terraform_data" "arc_app_private_key_version" {
+  triggers_replace = [sha256(var.arc_app_private_key_b64)]
+}
+resource "time_static" "arc_app_private_key_rotated_at" {
+  triggers = {
+    version = terraform_data.arc_app_private_key_version.id
+  }
+}

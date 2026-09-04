@@ -128,6 +128,22 @@ variable "bot_github_token" {
   sensitive   = true
 }
 
+variable "arc_app_id" {
+  type        = number
+  description = "App ID of the ARC GitHub App. Deliberately a SECOND app, not tnoff-ci: Actions Runner Controller needs administration:write to register self-hosted runners, which is the permission to change repository settings. tnoff-ci is contents+workflows only and every workflow can mint a token from it; keeping runner registration in a separate app means no workflow can reach that permission. Not a secret."
+}
+
+variable "arc_app_installation_id" {
+  type        = number
+  description = "Installation ID of the ARC GitHub App on this account. Distinct from the App ID: ARC authenticates as a specific installation and needs both. Read from the installation URL, or GET /app/installations when authenticated as the app. Not a secret."
+}
+
+variable "arc_app_private_key_b64" {
+  type        = string
+  description = "Base64 of the ARC GitHub App private key PEM, single line. Base64 for the same reason as ci_app_private_key_b64: GitLab masks only single-line values, so a raw multi-line PEM would cross CI unmasked. Produce with `base64 -w0`. terraform/apps base64decodes it into the k8s Secret ARC reads."
+  sensitive   = true
+}
+
 variable "ci_app_id" {
   type        = number
   description = "App ID of the tnoff-ci GitHub App. Exported so terraform/infra can name it as a ruleset bypass actor (actor_type Integration) and mint installation tokens in CI, replacing the human admin PAT that assemble-changelog needs to push to a protected default branch. Not a secret."
