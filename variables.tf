@@ -122,12 +122,6 @@ variable "github_token" {
   sensitive   = true
 }
 
-variable "bot_github_token" {
-  description = "GitHub personal access token used by Renovate"
-  type        = string
-  sensitive   = true
-}
-
 # ==============================================================================
 # tnoff-flux GitHub App -- Flux's read credential for docker-apps.
 #

@@ -64,16 +64,6 @@ resource "time_static" "github_token_rotated_at" {
   }
 }
 
-# Renovate bot GitHub PAT — same shape as github_token.
-resource "terraform_data" "bot_github_token_version" {
-  triggers_replace = [sha256(var.bot_github_token)]
-}
-resource "time_static" "bot_github_token_rotated_at" {
-  triggers = {
-    version = terraform_data.bot_github_token_version.id
-  }
-}
-
 # GitLab admin PAT — used by terraform-admin's gitlab provider.
 resource "terraform_data" "gitlab_api_key_version" {
   triggers_replace = [sha256(var.gitlab_api_key)]

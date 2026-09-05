@@ -274,12 +274,6 @@ locals {
     TF_VAR_discord_token         = var.discord_token
     TF_VAR_github_token          = var.github_token
 
-    # Consumed by terraform/infra as GitHub Actions secrets on each repo that
-    # has flipped to GitHub-canonical. bot_github_token was previously exported
-    # only as GITHUB_BOT_TOKEN (Renovate's release-notes lookup on GitLab), so
-    # infra/ had no way to reference it as a terraform input until now.
-    TF_VAR_bot_github_token = var.bot_github_token
-
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
     # protected `main`, so
@@ -330,14 +324,12 @@ locals {
     TF_VAR_discord_token_rotated_at                   = time_static.discord_token_rotated_at.rfc3339
     TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
     TF_VAR_github_token_rotated_at                    = time_static.github_token_rotated_at.rfc3339
-    TF_VAR_bot_github_token_rotated_at                = time_static.bot_github_token_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at              = time_static.ci_app_private_key_rotated_at.rfc3339
 
-    GITHUB_BOT_TOKEN = var.bot_github_token
   }
 }
 
@@ -410,12 +402,6 @@ locals {
     TF_VAR_discord_token         = var.discord_token
     TF_VAR_github_token          = var.github_token
 
-    # Consumed by terraform/infra as GitHub Actions secrets on each repo that
-    # has flipped to GitHub-canonical. bot_github_token was previously exported
-    # only as GITHUB_BOT_TOKEN (Renovate's release-notes lookup on GitLab), so
-    # infra/ had no way to reference it as a terraform input until now.
-    TF_VAR_bot_github_token = var.bot_github_token
-
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
     # protected `main`, so
@@ -438,14 +424,12 @@ locals {
     TF_VAR_discord_token_rotated_at                   = time_static.discord_token_rotated_at.rfc3339
     TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
     TF_VAR_github_token_rotated_at                    = time_static.github_token_rotated_at.rfc3339
-    TF_VAR_bot_github_token_rotated_at                = time_static.bot_github_token_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at              = time_static.ci_app_private_key_rotated_at.rfc3339
 
-    GITHUB_BOT_TOKEN = var.bot_github_token
   }
 
   # GitLab masking requires single-line, ≥8 chars, no '@'. These can't be
@@ -460,7 +444,6 @@ locals {
     "TF_VAR_discord_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
     "TF_VAR_github_token_rotated_at",
-    "TF_VAR_bot_github_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_bot_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
@@ -579,7 +562,6 @@ locals {
     "TF_VAR_discord_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
     "TF_VAR_github_token_rotated_at",
-    "TF_VAR_bot_github_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_bot_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
@@ -587,12 +569,13 @@ locals {
     "TF_VAR_ci_app_private_key_rotated_at",
   ]
 
-  # GITHUB_BOT_TOKEN does not cross over, for two independent reasons: GitHub
-  # rejects any secret or variable name beginning with GITHUB_, and the job
-  # that needed it does not exist here. On GitLab, Renovate required a separate
-  # github.com token purely for release-note lookups; on GitHub the platform
-  # token covers changelogs. See terraform-admin/.github/workflows/scheduled.yml.
-  terraform_github_excluded = ["GITHUB_BOT_TOKEN"]
+  # Empty, and kept rather than deleted: GitHub rejects any secret or variable
+  # name beginning with GITHUB_, so anything added to terraform_ci_vars with
+  # that prefix has to be listed here or the apply fails. GITHUB_BOT_TOKEN was
+  # the only entry until 2026-09-05, when it was removed as orphaned -- Renovate
+  # needed a separate github.com token for release-note lookups on GitLab, and
+  # on GitHub the platform token covers changelogs.
+  terraform_github_excluded = []
 
   terraform_github_secrets = {
     for key, value in local.terraform_ci_vars : key => value
