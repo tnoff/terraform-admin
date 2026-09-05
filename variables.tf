@@ -139,6 +139,41 @@ variable "github_token" {
 # All three are consumed by the operator-run bootstrap stack via the local
 # .envrc ONLY -- deliberately absent from terraform_ci_vars, the same treatment
 # the sealed-secrets controller key gets. Nothing in CI needs them.
+# ==============================================================================
+# tnoff-terraform GitHub App -- the identity terraform/infra manages GitHub with.
+#
+# Replaces github_token, which is the human admin PAT. That token carries the
+# whole account: every org membership, every repo the human can see, and it
+# authenticates AS the human in audit logs. The App is scoped to the repos it
+# is installed on, mints 1-hour tokens, is revocable in one click, and appears
+# as itself.
+#
+# Separate from tnoff-ci and tnoff-flux on purpose, and it is the most
+# privileged of the three -- Administration:write is what creates repositories
+# and manages rulesets. tnoff-ci pushes commits and would not survive being
+# given repo-admin; tnoff-flux reads one repo. Three Apps, three blast radii.
+#
+# Known limitation, unresolved at the time of writing: it is not documented
+# whether an installation token can create a repository on a PERSONAL account
+# (POST /user/repos). All 23 repos already exist, so this only matters when
+# adding a new one -- and it fails loudly with an obvious workaround (create by
+# hand, adopt with `import`) rather than silently.
+variable "terraform_app_id" {
+  type        = number
+  description = "App ID of the tnoff-terraform GitHub App. Not a secret. From https://github.com/settings/apps/tnoff-terraform."
+}
+
+variable "terraform_app_installation_id" {
+  type        = number
+  description = "Installation ID of the tnoff-terraform App on this account -- the trailing number in https://github.com/settings/installations/<id>. Not a secret."
+}
+
+variable "terraform_app_private_key_b64" {
+  type        = string
+  sensitive   = true
+  description = "Base64 of the tnoff-terraform App private key PEM, single line. Produce with `base64 -w0 tnoff-terraform.*.private-key.pem`. Set in admin/terraform.tfvars (gitignored); terraform/infra base64decodes it for the provider's app_auth block."
+}
+
 variable "flux_app_id" {
   type        = number
   description = "App ID of the tnoff-flux GitHub App. Not a secret. From https://github.com/settings/apps/tnoff-flux."
