@@ -195,12 +195,6 @@ variable "secret_age_tracker_gitlab_token" {
   sensitive   = true
 }
 
-variable "gcpe_gitlab_token" {
-  description = "GitLab personal access token (read_api scope) for gitlab-ci-pipelines-exporter (GCPE). Rendered into the gcpe-gitlab-token k8s Secret in the monitoring ns by the apps/ stack. Manual PAT (gitlab.com Free tier can't mint group access tokens) — same shape as secret_age_tracker_gitlab_token. See docs/projects/gitlab-ci-metrics.md."
-  type        = string
-  sensitive   = true
-}
-
 variable "ssh_public_key" {
   description = "SSH public key for OKE worker nodes"
   type        = string
