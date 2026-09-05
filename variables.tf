@@ -116,12 +116,6 @@ variable "discord_token" {
   sensitive   = true
 }
 
-variable "github_token" {
-  description = "GitHub personal access token (admin)"
-  type        = string
-  sensitive   = true
-}
-
 # ==============================================================================
 # tnoff-flux GitHub App -- Flux's read credential for docker-apps.
 #

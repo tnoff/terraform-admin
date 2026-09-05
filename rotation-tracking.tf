@@ -53,17 +53,6 @@ resource "time_static" "cloudflare_api_token_rotated_at" {
   }
 }
 
-# GitHub admin PAT — used by terraform's infra stack for repo + mirror
-# management. No k8s side, no committed file; ledger is the only signal.
-resource "terraform_data" "github_token_version" {
-  triggers_replace = [sha256(var.github_token)]
-}
-resource "time_static" "github_token_rotated_at" {
-  triggers = {
-    version = terraform_data.github_token_version.id
-  }
-}
-
 # GitLab admin PAT — used by terraform-admin's gitlab provider.
 resource "terraform_data" "gitlab_api_key_version" {
   triggers_replace = [sha256(var.gitlab_api_key)]
