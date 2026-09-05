@@ -284,10 +284,17 @@ locals {
     TF_VAR_ci_app_id              = var.ci_app_id
     TF_VAR_ci_app_client_id       = var.ci_app_client_id
     TF_VAR_ci_app_private_key_b64 = var.ci_app_private_key_b64
-    TF_VAR_gitlab_api_key         = var.gitlab_api_key
-    TF_VAR_gitlab_bot_api_key     = var.gitlab_bot_api_key
-    TF_VAR_ssh_public_key         = var.ssh_public_key
-    TF_VAR_alarm_email            = var.alarm_email
+
+    # tnoff-terraform App -- the identity infra/ manages GitHub with, replacing
+    # the human admin PAT. Needs to reach CI as well as .envrc: apply:infra runs
+    # the github provider on a hosted runner.
+    TF_VAR_terraform_app_id              = var.terraform_app_id
+    TF_VAR_terraform_app_installation_id = var.terraform_app_installation_id
+    TF_VAR_terraform_app_private_key_b64 = var.terraform_app_private_key_b64
+    TF_VAR_gitlab_api_key                = var.gitlab_api_key
+    TF_VAR_gitlab_bot_api_key            = var.gitlab_bot_api_key
+    TF_VAR_ssh_public_key                = var.ssh_public_key
+    TF_VAR_alarm_email                   = var.alarm_email
 
     # Sealed-secrets controller key (base64, single-line). Local .envrc ONLY —
     # deliberately absent from terraform_ci_vars below so the master key never
@@ -412,10 +419,17 @@ locals {
     TF_VAR_ci_app_id              = var.ci_app_id
     TF_VAR_ci_app_client_id       = var.ci_app_client_id
     TF_VAR_ci_app_private_key_b64 = var.ci_app_private_key_b64
-    TF_VAR_gitlab_api_key         = var.gitlab_api_key
-    TF_VAR_gitlab_bot_api_key     = var.gitlab_bot_api_key
-    TF_VAR_ssh_public_key         = var.ssh_public_key
-    TF_VAR_alarm_email            = var.alarm_email
+
+    # tnoff-terraform App -- the identity infra/ manages GitHub with, replacing
+    # the human admin PAT. Needs to reach CI as well as .envrc: apply:infra runs
+    # the github provider on a hosted runner.
+    TF_VAR_terraform_app_id              = var.terraform_app_id
+    TF_VAR_terraform_app_installation_id = var.terraform_app_installation_id
+    TF_VAR_terraform_app_private_key_b64 = var.terraform_app_private_key_b64
+    TF_VAR_gitlab_api_key                = var.gitlab_api_key
+    TF_VAR_gitlab_bot_api_key            = var.gitlab_bot_api_key
+    TF_VAR_ssh_public_key                = var.ssh_public_key
+    TF_VAR_alarm_email                   = var.alarm_email
 
     # See admin_secrets_bundle for the rationale on the rotated_at
     # values — same source, different consumer (CI vs local .envrc).
@@ -453,6 +467,8 @@ locals {
     # rejected outright -- and an App ID is public to anyone who can see the
     # app, so there is nothing to protect.
     "TF_VAR_ci_app_id",
+    "TF_VAR_terraform_app_id",
+    "TF_VAR_terraform_app_installation_id",
     # Not a secret either, and masking a non-secret only makes CI logs
     # harder to read.
     "TF_VAR_ci_app_client_id",
@@ -558,6 +574,8 @@ locals {
     "TF_VAR_ssh_public_key",
     "TF_VAR_cloudflare_account_id",
     "TF_VAR_ci_app_id",
+    "TF_VAR_terraform_app_id",
+    "TF_VAR_terraform_app_installation_id",
     "TF_VAR_ci_app_client_id",
     "TF_VAR_discord_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
