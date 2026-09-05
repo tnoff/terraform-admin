@@ -50,10 +50,23 @@ provider "gitlab" {
   token = var.gitlab_api_key
 }
 
-# Owner is set explicitly: the token belongs to a user, and without `owner`
-# the provider infers the authenticated account, which silently changes
-# meaning if the token is ever re-issued under a different identity.
+# Authenticates as the tnoff-terraform App, the same identity terraform/infra
+# uses. This was the last consumer of the human admin PAT; with it gone the
+# token can be revoked on github.com.
+#
+# Switched only after infra proved the App equivalent -- its plan reported "No
+# changes" across all 23 repositories, which is the assertion that the App has
+# exactly the access the PAT had rather than merely enough to look healthy.
+#
+# owner stays explicit for the same reason it did with the PAT: an installation
+# token is scoped, but the provider still needs to know which account these
+# resource addresses refer to.
 provider "github" {
-  token = var.github_token
   owner = "tnoff"
+
+  app_auth {
+    id              = var.terraform_app_id
+    installation_id = var.terraform_app_installation_id
+    pem_file        = base64decode(var.terraform_app_private_key_b64)
+  }
 }
