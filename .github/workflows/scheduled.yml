@@ -35,7 +35,7 @@ jobs:
   #     outside the App's installation (tox-dev/tox, open-telemetry).
   renovate:
     name: Renovate
-    uses: tnoff/github-workflows/.github/workflows/renovate.yml@8579e03b50ee081f47dd1989b79c6a057ee35867
+    uses: tnoff/github-workflows/.github/workflows/renovate.yml@b5f6dec4208b8a20967fc8f1054c55877ae0b82a
     secrets:
       app_client_id: ${{ secrets.CI_APP_CLIENT_ID }}
       app_private_key: ${{ secrets.CI_APP_PRIVATE_KEY }}
@@ -45,7 +45,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: read
-    uses: tnoff/github-workflows/.github/workflows/branch-cleanup.yml@8579e03b50ee081f47dd1989b79c6a057ee35867
+    uses: tnoff/github-workflows/.github/workflows/branch-cleanup.yml@b5f6dec4208b8a20967fc8f1054c55877ae0b82a
     with:
       age_days: 30
       dry_run: false
