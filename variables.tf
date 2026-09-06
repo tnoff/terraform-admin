@@ -152,6 +152,31 @@ variable "discord_token" {
 # (POST /user/repos). All 23 repos already exist, so this only matters when
 # adding a new one -- and it fails loudly with an obvious workaround (create by
 # hand, adopt with `import`) rather than silently.
+# The #ci-alerts Discord webhook, so terraform's apply.yml can say when an
+# apply fails.
+#
+# A failed apply is silent infrastructure drift: the run goes red on a push to
+# main, where nobody is looking at a checks list. That is the gap GCPE covered
+# for GitLab CI and nothing has covered since.
+#
+# Held here as a tfvar rather than read from the discord stack, because
+# terraform/infra no longer owns this repo -- ownership moved here on
+# 2026-09-05 so that a stack could not delete the credentials its own CI runs
+# on. admin has local state and reads no remote state, so the value is copied
+# in by hand.
+#
+# The cost of that, stated so it is not a surprise: this does NOT track the
+# discord stack automatically. If build_failure_webhook is rotated there, this
+# value goes stale and the notification silently stops working -- the failure
+# mode being a missing alert, which is exactly the thing that is hard to
+# notice. Re-copy it on rotation; the source is
+# `terragrunt -chdir=terraform/discord output build_failure_webhook`.
+variable "ci_alerts_webhook_url" {
+  type        = string
+  sensitive   = true
+  description = "Discord webhook URL for #ci-alerts, from terraform/discord's build_failure_webhook. Written to the terraform repo as DISCORD_WEBHOOK_URL so apply.yml can report a failed apply. Copied by hand: admin reads no remote state."
+}
+
 variable "terraform_app_id" {
   type        = number
   description = "App ID of the tnoff-terraform GitHub App. Not a secret. From https://github.com/settings/apps/tnoff-terraform."

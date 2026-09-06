@@ -681,5 +681,9 @@ module "terraform_repo" {
     CI_APP_ID          = var.ci_app_id
     CI_APP_CLIENT_ID   = var.ci_app_client_id
     CI_APP_PRIVATE_KEY = base64decode(var.ci_app_private_key_b64)
+
+    # So apply.yml can report a failed apply to #ci-alerts. See the variable
+    # for why this is a hand-copied tfvar rather than a remote_state read.
+    DISCORD_WEBHOOK_URL = var.ci_alerts_webhook_url
   }
 }
