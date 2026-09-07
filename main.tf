@@ -295,6 +295,34 @@ locals {
     TF_VAR_ssh_public_key                = var.ssh_public_key
     TF_VAR_alarm_email                   = var.alarm_email
 
+    # tnoff-backstage App -- the portal's read credential for catalog discovery
+    # (Contents + Metadata read, nothing else). Needs to reach CI as well as
+    # .envrc, unlike the flux App above: apply:apps runs in GitHub Actions and is
+    # what materialises the Secret the pod mounts.
+    #
+    # The private key is the ONLY secret here. GitHub App API auth is
+    # appId + privateKey -> JWT -> installation token; no client secret is
+    # involved. Verified in @backstage/integration rather than assumed:
+    # SingleInstanceGithubCredentialsProvider sets
+    # `baseAuthConfig = {appId, privateKey}` and both createAppAuth call sites
+    # take exactly that, so a client secret would be read from config, carried
+    # through three layers, and never reach the auth strategy. There is no such
+    # tfvar -- generating a real one would mint a live OAuth credential with no
+    # consumer. app-config passes a literal placeholder for the key Backstage
+    # insists on parsing.
+    #
+    # No installation ID either, unlike tnoff-terraform and tnoff-flux.
+    # @backstage/integration never reads one: the App key alone mints
+    # installation tokens, and allowedInstallationOwners keys on the owner
+    # LOGIN. tnoff-ci is the same shape for the same reason.
+    TF_VAR_backstage_app_id              = var.backstage_app_id
+    TF_VAR_backstage_app_client_id       = var.backstage_app_client_id
+    TF_VAR_backstage_app_private_key_b64 = var.backstage_app_private_key_b64
+
+    # Stamped by the sha256 trigger in rotation-tracking.tf and annotated onto
+    # the backstage-github-app-credentials Secret.
+    TF_VAR_backstage_app_private_key_rotated_at = time_static.backstage_app_private_key_rotated_at.rfc3339
+
     # Sealed-secrets controller key (base64, single-line). Local .envrc ONLY —
     # deliberately absent from terraform_ci_vars below so the master key never
     # lands in the `terraform` GitLab CI variables. Consumed by the operator-run
@@ -428,6 +456,34 @@ locals {
     TF_VAR_ssh_public_key                = var.ssh_public_key
     TF_VAR_alarm_email                   = var.alarm_email
 
+    # tnoff-backstage App -- the portal's read credential for catalog discovery
+    # (Contents + Metadata read, nothing else). Needs to reach CI as well as
+    # .envrc, unlike the flux App above: apply:apps runs in GitHub Actions and is
+    # what materialises the Secret the pod mounts.
+    #
+    # The private key is the ONLY secret here. GitHub App API auth is
+    # appId + privateKey -> JWT -> installation token; no client secret is
+    # involved. Verified in @backstage/integration rather than assumed:
+    # SingleInstanceGithubCredentialsProvider sets
+    # `baseAuthConfig = {appId, privateKey}` and both createAppAuth call sites
+    # take exactly that, so a client secret would be read from config, carried
+    # through three layers, and never reach the auth strategy. There is no such
+    # tfvar -- generating a real one would mint a live OAuth credential with no
+    # consumer. app-config passes a literal placeholder for the key Backstage
+    # insists on parsing.
+    #
+    # No installation ID either, unlike tnoff-terraform and tnoff-flux.
+    # @backstage/integration never reads one: the App key alone mints
+    # installation tokens, and allowedInstallationOwners keys on the owner
+    # LOGIN. tnoff-ci is the same shape for the same reason.
+    TF_VAR_backstage_app_id              = var.backstage_app_id
+    TF_VAR_backstage_app_client_id       = var.backstage_app_client_id
+    TF_VAR_backstage_app_private_key_b64 = var.backstage_app_private_key_b64
+
+    # Stamped by the sha256 trigger in rotation-tracking.tf and annotated onto
+    # the backstage-github-app-credentials Secret.
+    TF_VAR_backstage_app_private_key_rotated_at = time_static.backstage_app_private_key_rotated_at.rfc3339
+
     # See admin_secrets_bundle for the rationale on the rotated_at
     # values — same source, different consumer (CI vs local .envrc).
     TF_VAR_secret_age_tracker_gitlab_token = var.secret_age_tracker_gitlab_token
@@ -467,6 +523,9 @@ locals {
     # Not a secret either, and masking a non-secret only makes CI logs
     # harder to read.
     "TF_VAR_ci_app_client_id",
+    "TF_VAR_backstage_app_id",
+    "TF_VAR_backstage_app_client_id",
+    "TF_VAR_backstage_app_private_key_rotated_at",
   ]
 
   terraform_weekly_schedule = {
@@ -663,7 +722,7 @@ resource "github_actions_variable" "terraform" {
 # var.enable_ruleset`, and this repo is private, so no ruleset exists for an
 # actor to bypass. Rulesets on private repos need GitHub Pro.
 module "terraform_repo" {
-  source    = "git::https://github.com/tnoff/terraform-modules.git//github/repo?ref=32e1dd5de326da36423006bfcffeb47a097e9d8b"
+  source    = "git::https://github.com/tnoff/terraform-modules.git//github/repo?ref=4cbebdd95c017db8b3a55e461adac21733000ecd"
   repo_name = "terraform"
 
   repo_description = "Layer-1 infrastructure: OKE, networking, apps, DNS, Discord and the GitHub/GitLab repo fleet"

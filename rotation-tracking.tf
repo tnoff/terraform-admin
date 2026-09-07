@@ -136,3 +136,20 @@ resource "time_static" "flux_app_private_key_rotated_at" {
     version = terraform_data.flux_app_private_key_version.id
   }
 }
+
+# tnoff-backstage GitHub App private key. Same operator-rotated shape as the two
+# Apps above, and tracked for the reason the tnoff-flux comment gives: a
+# credential with no expiry is exactly the case where an AGE report is the only
+# thing that will ever prompt a rotation.
+#
+# One value, not two. An earlier draft combined this with a client secret; there
+# is no client secret, because GitHub App API auth never uses one -- see the
+# comment on the bundle entry in main.tf.
+resource "terraform_data" "backstage_app_private_key_version" {
+  triggers_replace = [sha256(var.backstage_app_private_key_b64)]
+}
+resource "time_static" "backstage_app_private_key_rotated_at" {
+  triggers = {
+    version = terraform_data.backstage_app_private_key_version.id
+  }
+}
