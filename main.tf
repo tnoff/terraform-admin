@@ -572,6 +572,29 @@ module "terraform_gitlab" {
   namespace_id     = data.gitlab_group.personal.id
   visibility_level = "private"
 
+  # The module defaults to "no one", and every repo in infra/repos.tf overrides
+  # it to "maintainer"; this one missed that sweep for the same reason the
+  # auto_cancel setting below did -- it is managed here rather than there.
+  #
+  # "no one" was correct while GitLab was canonical: changes arrived by MR, and
+  # allowed_to_merge (hardcoded "maintainer" in the module) is a separate gate,
+  # so nothing needed direct push. The flip to GitHub inverted that. GitLab
+  # `main` is now a mirror target, and github-workflows' fleet-mirror.yml
+  # fast-forwards it hourly, pushing as tnoff-robot -- a group Maintainer.
+  # "no one" rejects a direct push from *everyone including Owners*, so every
+  # run failed with "You are not allowed to push code to protected branches"
+  # and alerted #ci-alerts hourly.
+  #
+  # Raising this does not weaken review on the GitLab side: allowed_to_merge
+  # stays "maintainer" and allow_force_push stays false, both hardcoded in the
+  # module. GitHub is where the branch protection that matters now lives.
+  #
+  # Setting it by hand does NOT hold -- this resource is terraform-managed via
+  # the module's gitlab_branch_protection.main, so the next apply here reverts
+  # it. That is what happened on 2026-09-06: main was raised by hand to land a
+  # force-push, and an apply the same evening put it back.
+  push_access_level = "maintainer"
+
   # The module defaults to "enabled", which is what this project has been
   # running. Every repo in infra/repos.tf was set to "disabled" on 2026-07-25;
   # this one missed that sweep only because it is managed here rather than
