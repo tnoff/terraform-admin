@@ -722,7 +722,7 @@ resource "github_actions_variable" "terraform" {
 # var.enable_ruleset`, and this repo is private, so no ruleset exists for an
 # actor to bypass. Rulesets on private repos need GitHub Pro.
 module "terraform_repo" {
-  source    = "git::https://github.com/tnoff/terraform-modules.git//github/repo?ref=32e1dd5de326da36423006bfcffeb47a097e9d8b"
+  source    = "git::https://github.com/tnoff/terraform-modules.git//github/repo?ref=4cbebdd95c017db8b3a55e461adac21733000ecd"
   repo_name = "terraform"
 
   repo_description = "Layer-1 infrastructure: OKE, networking, apps, DNS, Discord and the GitHub/GitLab repo fleet"
