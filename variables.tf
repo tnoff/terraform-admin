@@ -184,6 +184,22 @@ variable "flux_app_private_key_b64" {
   description = "Base64 of the tnoff-flux App private key PEM, single line. Base64 for the same reason ci_app_private_key_b64 is: a multi-line PEM does not survive a shell round-trip cleanly. Produce with `base64 -w0 tnoff-flux.*.private-key.pem`. Set in admin/terraform.tfvars (gitignored); bootstrap base64decodes it into the Secret."
 }
 
+variable "backstage_app_id" {
+  type        = number
+  description = "App ID of the tnoff-backstage GitHub App. Not a secret. From https://github.com/settings/apps/tnoff-backstage."
+}
+
+variable "backstage_app_client_id" {
+  type        = string
+  description = "Client ID of the tnoff-backstage GitHub App (Iv23li... form). Not a secret, and shown on the App settings page without generating anything. Backstage requires the key to be PRESENT (readGithubIntegrationConfig uses getString, not getOptionalString) but never uses it: SingleInstanceGithubCredentialsProvider builds its auth config from appId + privateKey alone. Supplied so config parsing succeeds."
+}
+
+variable "backstage_app_private_key_b64" {
+  type        = string
+  sensitive   = true
+  description = "Base64 of the tnoff-backstage App private key PEM, single line. Base64 for the same reason ci_app_private_key_b64 is: a multi-line PEM does not survive a shell round-trip cleanly. Produce with `base64 -w0 tnoff-backstage.*.private-key.pem`. Set in admin/terraform.tfvars (gitignored); apps/ base64decodes it into the Secret the pod mounts."
+}
+
 variable "ci_app_id" {
   type        = number
   description = "App ID of the tnoff-ci GitHub App. Exported so terraform/infra can name it as a ruleset bypass actor (actor_type Integration) and mint installation tokens in CI, replacing the human admin PAT that assemble-changelog needs to push to a protected default branch. Not a secret."
