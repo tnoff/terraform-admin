@@ -1,0 +1,30 @@
+# Backstage catalog descriptor. Discovered automatically -- the portal's GitHub
+# provider reads catalog-info.yaml from the default branch of every repo the
+# tnoff-backstage App can see, so adding this file is the whole of onboarding.
+#
+# No annotations. github.com/project-slug is DERIVED by the portal's
+# AnnotateScmSlugEntityProcessor from the location this file was fetched from,
+# and the techdocs / kubernetes / grafana annotations each assert a target
+# exists. None of those targets do yet; they arrive with the plugins that read
+# them.
+#
+# spec.type is `infrastructure`, a fourth type beyond Backstage's well-known
+# service / website / library. It was added deliberately and narrowly: this repo
+# declares desired state rather than shipping software, which none of the three
+# can express, and unlike the `tool` type that was tried and withdrawn, "does it
+# ship something that runs, or does it describe where things run" has a stable
+# answer.
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-admin
+  description: >-
+    The admin-tier Terraform state, kept separate because it holds what the other states
+    are applied WITH: CI variables and secrets, and the rotation tracking that records
+    when each credential was last replaced.
+spec:
+  type: infrastructure
+  owner: group:default/admin
+  lifecycle: production
+  dependsOn:
+    - component:default/terraform-modules
