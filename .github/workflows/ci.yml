@@ -1,0 +1,90 @@
+name: CI
+
+# Pull-request checks. This repo had NONE until now -- `scheduled.yml` and
+# `notify-failure.yml` were the whole Actions surface, so every PR merged
+# unexamined and "green" meant "nothing ran".
+#
+# That gap is what this closes. It was found on 2026-09-08 while fixing a
+# contract break that killed `Release` in nine repos: this repo pins three
+# reusable workflows and had nothing capable of noticing if one of those pins
+# stopped matching its caller.
+#
+# ---------------------------------------------------------------------------
+# THESE CHECKS ARE ADVISORY, and that is not a choice made here
+# ---------------------------------------------------------------------------
+# This repo is PRIVATE on a free plan, where GitHub offers no rulesets and no
+# branch protection at all -- the API answers "Upgrade to GitHub Pro or make
+# this repository public to enable this feature." So no check here can be
+# REQUIRED, and nothing blocks a merge. The same is true of `terraform`,
+# `docker-apps` and `docs`; the public repos carry a `main-branch-protection`
+# ruleset requiring exactly `CI result`.
+#
+# The value is still real -- a red check on the PR is visible to a human where
+# a silent startup failure is not -- but do not read a green tick here as an
+# enforced gate. `result` is written to the fleet-standard shape so that if
+# this repo ever goes public or the plan changes, requiring one context is the
+# only step left.
+
+on:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Runs .pre-commit-config.yaml verbatim, so the local hooks and CI cannot
+  # drift. Both hooks are `language: docker_image` and both WRITE
+  # (`terraform fmt -write=true`, `terraform-docs .`), so pre-commit fails
+  # when a file changes -- which is exactly the check: terraform.md going
+  # stale against the .tf files is this repo's known rot.
+  #
+  # pre-commit.yml's header says terraform-admin "cannot use this as written"
+  # because it installs Python tooling only. Measured 2026-09-09 and that is
+  # not true here: docker_image hooks need Docker, not terraform on PATH, and
+  # hosted runners have Docker. Both hooks pass against this repo's HEAD.
+  pre-commit:
+    name: pre-commit
+    uses: tnoff/github-workflows/.github/workflows/pre-commit.yml@2740215791774b60db5cb6da23da260de2e6dfd8
+
+  secrets:
+    name: Scan for secrets
+    uses: tnoff/github-workflows/.github/workflows/trufflehog.yml@2740215791774b60db5cb6da23da260de2e6dfd8
+
+  # The check this repo was missing. scheduled.yml pins three reusable
+  # workflows; a `uses:` whose inputs or secrets stop matching the pinned
+  # callee fails at STARTUP -- no job, no check, no workflow_run event -- and
+  # with no PR CI at all there was nothing that could ever have caught it.
+  contracts:
+    name: Workflow contracts
+    uses: tnoff/github-workflows/.github/workflows/check-workflow-contracts.yml@2740215791774b60db5cb6da23da260de2e6dfd8
+
+  result:
+    name: CI result
+    # The fleet-standard single context. Advisory here for the plan reason
+    # above, but shaped so it never needs rewriting: this job always runs and
+    # its name never changes, and `skipped` deliberately passes so a fork PR
+    # skipping the cascade is not a failure.
+    if: always()
+    needs: [pre-commit, secrets, contracts]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Summarise
+        run: |
+          echo "pre-commit: ${{ needs['pre-commit'].result }}"
+          echo "secrets:    ${{ needs.secrets.result }}"
+          echo "contracts:  ${{ needs.contracts.result }}"
+
+      - name: Fail if any job failed
+        if: >-
+          needs['pre-commit'].result == 'failure' || needs['pre-commit'].result == 'cancelled' ||
+          needs.secrets.result == 'failure' || needs.secrets.result == 'cancelled' ||
+          needs.contracts.result == 'failure' || needs.contracts.result == 'cancelled'
+        run: |
+          echo "::error::One or more CI jobs did not pass."
+          exit 1
