@@ -350,6 +350,12 @@ locals {
     # docs/projects/secret-age-tracker.md.
     TF_VAR_secret_age_tracker_gitlab_token = var.secret_age_tracker_gitlab_token
 
+    # Local github MCP's read-only PAT. Local .envrc ONLY (below) -- like
+    # the sealed-secrets and tnoff-flux keys above, nothing in CI or the
+    # cluster consumes the token itself, only its rotated_at timestamp
+    # (see docs/projects/github-mcp-local.md).
+    TF_VAR_github_mcp_token = var.github_mcp_token
+
     # Auto-captured rotation timestamps — see rotation-tracking.tf.
     # Each `time_static.<var>_rotated_at.rfc3339` is fresh when the
     # underlying tfvar value's sha256 changes, and pinned otherwise.
@@ -362,6 +368,7 @@ locals {
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at              = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_github_mcp_token_rotated_at                = time_static.github_mcp_token_rotated_at.rfc3339
 
   }
 }
@@ -495,6 +502,7 @@ locals {
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at              = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_github_mcp_token_rotated_at                = time_static.github_mcp_token_rotated_at.rfc3339
 
   }
 
@@ -514,6 +522,7 @@ locals {
     "TF_VAR_ssh_public_key_rotated_at",
     "TF_VAR_secret_age_tracker_gitlab_token_rotated_at",
     "TF_VAR_ci_app_private_key_rotated_at",
+    "TF_VAR_github_mcp_token_rotated_at",
     # 7 characters. GitLab masking requires at least 8, so masking this is
     # rejected outright -- and an App ID is public to anyone who can see the
     # app, so there is nothing to protect.
@@ -661,6 +670,7 @@ locals {
     "TF_VAR_ssh_public_key_rotated_at",
     "TF_VAR_secret_age_tracker_gitlab_token_rotated_at",
     "TF_VAR_ci_app_private_key_rotated_at",
+    "TF_VAR_github_mcp_token_rotated_at",
   ]
 
   # Empty, and kept rather than deleted: GitHub rejects any secret or variable

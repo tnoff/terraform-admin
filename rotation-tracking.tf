@@ -96,6 +96,18 @@ resource "time_static" "secret_age_tracker_gitlab_token_rotated_at" {
   }
 }
 
+# Local github MCP's read-only PAT. Same operator-rotated shape as the
+# GitLab PATs above -- a fine-grained PAT has no terraform-derivable age,
+# so the sha256 trigger is the only way to know when it last changed.
+resource "terraform_data" "github_mcp_token_version" {
+  triggers_replace = [sha256(var.github_mcp_token)]
+}
+resource "time_static" "github_mcp_token_rotated_at" {
+  triggers = {
+    version = terraform_data.github_mcp_token_version.id
+  }
+}
+
 
 # tnoff-ci GitHub App private key. Operator-rotated like the PATs above: an
 # App key is regenerated from the App's settings page, so nothing here can

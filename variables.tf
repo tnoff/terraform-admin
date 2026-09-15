@@ -234,6 +234,20 @@ variable "secret_age_tracker_gitlab_token" {
   sensitive   = true
 }
 
+# Fine-grained GitHub PAT, read-only, scoped to every tnoff-owned repo
+# (Contents/Issues/Pull requests/Actions/Metadata: read). The local `github`
+# MCP server's only credential -- laptop-only, same as the local gitlab/
+# grafana/kubernetes MCP tokens, so unlike secret_age_tracker_gitlab_token
+# above it is never pushed to CI: nothing in a pipeline or in-cluster
+# consumes the token itself. Only its rotated_at timestamp (rotation-
+# tracking.tf) flows to CI, feeding the layer-1-rotation-ledger ConfigMap
+# like every other tracked secret's age. See docs/projects/github-mcp-local.md.
+variable "github_mcp_token" {
+  description = "Fine-grained GitHub PAT (read-only, all tnoff repos) backing the local `github` MCP server. Manually rotated via https://github.com/settings/personal-access-tokens; not consumed by any CI pipeline or cluster workload."
+  type        = string
+  sensitive   = true
+}
+
 variable "ssh_public_key" {
   description = "SSH public key for OKE worker nodes"
   type        = string
