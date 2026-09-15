@@ -8,5 +8,28 @@
     "pre-commit",
     "github-actions",
     "custom.regex"
+  ],
+  "postUpgradeTasks": {
+    "description": "Regenerate terraform.md after a dependency bump. The Modules table renders each module's `?ref=<sha>` in its Version column, so a bare terraform-modules digest bump staleness the doc without touching a variable, output or resource (#26, four module blocks). Since this repo gained PR CI -- which runs .pre-commit-config.yaml verbatim, including a terraform-docs hook that WRITES -- that drift is no longer merely invisible, it is a red check on every such PR. Renovate cannot infer the docs change, so the generator has to re-run.\n\nThe command must match the allowlist regex in the shared renovate.yml workflow's `allowed_commands` byte for byte: postUpgrade shell is refused unless the SELF-HOSTED (global) config allowlists it, and a repo's renovate.json cannot authorize its own commands. That default allowlist has always named this exact path; the script is what was missing here.\n\nfileFilters names the file rather than a `**/` glob because this repo is a single root module with exactly one terraform.md. executionMode is `branch`: the script regenerates the whole root module whatever changed, so once per branch is strictly cheaper than once per upgrade on a grouped PR.",
+    "commands": ["bash ci/renovate-terraform-docs.sh"],
+    "fileFilters": ["terraform.md"],
+    "executionMode": "branch"
+  },
+  "customManagers": [
+    {
+      "description": "terraform-docs, in the two places that pin it. These MUST move together: CI runs the pre-commit hook and fails on any file it rewrites, while ci/renovate-terraform-docs.sh is what generates the file being checked -- so a skew between them fails every Renovate PR on a docs diff nobody wrote. Nothing tracked either pin before: the pre-commit manager reads remote `repo:` entries, not a local hook's docker_image, and the docker managers are not enabled here. The script also asserts the two agree at runtime, so a regex that stops matching fails loudly instead of silently generating the wrong format.",
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.pre-commit-config\\.yaml$",
+        "^ci/renovate-terraform-docs\\.sh$"
+      ],
+      "matchStrings": [
+        "quay\\.io/terraform-docs/terraform-docs:(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)",
+        "VERSION=\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "terraform-docs/terraform-docs",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    }
   ]
 }
