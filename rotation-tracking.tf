@@ -63,14 +63,27 @@ resource "time_static" "gitlab_api_key_rotated_at" {
   }
 }
 
-# GitLab bot PAT — pushed as a CI variable on the terraform repo.
-resource "terraform_data" "gitlab_bot_api_key_version" {
-  triggers_replace = [sha256(var.gitlab_bot_api_key)]
+# GitLab token for the tnoff-ci service account — pushed as a CI variable
+# on the terraform repo. Renamed from gitlab_bot_api_key(_version/_rotated_at)
+# -- moved blocks below preserve the tracked rotation timestamp across the
+# rename instead of resetting it via destroy+recreate.
+resource "terraform_data" "gitlab_ci_api_key_version" {
+  triggers_replace = [sha256(var.gitlab_ci_api_key)]
 }
-resource "time_static" "gitlab_bot_api_key_rotated_at" {
+resource "time_static" "gitlab_ci_api_key_rotated_at" {
   triggers = {
-    version = terraform_data.gitlab_bot_api_key_version.id
+    version = terraform_data.gitlab_ci_api_key_version.id
   }
+}
+
+moved {
+  from = terraform_data.gitlab_bot_api_key_version
+  to   = terraform_data.gitlab_ci_api_key_version
+}
+
+moved {
+  from = time_static.gitlab_bot_api_key_rotated_at
+  to   = time_static.gitlab_ci_api_key_rotated_at
 }
 
 # OKE worker-node SSH public key. Not a secret per se (just authorized_keys),
