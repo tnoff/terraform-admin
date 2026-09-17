@@ -291,7 +291,8 @@ locals {
     TF_VAR_terraform_app_installation_id = var.terraform_app_installation_id
     TF_VAR_terraform_app_private_key_b64 = var.terraform_app_private_key_b64
     TF_VAR_gitlab_api_key                = var.gitlab_api_key
-    TF_VAR_gitlab_bot_api_key            = var.gitlab_bot_api_key
+    TF_VAR_gitlab_ci_api_key             = var.gitlab_ci_api_key
+    TF_VAR_gitlab_ci_service_account_id  = var.gitlab_ci_service_account_id
     TF_VAR_ssh_public_key                = var.ssh_public_key
     TF_VAR_alarm_email                   = var.alarm_email
 
@@ -358,7 +359,7 @@ locals {
     TF_VAR_discord_token_rotated_at                   = time_static.discord_token_rotated_at.rfc3339
     TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
+    TF_VAR_gitlab_ci_api_key_rotated_at               = time_static.gitlab_ci_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at              = time_static.ci_app_private_key_rotated_at.rfc3339
@@ -452,7 +453,8 @@ locals {
     TF_VAR_terraform_app_installation_id = var.terraform_app_installation_id
     TF_VAR_terraform_app_private_key_b64 = var.terraform_app_private_key_b64
     TF_VAR_gitlab_api_key                = var.gitlab_api_key
-    TF_VAR_gitlab_bot_api_key            = var.gitlab_bot_api_key
+    TF_VAR_gitlab_ci_api_key             = var.gitlab_ci_api_key
+    TF_VAR_gitlab_ci_service_account_id  = var.gitlab_ci_service_account_id
     TF_VAR_ssh_public_key                = var.ssh_public_key
     TF_VAR_alarm_email                   = var.alarm_email
 
@@ -491,7 +493,7 @@ locals {
     TF_VAR_discord_token_rotated_at                   = time_static.discord_token_rotated_at.rfc3339
     TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_bot_api_key_rotated_at              = time_static.gitlab_bot_api_key_rotated_at.rfc3339
+    TF_VAR_gitlab_ci_api_key_rotated_at               = time_static.gitlab_ci_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at              = time_static.ci_app_private_key_rotated_at.rfc3339
@@ -510,7 +512,7 @@ locals {
     "TF_VAR_discord_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
-    "TF_VAR_gitlab_bot_api_key_rotated_at",
+    "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
     "TF_VAR_secret_age_tracker_gitlab_token_rotated_at",
     "TF_VAR_ci_app_private_key_rotated_at",
@@ -526,6 +528,9 @@ locals {
     "TF_VAR_backstage_app_id",
     "TF_VAR_backstage_app_client_id",
     "TF_VAR_backstage_app_private_key_rotated_at",
+    # A GitLab service_account_id, not a credential -- same reasoning as
+    # ci_app_id above, and likely under 8 characters too.
+    "TF_VAR_gitlab_ci_service_account_id",
   ]
 
   terraform_weekly_schedule = {
@@ -580,7 +585,7 @@ module "terraform_gitlab" {
   # allowed_to_merge (hardcoded "maintainer" in the module) is a separate gate,
   # so nothing needed direct push. The flip to GitHub inverted that. GitLab
   # `main` is now a mirror target, and github-workflows' fleet-mirror.yml
-  # fast-forwards it hourly, pushing as tnoff-robot -- a group Maintainer.
+  # fast-forwards it hourly, pushing as tnoff-ci -- a group Maintainer.
   # "no one" rejects a direct push from *everyone including Owners*, so every
   # run failed with "You are not allowed to push code to protected branches"
   # and alerted #ci-alerts hourly.
@@ -657,10 +662,11 @@ locals {
     "TF_VAR_discord_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
-    "TF_VAR_gitlab_bot_api_key_rotated_at",
+    "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
     "TF_VAR_secret_age_tracker_gitlab_token_rotated_at",
     "TF_VAR_ci_app_private_key_rotated_at",
+    "TF_VAR_gitlab_ci_service_account_id",
   ]
 
   # Empty, and kept rather than deleted: GitHub rejects any secret or variable
