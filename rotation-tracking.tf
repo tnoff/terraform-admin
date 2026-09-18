@@ -97,18 +97,6 @@ resource "time_static" "ssh_public_key_rotated_at" {
   }
 }
 
-# Secret-age tracker's own GitLab read_api PAT — the CronJob that consumes
-# rotation timestamps also gets its own timestamp tracked. Recursive but
-# useful.
-resource "terraform_data" "secret_age_tracker_gitlab_token_version" {
-  triggers_replace = [sha256(var.secret_age_tracker_gitlab_token)]
-}
-resource "time_static" "secret_age_tracker_gitlab_token_rotated_at" {
-  triggers = {
-    version = terraform_data.secret_age_tracker_gitlab_token_version.id
-  }
-}
-
 
 # tnoff-ci GitHub App private key. Operator-rotated like the PATs above: an
 # App key is regenerated from the App's settings page, so nothing here can

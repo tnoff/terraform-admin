@@ -233,12 +233,6 @@ variable "gitlab_ci_service_account_id" {
   type        = string
 }
 
-variable "secret_age_tracker_gitlab_token" {
-  description = "GitLab personal access token consumed by the secret-age-tracker CronJob (read_api scope). Used to blame docker-apps SealedSecret YAMLs and list PAT expiries. Folded into the oke-security-scanner image per docs/projects/secret-age-tracker.md."
-  type        = string
-  sensitive   = true
-}
-
 variable "ssh_public_key" {
   description = "SSH public key for OKE worker nodes"
   type        = string
