@@ -345,24 +345,17 @@ locals {
     # credential like every other long-lived secret.
     TF_VAR_flux_app_private_key_rotated_at = time_static.flux_app_private_key_rotated_at.rfc3339
 
-    # Consumed by the apps/ stack to materialize the
-    # `secret-age-tracker-gitlab-token` k8s Secret in the security-scanner
-    # ns. Folded into the oke-security-scanner image per
-    # docs/projects/secret-age-tracker.md.
-    TF_VAR_secret_age_tracker_gitlab_token = var.secret_age_tracker_gitlab_token
-
     # Auto-captured rotation timestamps — see rotation-tracking.tf.
     # Each `time_static.<var>_rotated_at.rfc3339` is fresh when the
     # underlying tfvar value's sha256 changes, and pinned otherwise.
     # The apps/ stack reads these and writes the
     # `layer-1-rotation-ledger` ConfigMap from them.
-    TF_VAR_discord_token_rotated_at                   = time_static.discord_token_rotated_at.rfc3339
-    TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
-    TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_ci_api_key_rotated_at               = time_static.gitlab_ci_api_key_rotated_at.rfc3339
-    TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
-    TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
-    TF_VAR_ci_app_private_key_rotated_at              = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_discord_token_rotated_at        = time_static.discord_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_api_token_rotated_at = time_static.cloudflare_api_token_rotated_at.rfc3339
+    TF_VAR_gitlab_api_key_rotated_at       = time_static.gitlab_api_key_rotated_at.rfc3339
+    TF_VAR_gitlab_ci_api_key_rotated_at    = time_static.gitlab_ci_api_key_rotated_at.rfc3339
+    TF_VAR_ssh_public_key_rotated_at       = time_static.ssh_public_key_rotated_at.rfc3339
+    TF_VAR_ci_app_private_key_rotated_at   = time_static.ci_app_private_key_rotated_at.rfc3339
 
   }
 }
@@ -488,15 +481,12 @@ locals {
 
     # See admin_secrets_bundle for the rationale on the rotated_at
     # values — same source, different consumer (CI vs local .envrc).
-    TF_VAR_secret_age_tracker_gitlab_token = var.secret_age_tracker_gitlab_token
-
-    TF_VAR_discord_token_rotated_at                   = time_static.discord_token_rotated_at.rfc3339
-    TF_VAR_cloudflare_api_token_rotated_at            = time_static.cloudflare_api_token_rotated_at.rfc3339
-    TF_VAR_gitlab_api_key_rotated_at                  = time_static.gitlab_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_ci_api_key_rotated_at               = time_static.gitlab_ci_api_key_rotated_at.rfc3339
-    TF_VAR_ssh_public_key_rotated_at                  = time_static.ssh_public_key_rotated_at.rfc3339
-    TF_VAR_secret_age_tracker_gitlab_token_rotated_at = time_static.secret_age_tracker_gitlab_token_rotated_at.rfc3339
-    TF_VAR_ci_app_private_key_rotated_at              = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_discord_token_rotated_at        = time_static.discord_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_api_token_rotated_at = time_static.cloudflare_api_token_rotated_at.rfc3339
+    TF_VAR_gitlab_api_key_rotated_at       = time_static.gitlab_api_key_rotated_at.rfc3339
+    TF_VAR_gitlab_ci_api_key_rotated_at    = time_static.gitlab_ci_api_key_rotated_at.rfc3339
+    TF_VAR_ssh_public_key_rotated_at       = time_static.ssh_public_key_rotated_at.rfc3339
+    TF_VAR_ci_app_private_key_rotated_at   = time_static.ci_app_private_key_rotated_at.rfc3339
 
   }
 
@@ -514,7 +504,6 @@ locals {
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
-    "TF_VAR_secret_age_tracker_gitlab_token_rotated_at",
     "TF_VAR_ci_app_private_key_rotated_at",
     # 7 characters. GitLab masking requires at least 8, so masking this is
     # rejected outright -- and an App ID is public to anyone who can see the
@@ -664,7 +653,6 @@ locals {
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
-    "TF_VAR_secret_age_tracker_gitlab_token_rotated_at",
     "TF_VAR_ci_app_private_key_rotated_at",
     "TF_VAR_gitlab_ci_service_account_id",
   ]
