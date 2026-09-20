@@ -1,16 +1,18 @@
 # Terraform Admin
 
 Bootstrap Terraform configuration for the OCI tenancy that hosts everything else
-(the `terraform` workload repo's stacks: `oci/`, `oci-alarms/`, `apps/`,
-`discord/`, `dns/`, `infra/`).
+(the `terraform` workload repo's stacks: `oci/`, `apps/`, `discord/`, `dns/`,
+`infra/`, plus the operator-run `bootstrap/`).
 
 ## What this creates
 
 - The OCI `terraform-admin` IAM user, group, policy, and API key (used by every
   other stack to auth against OCI)
 - A KMS vault + key that encrypts state at rest
-- One Object Storage bucket per workload stack (`terraform-state-<stack>`) used
-  as the remote state backend by the other stacks
+- One Object Storage bucket per entry in `var.workspaces`
+  ([variables.tf](variables.tf) — that list is the source of truth for which
+  stacks have a bucket, `terraform-state-<workspace>`), used as the remote
+  state backend by the other stacks
 - Every CI/CD credential the `terraform` workload repo's CI uses — pushed to
   its GitHub Actions secrets/variables (the live path, since it went
   GitHub-canonical) and to its `tnoff-projects/terraform` GitLab project's CI

@@ -40,7 +40,14 @@ variable "workspaces" {
   # apps/dns). `bootstrap` is the operator-run cluster-foundation stack
   # (terraform/bootstrap) — its backend is terraform-state-bootstrap, and
   # this list also drives the objectstorage KMS-use policy below.
-  default = ["discord", "infra", "oci", "oci-alarms", "bootstrap", "apps", "dns"]
+  #
+  # `oci-alarms` removed 2026-09-20: the workspace it backed was retired
+  # (no oci-alarms/ directory in tnoff/terraform, no alarm/notification-topic
+  # resource anywhere in that repo). Removing it here on the next apply
+  # destroys the terraform_state_buckets/oci_identity_policy resources for
+  # it -- the bucket itself must be emptied first (OCI object storage has no
+  # force_destroy; a non-empty bucket fails to delete).
+  default = ["discord", "infra", "oci", "bootstrap", "apps", "dns"]
 }
 
 variable "vault_name" {
