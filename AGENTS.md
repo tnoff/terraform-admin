@@ -61,6 +61,26 @@ that list is masked by default. If a new variable can't be masked (e.g.
 contains `@` like an email), add it to the allowlist rather than turning
 masking off globally.
 
+### Two Discord bot tokens, not one
+
+`discord_bot_token` and `discord_management_token` are two SEPARATE Discord
+bot applications, not a naming quirk. `discord_bot_token` is the live
+application bot's own identity (the one running in docker-apps, role
+`vidya-game-machine`) -- it's held here only for rotation tracking and as
+the source to copy from when re-sealing docker-apps' secret, and it is NOT
+pushed to `terraform`'s CI. `discord_management_token` is a bot that exists
+only to let `terraform/discord`'s `discord` provider manage server structure
+(roles/channels/webhooks); it has no docker-apps counterpart at all.
+
+Before 2026-09-20 these were one variable (`discord_token`), reused for both
+purposes. That was wrong, not just imprecisely named: it meant the
+application bot's own live credential was also sitting in `terraform`'s CI
+variables with no reason to be there. If you're tempted to point
+`terraform/discord`'s provider at `discord_bot_token` because it's already
+populated and `discord_management_token` isn't yet -- don't. The whole point
+of the split is that Terraform's provider auth and the live bot's identity
+are different blast radii.
+
 ## Module sources
 
 Modules come from `gitlab.com/tnoff-projects/terraform-modules` pinned to

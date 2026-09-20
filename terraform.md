@@ -56,7 +56,8 @@
 | [terraform_data.backstage_app_private_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.ci_app_private_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.cloudflare_api_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
-| [terraform_data.discord_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
+| [terraform_data.discord_bot_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
+| [terraform_data.discord_management_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.flux_app_private_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_ci_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
@@ -64,7 +65,8 @@
 | [time_static.backstage_app_private_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.ci_app_private_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.cloudflare_api_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
-| [time_static.discord_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
+| [time_static.discord_bot_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
+| [time_static.discord_management_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.flux_app_private_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_ci_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
@@ -89,7 +91,8 @@
 | <a name="input_cloudflare_account_id"></a> [cloudflare\_account\_id](#input\_cloudflare\_account\_id) | Cloudflare account identifier (not secret) | `string` | n/a | yes |
 | <a name="input_cloudflare_api_token"></a> [cloudflare\_api\_token](#input\_cloudflare\_api\_token) | Cloudflare account API token | `string` | n/a | yes |
 | <a name="input_config_file_profile"></a> [config\_file\_profile](#input\_config\_file\_profile) | Profile name in ~/.oci/config file | `string` | `"DEFAULT"` | no |
-| <a name="input_discord_token"></a> [discord\_token](#input\_discord\_token) | Discord bot token | `string` | n/a | yes |
+| <a name="input_discord_bot_token"></a> [discord\_bot\_token](#input\_discord\_bot\_token) | The application bot's own Discord token -- the credential that runs as the live bot in docker-apps (role vidya-game-machine). Not relayed to terraform's CI: nothing there reads it. Held here only for rotation tracking (rotation-tracking.tf) and as the canonical value to copy from when re-sealing docker-apps/apps/discord/secrets-conf.yaml's DISCORD\_TOKEN. | `string` | n/a | yes |
+| <a name="input_discord_management_token"></a> [discord\_management\_token](#input\_discord\_management\_token) | Token for a SEPARATE Discord bot application, used only by terraform/discord's `discord` provider to manage server structure (roles, channels, webhooks). Distinct from discord\_bot\_token on purpose: that one is the live application bot's own identity, and reusing it for Terraform's provider auth was the thing this variable split away from. Needs its own bot application created in the Discord Developer Portal, invited to the server with the permissions terraform/discord's resources require (at minimum Manage Roles, Manage Channels, Manage Webhooks) -- there is no API to mint a second token for an existing bot. | `string` | n/a | yes |
 | <a name="input_flux_app_id"></a> [flux\_app\_id](#input\_flux\_app\_id) | App ID of the tnoff-flux GitHub App. Not a secret. From https://github.com/settings/apps/tnoff-flux. | `number` | n/a | yes |
 | <a name="input_flux_app_installation_id"></a> [flux\_app\_installation\_id](#input\_flux\_app\_installation\_id) | Installation ID of the tnoff-flux App on tnoff/docker-apps -- the trailing number in https://github.com/settings/installations/<id>. Not a secret. Flux accepts githubAppInstallationOwner instead, but the ID has been supported since 2.5 and the owner form is newer, so the ID is the safer pin. | `number` | n/a | yes |
 | <a name="input_flux_app_private_key_b64"></a> [flux\_app\_private\_key\_b64](#input\_flux\_app\_private\_key\_b64) | Base64 of the tnoff-flux App private key PEM, single line. Base64 for the same reason ci\_app\_private\_key\_b64 is: a multi-line PEM does not survive a shell round-trip cleanly. Produce with `base64 -w0 tnoff-flux.*.private-key.pem`. Set in admin/terraform.tfvars (gitignored); bootstrap base64decodes it into the Secret. | `string` | n/a | yes |

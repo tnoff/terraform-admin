@@ -271,7 +271,11 @@ locals {
 
     TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
     TF_VAR_cloudflare_account_id = var.cloudflare_account_id
-    TF_VAR_discord_token         = var.discord_token
+
+    # discord_bot_token deliberately NOT here -- see its description in
+    # variables.tf. It's the live application bot's own credential;
+    # terraform/discord uses this separate management-only bot instead.
+    TF_VAR_discord_management_token = var.discord_management_token
 
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
@@ -350,12 +354,13 @@ locals {
     # underlying tfvar value's sha256 changes, and pinned otherwise.
     # The apps/ stack reads these and writes the
     # `layer-1-rotation-ledger` ConfigMap from them.
-    TF_VAR_discord_token_rotated_at        = time_static.discord_token_rotated_at.rfc3339
-    TF_VAR_cloudflare_api_token_rotated_at = time_static.cloudflare_api_token_rotated_at.rfc3339
-    TF_VAR_gitlab_api_key_rotated_at       = time_static.gitlab_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_ci_api_key_rotated_at    = time_static.gitlab_ci_api_key_rotated_at.rfc3339
-    TF_VAR_ssh_public_key_rotated_at       = time_static.ssh_public_key_rotated_at.rfc3339
-    TF_VAR_ci_app_private_key_rotated_at   = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_discord_bot_token_rotated_at        = time_static.discord_bot_token_rotated_at.rfc3339
+    TF_VAR_discord_management_token_rotated_at = time_static.discord_management_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_api_token_rotated_at     = time_static.cloudflare_api_token_rotated_at.rfc3339
+    TF_VAR_gitlab_api_key_rotated_at           = time_static.gitlab_api_key_rotated_at.rfc3339
+    TF_VAR_gitlab_ci_api_key_rotated_at        = time_static.gitlab_ci_api_key_rotated_at.rfc3339
+    TF_VAR_ssh_public_key_rotated_at           = time_static.ssh_public_key_rotated_at.rfc3339
+    TF_VAR_ci_app_private_key_rotated_at       = time_static.ci_app_private_key_rotated_at.rfc3339
 
   }
 }
@@ -426,7 +431,11 @@ locals {
 
     TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
     TF_VAR_cloudflare_account_id = var.cloudflare_account_id
-    TF_VAR_discord_token         = var.discord_token
+
+    # discord_bot_token deliberately NOT here -- see its description in
+    # variables.tf. It's the live application bot's own credential;
+    # terraform/discord uses this separate management-only bot instead.
+    TF_VAR_discord_management_token = var.discord_management_token
 
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
@@ -481,12 +490,13 @@ locals {
 
     # See admin_secrets_bundle for the rationale on the rotated_at
     # values — same source, different consumer (CI vs local .envrc).
-    TF_VAR_discord_token_rotated_at        = time_static.discord_token_rotated_at.rfc3339
-    TF_VAR_cloudflare_api_token_rotated_at = time_static.cloudflare_api_token_rotated_at.rfc3339
-    TF_VAR_gitlab_api_key_rotated_at       = time_static.gitlab_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_ci_api_key_rotated_at    = time_static.gitlab_ci_api_key_rotated_at.rfc3339
-    TF_VAR_ssh_public_key_rotated_at       = time_static.ssh_public_key_rotated_at.rfc3339
-    TF_VAR_ci_app_private_key_rotated_at   = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_discord_bot_token_rotated_at        = time_static.discord_bot_token_rotated_at.rfc3339
+    TF_VAR_discord_management_token_rotated_at = time_static.discord_management_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_api_token_rotated_at     = time_static.cloudflare_api_token_rotated_at.rfc3339
+    TF_VAR_gitlab_api_key_rotated_at           = time_static.gitlab_api_key_rotated_at.rfc3339
+    TF_VAR_gitlab_ci_api_key_rotated_at        = time_static.gitlab_ci_api_key_rotated_at.rfc3339
+    TF_VAR_ssh_public_key_rotated_at           = time_static.ssh_public_key_rotated_at.rfc3339
+    TF_VAR_ci_app_private_key_rotated_at       = time_static.ci_app_private_key_rotated_at.rfc3339
 
   }
 
@@ -499,7 +509,8 @@ locals {
     # rotated_at timestamps are RFC3339 strings containing `:` which
     # GitLab masking rejects. Contents are non-secret apply timestamps,
     # safe to expose.
-    "TF_VAR_discord_token_rotated_at",
+    "TF_VAR_discord_bot_token_rotated_at",
+    "TF_VAR_discord_management_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
@@ -648,7 +659,8 @@ locals {
     "TF_VAR_terraform_app_id",
     "TF_VAR_terraform_app_installation_id",
     "TF_VAR_ci_app_client_id",
-    "TF_VAR_discord_token_rotated_at",
+    "TF_VAR_discord_bot_token_rotated_at",
+    "TF_VAR_discord_management_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
