@@ -28,21 +28,16 @@ Bootstrap Terraform configuration for the OCI tenancy that hosts everything else
 This repo uses **local state** because it creates the remote state backend that
 everything else uses. Standard chicken-and-egg pattern for IaC.
 
-State lives outside the repo tree at
-`~/.local/state/terraform-admin/terraform.tfstate` (configured in
-[provider.tf](provider.tf)) so it can't be committed or wiped by `git clean`.
-That directory is a symlink to `~/Dropbox/Terraform-Backup/`, so state is
-continuously backed up to Dropbox — losing the local disk no longer means
-losing the state. See [Security notes](#security-notes) for the tradeoff this
-carries.
-
-Losing the state entirely means losing the ability to manage the IAM user /
-KMS key / state buckets cleanly.
+State lives outside the repo tree (see [provider.tf](provider.tf) for the
+configured path) so it can't be committed or wiped by `git clean`. Back it up
+yourself — losing it means losing the ability to manage the IAM user / KMS
+key / state buckets cleanly. See [Security notes](#security-notes) for what
+the file contains and why that matters for whatever backup target you pick.
 
 ## Workload-repo handoff
 
-After `terraform apply` here, the workload repo (`/home/tnorth/Code/terraform`)
-gets its auth two ways:
+After `terraform apply` here, the workload repo (`~/Code/terraform`) gets its
+auth two ways:
 
 - **In CI**: GitHub Actions secrets/variables pushed by
   `github_actions_secret.terraform` / `github_actions_variable.terraform` →
@@ -112,18 +107,17 @@ are sensitive — do not commit.
 
 ## Security notes
 
-- The state file is gitignored and kept outside the repo at
-  `~/.local/state/terraform-admin/`. It holds the **unencrypted** admin private
-  key and all sensitive `TF_VAR_*` values pushed to GitHub Actions and
-  GitLab CI.
-- ⚠️ That state directory is symlinked to `~/Dropbox/Terraform-Backup/`, so the
-  plaintext secrets above are synced to Dropbox. This is a deliberate
-  convenience-vs-exposure tradeoff for a single-user personal setup: the
-  secrets now leave the machine to a third-party cloud provider (which keeps
-  version history even after deletion). Acceptable here only because it's a
-  personal tenancy; do not replicate for shared/production state. Prefer an
-  encrypted sync (e.g. git-crypt, restic, or an encrypted volume) if the
-  Dropbox account is not otherwise trusted with these credentials.
+- The state file is gitignored and kept outside the repo tree (not committed,
+  not wiped by `git clean`). It holds the **unencrypted** admin private key and
+  all sensitive `TF_VAR_*` values pushed to GitHub Actions and GitLab CI —
+  treat any backup or sync target for it with the same care you'd give those
+  credentials directly.
+- ⚠️ If you back this state up anywhere (cloud sync, another disk, etc.), the
+  plaintext secrets above travel with it. Prefer an encrypted target (e.g.
+  git-crypt, restic, or an encrypted volume) over a general-purpose sync
+  unless you already trust that destination with these credentials directly.
+  Acceptable to relax this only for a personal, single-user tenancy; do not
+  replicate for shared/production state.
 - State buckets have versioning enabled. Old versions archive after 30 days
   and are deleted after 90.
 - KMS encryption is applied to every state bucket via the `terraform-state`
