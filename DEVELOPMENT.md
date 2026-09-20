@@ -86,5 +86,6 @@ terraform apply
 ```
 
 This rotates the OCI API key, rewrites the PEM file, re-encodes
-`OCI_API_KEY_B64`, and pushes the new value to GitLab CI variables. Any local
-shells using the old `.envrc` need to re-source it.
+`OCI_API_KEY_B64`, and pushes the new value to `terraform`'s GitHub Actions
+secrets and GitLab CI variables. Any local shells using the old `.envrc`
+need to re-source it.

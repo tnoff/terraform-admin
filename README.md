@@ -11,8 +11,13 @@ Bootstrap Terraform configuration for the OCI tenancy that hosts everything else
 - A KMS vault + key that encrypts state at rest
 - One Object Storage bucket per workload stack (`terraform-state-<stack>`) used
   as the remote state backend by the other stacks
-- The `tnoff-projects/terraform` GitLab project itself (the repo the workload
-  code lives in), plus every CI/CD variable it uses
+- Every CI/CD credential the `terraform` workload repo's CI uses — pushed to
+  its GitHub Actions secrets/variables (the live path, since it went
+  GitHub-canonical) and to its `tnoff-projects/terraform` GitLab project's CI
+  variables (kept as a rollback path; see [AGENTS.md](AGENTS.md))
+- The GitLab project resource itself (branch protection, mirror settings) —
+  not the code's canonical home anymore, just a mirror `github-workflows`'
+  `fleet-mirror.yml` keeps in sync
 - Generated artifacts in `generated-output/` (gitignored):
   - `terraform_admin_private_key.pem` — the admin API key
   - `.envrc` — `export VAR=value` lines for every env var the workload stacks
@@ -39,9 +44,15 @@ KMS key / state buckets cleanly.
 After `terraform apply` here, the workload repo (`/home/tnorth/Code/terraform`)
 gets its auth two ways:
 
-- **In CI**: GitLab CI variables pushed by the `terraform_gitlab` module →
-  exposed as env vars in every CI job → `before_script` decodes
-  `OCI_API_KEY_B64` to a file and exports `OCI_PRIVATE_KEY_PATH`.
+- **In CI**: GitHub Actions secrets/variables pushed by
+  `github_actions_secret.terraform` / `github_actions_variable.terraform` →
+  exposed as env vars via `terraform`'s `.github/actions/terragrunt`
+  composite action, whose "Materialise the OCI API key" step decodes
+  `OCI_API_KEY_B64` to a file and exports `OCI_PRIVATE_KEY_PATH`. The same
+  values also still reach `terraform`'s GitLab CI variables (the
+  `terraform_gitlab` module's `pipeline_variables`), but only as a rollback
+  path — `terraform` went GitHub-canonical on 2026-09-04 and its
+  `.gitlab-ci.yml` no longer exists.
 - **Locally**: source the generated `.envrc` from `generated-output/` into
   your shell. Simplest setup is a symlink in the workload repo so `direnv`
   picks it up:
@@ -61,19 +72,31 @@ gets its auth two ways:
   users, KMS vaults, and Object Storage buckets in the target tenancy
 - A GitLab personal access token with `api` scope (provided via
   `TF_VAR_gitlab_api_key`)
+- Four GitHub Apps already created (`tnoff-terraform`, `tnoff-ci`,
+  `tnoff-flux`, `tnoff-backstage`) with their IDs/keys on hand — see
+  [variables.tf](variables.tf) for what each replaces and why they're
+  separate Apps rather than one
 
 ## Usage
 
 Inputs are passed as `TF_VAR_*` environment variables (no checked-in tfvars
-file). See [variables.tf](variables.tf) for the full list; required ones:
+file). See [variables.tf](variables.tf) for the full, current list — it is
+the source of truth; the grouping below is current as of this writing but
+will drift, same as the previous version of this list did:
 
 - `oci_tenancy_ocid`
 - `cloudflare_api_token`, `cloudflare_account_id`
 - `discord_token`
-- `github_token`, `bot_github_token`
-- `gitlab_api_key`, `gitlab_bot_api_key`
+- `terraform_app_id`, `terraform_app_installation_id`,
+  `terraform_app_private_key_b64`
+- `flux_app_id`, `flux_app_installation_id`, `flux_app_private_key_b64`
+- `backstage_app_id`, `backstage_app_client_id`,
+  `backstage_app_private_key_b64`
+- `ci_app_id`, `ci_app_client_id`, `ci_app_private_key_b64`
+- `gitlab_api_key`, `gitlab_ci_api_key`, `gitlab_ci_service_account_id`
 - `ssh_public_key`
 - `alarm_email`
+- `sealed_secrets_tls_crt_b64`, `sealed_secrets_tls_key_b64`
 
 Apply:
 
@@ -91,7 +114,8 @@ are sensitive — do not commit.
 
 - The state file is gitignored and kept outside the repo at
   `~/.local/state/terraform-admin/`. It holds the **unencrypted** admin private
-  key and all sensitive `TF_VAR_*` values pushed to GitLab.
+  key and all sensitive `TF_VAR_*` values pushed to GitHub Actions and
+  GitLab CI.
 - ⚠️ That state directory is symlinked to `~/Dropbox/Terraform-Backup/`, so the
   plaintext secrets above are synced to Dropbox. This is a deliberate
   convenience-vs-exposure tradeoff for a single-user personal setup: the
