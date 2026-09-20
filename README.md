@@ -69,7 +69,7 @@ file). See [variables.tf](variables.tf) for the full list; required ones:
 
 - `oci_tenancy_ocid`
 - `cloudflare_api_token`, `cloudflare_account_id`
-- `discord_token`
+- `discord_bot_token`, `discord_management_token`
 - `github_token`, `bot_github_token`
 - `gitlab_api_key`, `gitlab_bot_api_key`
 - `ssh_public_key`

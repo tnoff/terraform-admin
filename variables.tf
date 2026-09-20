@@ -94,9 +94,14 @@ variable "mcp_readonly_private_key_path" {
 }
 
 # ==============================================================================
-# External Secrets — admin/ holds these and pushes them to the `terraform`
-# GitLab project's CI/CD variables (via the gitlab/repo module call below).
-# Manually rotated by editing this stack's tfvars (or env vars) and re-applying.
+# External Secrets — admin/ holds these and pushes them to `terraform`'s
+# GitHub Actions secrets and GitLab CI/CD variables (see terraform_ci_vars in
+# main.tf). Manually rotated by editing this stack's tfvars (or env vars) and
+# re-applying.
+#
+# Exception: discord_bot_token is NOT pushed anywhere from here -- see its
+# description. It's still an external secret admin/ holds and tracks rotation
+# for, just not one `terraform` consumes.
 # ==============================================================================
 
 variable "cloudflare_api_token" {
@@ -110,8 +115,14 @@ variable "cloudflare_account_id" {
   type        = string
 }
 
-variable "discord_token" {
-  description = "Discord bot token"
+variable "discord_bot_token" {
+  description = "The application bot's own Discord token -- the credential that runs as the live bot in docker-apps (role vidya-game-machine). Not relayed to terraform's CI: nothing there reads it. Held here only for rotation tracking (rotation-tracking.tf) and as the canonical value to copy from when re-sealing docker-apps/apps/discord/secrets-conf.yaml's DISCORD_TOKEN."
+  type        = string
+  sensitive   = true
+}
+
+variable "discord_management_token" {
+  description = "Token for a SEPARATE Discord bot application, used only by terraform/discord's `discord` provider to manage server structure (roles, channels, webhooks). Distinct from discord_bot_token on purpose: that one is the live application bot's own identity, and reusing it for Terraform's provider auth was the thing this variable split away from. Needs its own bot application created in the Discord Developer Portal, invited to the server with the permissions terraform/discord's resources require (at minimum Manage Roles, Manage Channels, Manage Webhooks) -- there is no API to mint a second token for an existing bot."
   type        = string
   sensitive   = true
 }
