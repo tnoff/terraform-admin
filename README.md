@@ -90,7 +90,6 @@ will drift, same as the previous version of this list did:
 - `ci_app_id`, `ci_app_client_id`, `ci_app_private_key_b64`
 - `gitlab_api_key`, `gitlab_ci_api_key`, `gitlab_ci_service_account_id`
 - `ssh_public_key`
-- `alarm_email`
 - `sealed_secrets_tls_crt_b64`, `sealed_secrets_tls_key_b64`
 
 Apply:

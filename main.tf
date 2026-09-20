@@ -299,7 +299,6 @@ locals {
     TF_VAR_gitlab_ci_api_key             = var.gitlab_ci_api_key
     TF_VAR_gitlab_ci_service_account_id  = var.gitlab_ci_service_account_id
     TF_VAR_ssh_public_key                = var.ssh_public_key
-    TF_VAR_alarm_email                   = var.alarm_email
 
     # tnoff-backstage App -- the portal's read credential for catalog discovery
     # (Contents + Metadata read, nothing else). Needs to reach CI as well as
@@ -456,7 +455,6 @@ locals {
     TF_VAR_gitlab_ci_api_key             = var.gitlab_ci_api_key
     TF_VAR_gitlab_ci_service_account_id  = var.gitlab_ci_service_account_id
     TF_VAR_ssh_public_key                = var.ssh_public_key
-    TF_VAR_alarm_email                   = var.alarm_email
 
     # tnoff-backstage App -- the portal's read credential for catalog discovery
     # (Contents + Metadata read, nothing else). Needs to reach CI as well as
@@ -500,7 +498,6 @@ locals {
   # GitLab masking requires single-line, ≥8 chars, no '@'. These can't be
   # masked; explicit allowlist so the rest stay masked by default.
   terraform_ci_vars_unmasked = [
-    "TF_VAR_alarm_email",
     "TF_VAR_ssh_public_key",
     "TF_VAR_cloudflare_account_id",
     # rotated_at timestamps are RFC3339 strings containing `:` which
@@ -633,7 +630,8 @@ module "terraform_gitlab" {
 # local.terraform_ci_vars_unmasked here would be wrong. That list exists
 # because GitLab can only mask a single-line value of >=8 characters with no
 # '@' -- a platform constraint, not a judgement about sensitivity.
-# TF_VAR_alarm_email is on it purely because of the '@'. GitHub has no such
+# TF_VAR_ssh_public_key is on it partly for that reason too -- the trailing
+# user@host comment on a public key contains an '@'. GitHub has no such
 # limit, so the default here is secret, and the exceptions are the values that
 # are genuinely public:
 #

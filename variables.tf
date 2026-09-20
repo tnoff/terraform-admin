@@ -238,11 +238,6 @@ variable "ssh_public_key" {
   type        = string
 }
 
-variable "alarm_email" {
-  description = "Email address for OCI alarm notifications"
-  type        = string
-}
-
 # ==============================================================================
 # Sealed-secrets controller key — the single backed-up controller key
 # (docs/projects/sealed-secrets-key-bootstrap.md). Held in admin LOCAL state
