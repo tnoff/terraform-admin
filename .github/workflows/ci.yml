@@ -48,11 +48,11 @@ jobs:
   # hosted runners have Docker. Both hooks pass against this repo's HEAD.
   pre-commit:
     name: pre-commit
-    uses: tnoff/github-workflows/.github/workflows/pre-commit.yml@0d92c3c09cf7dd78ce36cb5f40618e7fc296e6a2
+    uses: tnoff/github-workflows/.github/workflows/pre-commit.yml@8f112893cd17d68fe039d3ba2643d2881bfafdcb
 
   secrets:
     name: Scan for secrets
-    uses: tnoff/github-workflows/.github/workflows/trufflehog.yml@0d92c3c09cf7dd78ce36cb5f40618e7fc296e6a2
+    uses: tnoff/github-workflows/.github/workflows/trufflehog.yml@8f112893cd17d68fe039d3ba2643d2881bfafdcb
 
   # The check this repo was missing. scheduled.yml pins three reusable
   # workflows; a `uses:` whose inputs or secrets stop matching the pinned
@@ -60,7 +60,7 @@ jobs:
   # with no PR CI at all there was nothing that could ever have caught it.
   contracts:
     name: Workflow contracts
-    uses: tnoff/github-workflows/.github/workflows/check-workflow-contracts.yml@0d92c3c09cf7dd78ce36cb5f40618e7fc296e6a2
+    uses: tnoff/github-workflows/.github/workflows/check-workflow-contracts.yml@8f112893cd17d68fe039d3ba2643d2881bfafdcb
 
   result:
     name: CI result
