@@ -97,6 +97,15 @@ the `discord-bot-token` Secret directly from this variable (same pattern as
 putting the manual reseal step back -- doing one without the other silently
 recreates this exact incident.
 
+The same split shape got applied again immediately after, to
+`cloudflare_api_token` / `cloudflare_dns01_token`: `cloudflare_api_token`
+stays terraform-only (`terraform/dns`'s own provider), and
+`cloudflare_dns01_token` is the one `apps/`'s
+`kubernetes_secret_v1.cloudflare_api_key` consumes, replacing another
+hand-sealed docker-apps SealedSecret. If a third credential shows up
+needing this treatment, that's a pattern worth naming and writing up
+properly rather than re-explaining per-variable a third time.
+
 ## Module sources
 
 Modules come from `gitlab.com/tnoff-projects/terraform-modules` pinned to
