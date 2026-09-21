@@ -221,6 +221,31 @@ variable "eastbay_flask_secret_key" {
   sensitive   = true
 }
 
+# Grafana's own bootstrap admin credential -- the last SealedSecret in the
+# fleet as of 2026-09-21 (monitoring/grafana/secrets.yaml, docker-apps).
+# IMPORTANT: unlike every other secret in this file, Grafana only ever reads
+# GF_SECURITY_ADMIN_USER/GF_SECURITY_ADMIN_PASSWORD when it initializes its
+# internal user DB for the very first time. Once that admin account exists
+# (it already does, on the live instance), changing this value and letting
+# Reloader restart the pod does NOT change the running account -- Grafana
+# silently ignores the env var on every boot after the first. Rotating the
+# actual live password still requires the Grafana UI/API/grafana-cli, same as
+# before this migration; moving the source of truth to terraform only fixes
+# where the value is declared, not how a real rotation takes effect. See
+# docs/projects/sealed-secrets-terraform-admin-migration.md.
+
+variable "grafana_admin_user" {
+  description = "Grafana's bootstrap admin username, base64-encoded (GitLab's masked-variable check requires >= 8 chars; the conventional 'admin' is only 5). Consumed by apps/'s kubernetes_secret_v1.grafana_admin, which base64decode()s it -- previously hand-sealed as grafana-admin's admin-user (docker-apps). Also read by monitoring/grafana-sa-bootstrap's Job to authenticate to Grafana's own REST API when minting service-account tokens -- see the Deployment/Job comments for why a rotation here doesn't propagate on its own."
+  type        = string
+  sensitive   = true
+}
+
+variable "grafana_admin_password" {
+  description = "Grafana's bootstrap admin password, base64-encoded (defensive -- GitLab's masked-variable check has already rejected two other values in this project for containing characters outside its charset; encoding sidesteps the question for whatever the operator picks). Consumed by apps/'s kubernetes_secret_v1.grafana_admin, which base64decode()s it -- previously hand-sealed as grafana-admin's admin-password (docker-apps). Also read by monitoring/grafana-sa-bootstrap's Job. Changing this value does NOT change Grafana's actual live admin password -- see the variable block comment above."
+  type        = string
+  sensitive   = true
+}
+
 # ==============================================================================
 # tnoff-flux GitHub App -- Flux's read credential for docker-apps.
 #

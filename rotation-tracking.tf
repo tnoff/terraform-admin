@@ -209,6 +209,27 @@ resource "time_static" "eastbay_flask_secret_key_rotated_at" {
   }
 }
 
+# Grafana's bootstrap admin credential -- tracked for consistency with every
+# other secret here, though rotating it doesn't actually change Grafana's
+# live admin account (see the variable block comment in variables.tf).
+resource "terraform_data" "grafana_admin_user_version" {
+  triggers_replace = [sha256(var.grafana_admin_user)]
+}
+resource "time_static" "grafana_admin_user_rotated_at" {
+  triggers = {
+    version = terraform_data.grafana_admin_user_version.id
+  }
+}
+
+resource "terraform_data" "grafana_admin_password_version" {
+  triggers_replace = [sha256(var.grafana_admin_password)]
+}
+resource "time_static" "grafana_admin_password_rotated_at" {
+  triggers = {
+    version = terraform_data.grafana_admin_password_version.id
+  }
+}
+
 # GitLab admin PAT — used by terraform-admin's gitlab provider.
 resource "terraform_data" "gitlab_api_key_version" {
   triggers_replace = [sha256(var.gitlab_api_key)]

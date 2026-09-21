@@ -72,6 +72,8 @@
 | [terraform_data.flux_app_private_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_ci_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
+| [terraform_data.grafana_admin_password_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
+| [terraform_data.grafana_admin_user_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.openweather_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.ssh_public_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [time_static.backstage_app_private_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
@@ -93,6 +95,8 @@
 | [time_static.flux_app_private_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_ci_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
+| [time_static.grafana_admin_password_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
+| [time_static.grafana_admin_user_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.openweather_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.ssh_public_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [tls_private_key.mcp_readonly](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
@@ -133,6 +137,8 @@
 | <a name="input_gitlab_api_key"></a> [gitlab\_api\_key](#input\_gitlab\_api\_key) | GitLab personal access token for admin user | `string` | n/a | yes |
 | <a name="input_gitlab_ci_api_key"></a> [gitlab\_ci\_api\_key](#input\_gitlab\_ci\_api\_key) | GitLab access token for the tnoff-ci service account (formerly the tnoff-robot user's PAT, and formerly named gitlab\_bot\_api\_key) | `string` | n/a | yes |
 | <a name="input_gitlab_ci_service_account_id"></a> [gitlab\_ci\_service\_account\_id](#input\_gitlab\_ci\_service\_account\_id) | Numeric service\_account\_id (as a string) of the tnoff-ci GitLab group service account, created manually via the GitLab UI. Not a secret. | `string` | n/a | yes |
+| <a name="input_grafana_admin_password"></a> [grafana\_admin\_password](#input\_grafana\_admin\_password) | Grafana's bootstrap admin password, base64-encoded (defensive -- GitLab's masked-variable check has already rejected two other values in this project for containing characters outside its charset; encoding sidesteps the question for whatever the operator picks). Consumed by apps/'s kubernetes\_secret\_v1.grafana\_admin, which base64decode()s it -- previously hand-sealed as grafana-admin's admin-password (docker-apps). Also read by monitoring/grafana-sa-bootstrap's Job. Changing this value does NOT change Grafana's actual live admin password -- see the variable block comment above. | `string` | n/a | yes |
+| <a name="input_grafana_admin_user"></a> [grafana\_admin\_user](#input\_grafana\_admin\_user) | Grafana's bootstrap admin username, base64-encoded (GitLab's masked-variable check requires >= 8 chars; the conventional 'admin' is only 5). Consumed by apps/'s kubernetes\_secret\_v1.grafana\_admin, which base64decode()s it -- previously hand-sealed as grafana-admin's admin-user (docker-apps). Also read by monitoring/grafana-sa-bootstrap's Job to authenticate to Grafana's own REST API when minting service-account tokens -- see the Deployment/Job comments for why a rotation here doesn't propagate on its own. | `string` | n/a | yes |
 | <a name="input_mcp_readonly_group_name"></a> [mcp\_readonly\_group\_name](#input\_mcp\_readonly\_group\_name) | Name of the tenancy-wide read-only group backing the local OCI MCP server | `string` | `"mcp-readonly-bot"` | no |
 | <a name="input_mcp_readonly_private_key_path"></a> [mcp\_readonly\_private\_key\_path](#input\_mcp\_readonly\_private\_key\_path) | Path where the MCP read-only user's API key PEM will be written | `string` | `"generated-output/mcp_readonly_api_key.pem"` | no |
 | <a name="input_mcp_readonly_user_name"></a> [mcp\_readonly\_user\_name](#input\_mcp\_readonly\_user\_name) | Name of the tenancy-wide read-only user backing the local OCI MCP server | `string` | `"mcp-readonly-bot"` | no |
