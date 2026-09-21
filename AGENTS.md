@@ -66,20 +66,36 @@ masking off globally.
 `discord_bot_token` and `discord_management_token` are two SEPARATE Discord
 bot applications, not a naming quirk. `discord_bot_token` is the live
 application bot's own identity (the one running in docker-apps, role
-`vidya-game-machine`) -- it's held here only for rotation tracking and as
-the source to copy from when re-sealing docker-apps' secret, and it is NOT
-pushed to `terraform`'s CI. `discord_management_token` is a bot that exists
-only to let `terraform/discord`'s `discord` provider manage server structure
-(roles/channels/webhooks); it has no docker-apps counterpart at all.
+`vidya-game-machine`). `discord_management_token` is a bot that exists only
+to let `terraform/discord`'s `discord` provider manage server structure
+(roles/channels/webhooks); it has no docker-apps counterpart at all and
+never reaches the cluster.
 
 Before 2026-09-20 these were one variable (`discord_token`), reused for both
-purposes. That was wrong, not just imprecisely named: it meant the
-application bot's own live credential was also sitting in `terraform`'s CI
-variables with no reason to be there. If you're tempted to point
-`terraform/discord`'s provider at `discord_bot_token` because it's already
-populated and `discord_management_token` isn't yet -- don't. The whole point
-of the split is that Terraform's provider auth and the live bot's identity
-are different blast radii.
+purposes -- wrong, not just imprecisely named: it meant the application
+bot's own live credential was also sitting in `terraform`'s CI variables
+with no reason to be there. If you're tempted to point `terraform/discord`'s
+provider at `discord_bot_token` because it's populated and
+`discord_management_token` isn't yet -- don't. Terraform's provider auth and
+the live bot's identity are different blast radii on purpose.
+
+**`discord_bot_token` IS pushed to `terraform`'s CI, and that's load-bearing
+now, not an oversight.** It briefly wasn't, for the few hours between the
+split above and the incident below -- the reasoning at the time was "nothing
+in `terraform` reads it, so don't push it." That was true only because
+`docker-apps` was still the one holding the live value, hand-sealed and
+manually kept in sync. The first token rotation after the split (fresh
+tokens minted for both bots, 2026-09-21) proved that manual-sync discipline
+doesn't survive a real rotation under time pressure: `docker-apps`'
+`discord-conf-secrets` went stale, and the bot crash-looped on `Improper
+token has been passed.` for hours before anyone connected it to the
+rotation. Fix: `apps/`'s `kubernetes_secret_v1.discord_bot_token` now creates
+the `discord-bot-token` Secret directly from this variable (same pattern as
+`discord-os-credentials`), and `docker-apps` no longer hand-seals
+`DISCORD_TOKEN` at all. Don't re-remove `discord_bot_token` from
+`terraform_ci_vars` without also removing that terraform-managed Secret and
+putting the manual reseal step back -- doing one without the other silently
+recreates this exact incident.
 
 ## Module sources
 

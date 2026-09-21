@@ -272,9 +272,11 @@ locals {
     TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
     TF_VAR_cloudflare_account_id = var.cloudflare_account_id
 
-    # discord_bot_token deliberately NOT here -- see its description in
-    # variables.tf. It's the live application bot's own credential;
-    # terraform/discord uses this separate management-only bot instead.
+    # discord_bot_token: back to being pushed, as of the incident on
+    # 2026-09-21 -- see its description in variables.tf for why. It is now
+    # consumed for real, by apps/'s kubernetes_secret_v1.discord_bot_token,
+    # not just carried for no reason.
+    TF_VAR_discord_bot_token        = var.discord_bot_token
     TF_VAR_discord_management_token = var.discord_management_token
 
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
@@ -432,9 +434,11 @@ locals {
     TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
     TF_VAR_cloudflare_account_id = var.cloudflare_account_id
 
-    # discord_bot_token deliberately NOT here -- see its description in
-    # variables.tf. It's the live application bot's own credential;
-    # terraform/discord uses this separate management-only bot instead.
+    # discord_bot_token: back to being pushed, as of the incident on
+    # 2026-09-21 -- see its description in variables.tf for why. It is now
+    # consumed for real, by apps/'s kubernetes_secret_v1.discord_bot_token,
+    # not just carried for no reason.
+    TF_VAR_discord_bot_token        = var.discord_bot_token
     TF_VAR_discord_management_token = var.discord_management_token
 
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
