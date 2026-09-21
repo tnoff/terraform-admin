@@ -140,6 +140,12 @@ variable "discord_management_token" {
   sensitive   = true
 }
 
+variable "openweather_api_key" {
+  description = "Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s kubernetes_secret_v1.openweather_api_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-castro/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord_bot_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. BART_API_KEY, which shares castro/concord's mirror-api-keys SealedSecret, is unrelated and stays there -- no terraform-admin ownership case for it."
+  type        = string
+  sensitive   = true
+}
+
 # ==============================================================================
 # tnoff-flux GitHub App -- Flux's read credential for docker-apps.
 #

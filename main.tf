@@ -285,6 +285,11 @@ locals {
     TF_VAR_discord_bot_token        = var.discord_bot_token
     TF_VAR_discord_management_token = var.discord_management_token
 
+    # OpenWeather API key -- pushed as of 2026-09-20, consumed for real by
+    # apps/'s kubernetes_secret_v1.openweather_api_key. See its description
+    # in variables.tf.
+    TF_VAR_openweather_api_key = var.openweather_api_key
+
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
     # protected `main`, so
@@ -366,6 +371,7 @@ locals {
     TF_VAR_discord_management_token_rotated_at = time_static.discord_management_token_rotated_at.rfc3339
     TF_VAR_cloudflare_api_token_rotated_at     = time_static.cloudflare_api_token_rotated_at.rfc3339
     TF_VAR_cloudflare_dns01_token_rotated_at   = time_static.cloudflare_dns01_token_rotated_at.rfc3339
+    TF_VAR_openweather_api_key_rotated_at      = time_static.openweather_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at           = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_ci_api_key_rotated_at        = time_static.gitlab_ci_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at           = time_static.ssh_public_key_rotated_at.rfc3339
@@ -450,6 +456,11 @@ locals {
     TF_VAR_discord_bot_token        = var.discord_bot_token
     TF_VAR_discord_management_token = var.discord_management_token
 
+    # OpenWeather API key -- pushed as of 2026-09-20, consumed for real by
+    # apps/'s kubernetes_secret_v1.openweather_api_key. See its description
+    # in variables.tf.
+    TF_VAR_openweather_api_key = var.openweather_api_key
+
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
     # protected `main`, so
@@ -506,6 +517,7 @@ locals {
     TF_VAR_discord_management_token_rotated_at = time_static.discord_management_token_rotated_at.rfc3339
     TF_VAR_cloudflare_api_token_rotated_at     = time_static.cloudflare_api_token_rotated_at.rfc3339
     TF_VAR_cloudflare_dns01_token_rotated_at   = time_static.cloudflare_dns01_token_rotated_at.rfc3339
+    TF_VAR_openweather_api_key_rotated_at      = time_static.openweather_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at           = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_ci_api_key_rotated_at        = time_static.gitlab_ci_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at           = time_static.ssh_public_key_rotated_at.rfc3339
@@ -525,6 +537,7 @@ locals {
     "TF_VAR_discord_management_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
     "TF_VAR_cloudflare_dns01_token_rotated_at",
+    "TF_VAR_openweather_api_key_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
@@ -677,6 +690,7 @@ locals {
     "TF_VAR_discord_management_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
     "TF_VAR_cloudflare_dns01_token_rotated_at",
+    "TF_VAR_openweather_api_key_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
