@@ -29,27 +29,67 @@
 # See docs/projects/secret-age-tracker.md.
 # ==============================================================================
 
-# Discord bot token — also lives in docker-apps/apps/discord/secrets-conf.yaml
-# as DISCORD_TOKEN; rotation discipline is to re-seal that file after
-# bumping this tfvar.
-resource "terraform_data" "discord_token_version" {
-  triggers_replace = [sha256(var.discord_token)]
+# The application bot's own Discord token — also lives in
+# docker-apps/apps/discord/secrets-conf.yaml as DISCORD_TOKEN; rotation
+# discipline is to re-seal that file after bumping this tfvar. Renamed from
+# discord_token(_version/_rotated_at) 2026-09-20 when the management-only
+# terraform/discord credential was split out into its own variable below --
+# this one was never actually terraform-only, it's the live bot's identity.
+resource "terraform_data" "discord_bot_token_version" {
+  triggers_replace = [sha256(var.discord_bot_token)]
 }
-resource "time_static" "discord_token_rotated_at" {
+resource "time_static" "discord_bot_token_rotated_at" {
   triggers = {
-    version = terraform_data.discord_token_version.id
+    version = terraform_data.discord_bot_token_version.id
   }
 }
 
-# Cloudflare API token — also lives in
-# docker-apps/infrastructure/configs/cert-manager/cloudflare-api-key.yaml
-# as api-key; rotation discipline is to re-seal that file too.
+moved {
+  from = terraform_data.discord_token_version
+  to   = terraform_data.discord_bot_token_version
+}
+
+moved {
+  from = time_static.discord_token_rotated_at
+  to   = time_static.discord_bot_token_rotated_at
+}
+
+# Management-only Discord bot token — a separate bot application from the one
+# above, used solely by terraform/discord's `discord` provider to manage
+# server structure. No docker-apps counterpart: nothing outside terraform
+# consumes it, so there's no secondary file to re-seal on rotation. New as of
+# 2026-09-20, so its first apply stamps "today" same as any brand-new tfvar
+# (see Caveat #2 above).
+resource "terraform_data" "discord_management_token_version" {
+  triggers_replace = [sha256(var.discord_management_token)]
+}
+resource "time_static" "discord_management_token_rotated_at" {
+  triggers = {
+    version = terraform_data.discord_management_token_version.id
+  }
+}
+
+# Cloudflare API token for terraform/dns's own provider. Terraform-only,
+# same reasoning as discord_management_token -- no docker-apps counterpart.
 resource "terraform_data" "cloudflare_api_token_version" {
   triggers_replace = [sha256(var.cloudflare_api_token)]
 }
 resource "time_static" "cloudflare_api_token_rotated_at" {
   triggers = {
     version = terraform_data.cloudflare_api_token_version.id
+  }
+}
+
+# Cloudflare API token for cert-manager's DNS01 solver -- the one that
+# actually reaches the cluster, via apps/'s kubernetes_secret_v1.cloudflare_api_key.
+# No docker-apps SealedSecret anymore as of the same incident that split
+# discord_token; see that variable's description in variables.tf.
+resource "terraform_data" "cloudflare_dns01_token_version" {
+  triggers_replace = [sha256(var.cloudflare_dns01_token)]
+}
+resource "time_static" "cloudflare_dns01_token_rotated_at" {
+  triggers = {
+    version = terraform_data.cloudflare_dns01_token_version.id
   }
 }
 

@@ -82,8 +82,8 @@ the source of truth; the grouping below is current as of this writing but
 will drift, same as the previous version of this list did:
 
 - `oci_tenancy_ocid`
-- `cloudflare_api_token`, `cloudflare_account_id`
-- `discord_token`
+- `cloudflare_api_token`, `cloudflare_dns01_token`, `cloudflare_account_id`
+- `discord_bot_token`, `discord_management_token`
 - `terraform_app_id`, `terraform_app_installation_id`,
   `terraform_app_private_key_b64`
 - `flux_app_id`, `flux_app_installation_id`, `flux_app_private_key_b64`

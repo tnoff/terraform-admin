@@ -15,7 +15,7 @@ data "oci_objectstorage_namespace" "this" {
 # ==============================================================================
 
 module "terraform_state_vault" {
-  source = "git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault?ref=4cbebdd95c017db8b3a55e461adac21733000ecd"
+  source = "git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault?ref=a853c6f188e873ec24c43e9868c99be1bf015bb9"
 
   compartment_ocid    = var.oci_tenancy_ocid
   display_name        = var.vault_name
@@ -32,7 +32,7 @@ module "terraform_state_vault" {
 # ==============================================================================
 
 module "terraform_state_buckets" {
-  source                          = "git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket?ref=4cbebdd95c017db8b3a55e461adac21733000ecd"
+  source                          = "git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket?ref=a853c6f188e873ec24c43e9868c99be1bf015bb9"
   for_each                        = toset(var.workspaces)
   compartment_ocid                = var.oci_tenancy_ocid
   kms_key_ocid                    = module.terraform_state_vault.kms_key.id
@@ -274,9 +274,16 @@ locals {
     TF_VAR_oci_fingerprint  = oci_identity_api_key.terraform_admin.fingerprint
     TF_VAR_oci_api_key_b64  = base64encode(tls_private_key.terraform_admin.private_key_pem)
 
-    TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
-    TF_VAR_cloudflare_account_id = var.cloudflare_account_id
-    TF_VAR_discord_token         = var.discord_token
+    TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
+    TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token
+    TF_VAR_cloudflare_account_id  = var.cloudflare_account_id
+
+    # discord_bot_token: back to being pushed, as of the incident on
+    # 2026-09-21 -- see its description in variables.tf for why. It is now
+    # consumed for real, by apps/'s kubernetes_secret_v1.discord_bot_token,
+    # not just carried for no reason.
+    TF_VAR_discord_bot_token        = var.discord_bot_token
+    TF_VAR_discord_management_token = var.discord_management_token
 
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
@@ -355,12 +362,14 @@ locals {
     # underlying tfvar value's sha256 changes, and pinned otherwise.
     # The apps/ stack reads these and writes the
     # `layer-1-rotation-ledger` ConfigMap from them.
-    TF_VAR_discord_token_rotated_at        = time_static.discord_token_rotated_at.rfc3339
-    TF_VAR_cloudflare_api_token_rotated_at = time_static.cloudflare_api_token_rotated_at.rfc3339
-    TF_VAR_gitlab_api_key_rotated_at       = time_static.gitlab_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_ci_api_key_rotated_at    = time_static.gitlab_ci_api_key_rotated_at.rfc3339
-    TF_VAR_ssh_public_key_rotated_at       = time_static.ssh_public_key_rotated_at.rfc3339
-    TF_VAR_ci_app_private_key_rotated_at   = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_discord_bot_token_rotated_at        = time_static.discord_bot_token_rotated_at.rfc3339
+    TF_VAR_discord_management_token_rotated_at = time_static.discord_management_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_api_token_rotated_at     = time_static.cloudflare_api_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_dns01_token_rotated_at   = time_static.cloudflare_dns01_token_rotated_at.rfc3339
+    TF_VAR_gitlab_api_key_rotated_at           = time_static.gitlab_api_key_rotated_at.rfc3339
+    TF_VAR_gitlab_ci_api_key_rotated_at        = time_static.gitlab_ci_api_key_rotated_at.rfc3339
+    TF_VAR_ssh_public_key_rotated_at           = time_static.ssh_public_key_rotated_at.rfc3339
+    TF_VAR_ci_app_private_key_rotated_at       = time_static.ci_app_private_key_rotated_at.rfc3339
 
   }
 }
@@ -430,9 +439,16 @@ locals {
     TF_VAR_oci_fingerprint  = oci_identity_api_key.terraform_admin.fingerprint
     TF_VAR_oci_api_key_b64  = base64encode(tls_private_key.terraform_admin.private_key_pem)
 
-    TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
-    TF_VAR_cloudflare_account_id = var.cloudflare_account_id
-    TF_VAR_discord_token         = var.discord_token
+    TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
+    TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token
+    TF_VAR_cloudflare_account_id  = var.cloudflare_account_id
+
+    # discord_bot_token: back to being pushed, as of the incident on
+    # 2026-09-21 -- see its description in variables.tf for why. It is now
+    # consumed for real, by apps/'s kubernetes_secret_v1.discord_bot_token,
+    # not just carried for no reason.
+    TF_VAR_discord_bot_token        = var.discord_bot_token
+    TF_VAR_discord_management_token = var.discord_management_token
 
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
@@ -486,12 +502,14 @@ locals {
 
     # See admin_secrets_bundle for the rationale on the rotated_at
     # values — same source, different consumer (CI vs local .envrc).
-    TF_VAR_discord_token_rotated_at        = time_static.discord_token_rotated_at.rfc3339
-    TF_VAR_cloudflare_api_token_rotated_at = time_static.cloudflare_api_token_rotated_at.rfc3339
-    TF_VAR_gitlab_api_key_rotated_at       = time_static.gitlab_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_ci_api_key_rotated_at    = time_static.gitlab_ci_api_key_rotated_at.rfc3339
-    TF_VAR_ssh_public_key_rotated_at       = time_static.ssh_public_key_rotated_at.rfc3339
-    TF_VAR_ci_app_private_key_rotated_at   = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_discord_bot_token_rotated_at        = time_static.discord_bot_token_rotated_at.rfc3339
+    TF_VAR_discord_management_token_rotated_at = time_static.discord_management_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_api_token_rotated_at     = time_static.cloudflare_api_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_dns01_token_rotated_at   = time_static.cloudflare_dns01_token_rotated_at.rfc3339
+    TF_VAR_gitlab_api_key_rotated_at           = time_static.gitlab_api_key_rotated_at.rfc3339
+    TF_VAR_gitlab_ci_api_key_rotated_at        = time_static.gitlab_ci_api_key_rotated_at.rfc3339
+    TF_VAR_ssh_public_key_rotated_at           = time_static.ssh_public_key_rotated_at.rfc3339
+    TF_VAR_ci_app_private_key_rotated_at       = time_static.ci_app_private_key_rotated_at.rfc3339
 
   }
 
@@ -503,8 +521,10 @@ locals {
     # rotated_at timestamps are RFC3339 strings containing `:` which
     # GitLab masking rejects. Contents are non-secret apply timestamps,
     # safe to expose.
-    "TF_VAR_discord_token_rotated_at",
+    "TF_VAR_discord_bot_token_rotated_at",
+    "TF_VAR_discord_management_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
+    "TF_VAR_cloudflare_dns01_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
@@ -565,7 +585,7 @@ locals {
 }
 
 module "terraform_gitlab" {
-  source           = "git::https://github.com/tnoff/terraform-modules.git//gitlab/repo?ref=4cbebdd95c017db8b3a55e461adac21733000ecd"
+  source           = "git::https://github.com/tnoff/terraform-modules.git//gitlab/repo?ref=a853c6f188e873ec24c43e9868c99be1bf015bb9"
   name             = "terraform"
   namespace_id     = data.gitlab_group.personal.id
   visibility_level = "private"
@@ -653,8 +673,10 @@ locals {
     "TF_VAR_terraform_app_id",
     "TF_VAR_terraform_app_installation_id",
     "TF_VAR_ci_app_client_id",
-    "TF_VAR_discord_token_rotated_at",
+    "TF_VAR_discord_bot_token_rotated_at",
+    "TF_VAR_discord_management_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
+    "TF_VAR_cloudflare_dns01_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
@@ -744,7 +766,7 @@ resource "github_actions_variable" "terraform" {
 # var.enable_ruleset`, and this repo is private, so no ruleset exists for an
 # actor to bypass. Rulesets on private repos need GitHub Pro.
 module "terraform_repo" {
-  source    = "git::https://github.com/tnoff/terraform-modules.git//github/repo?ref=4cbebdd95c017db8b3a55e461adac21733000ecd"
+  source    = "git::https://github.com/tnoff/terraform-modules.git//github/repo?ref=a853c6f188e873ec24c43e9868c99be1bf015bb9"
   repo_name = "terraform"
 
   repo_description = "Layer-1 infrastructure: OKE, networking, apps, DNS, Discord and the GitHub/GitLab repo fleet"
