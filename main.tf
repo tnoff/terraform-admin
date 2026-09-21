@@ -295,6 +295,20 @@ locals {
     # See its description in variables.tf.
     TF_VAR_bart_api_key = var.bart_api_key
 
+    # discord's Spotify/YouTube search creds + VPN key, and eastbay's website
+    # secrets -- pushed as of 2026-09-21, consumed for real by apps/'s
+    # kubernetes_secret_v1.discord_search_creds/discord_vpn_key/eastbay_website_creds.
+    # See their descriptions in variables.tf.
+    TF_VAR_discord_spotify_client_id     = var.discord_spotify_client_id
+    TF_VAR_discord_spotify_client_secret = var.discord_spotify_client_secret
+    TF_VAR_discord_youtube_api_key       = var.discord_youtube_api_key
+    TF_VAR_discord_vpn_private_key       = var.discord_vpn_private_key
+    TF_VAR_eastbay_contact_email         = var.eastbay_contact_email
+    TF_VAR_eastbay_contact_number        = var.eastbay_contact_number
+    TF_VAR_eastbay_email_host_user       = var.eastbay_email_host_user
+    TF_VAR_eastbay_email_host_password   = var.eastbay_email_host_password
+    TF_VAR_eastbay_flask_secret_key      = var.eastbay_flask_secret_key
+
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
     # protected `main`, so
@@ -372,16 +386,25 @@ locals {
     # underlying tfvar value's sha256 changes, and pinned otherwise.
     # The apps/ stack reads these and writes the
     # `layer-1-rotation-ledger` ConfigMap from them.
-    TF_VAR_discord_bot_token_rotated_at        = time_static.discord_bot_token_rotated_at.rfc3339
-    TF_VAR_discord_management_token_rotated_at = time_static.discord_management_token_rotated_at.rfc3339
-    TF_VAR_cloudflare_api_token_rotated_at     = time_static.cloudflare_api_token_rotated_at.rfc3339
-    TF_VAR_cloudflare_dns01_token_rotated_at   = time_static.cloudflare_dns01_token_rotated_at.rfc3339
-    TF_VAR_openweather_api_key_rotated_at      = time_static.openweather_api_key_rotated_at.rfc3339
-    TF_VAR_bart_api_key_rotated_at             = time_static.bart_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_api_key_rotated_at           = time_static.gitlab_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_ci_api_key_rotated_at        = time_static.gitlab_ci_api_key_rotated_at.rfc3339
-    TF_VAR_ssh_public_key_rotated_at           = time_static.ssh_public_key_rotated_at.rfc3339
-    TF_VAR_ci_app_private_key_rotated_at       = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_discord_bot_token_rotated_at             = time_static.discord_bot_token_rotated_at.rfc3339
+    TF_VAR_discord_management_token_rotated_at      = time_static.discord_management_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_api_token_rotated_at          = time_static.cloudflare_api_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_dns01_token_rotated_at        = time_static.cloudflare_dns01_token_rotated_at.rfc3339
+    TF_VAR_openweather_api_key_rotated_at           = time_static.openweather_api_key_rotated_at.rfc3339
+    TF_VAR_bart_api_key_rotated_at                  = time_static.bart_api_key_rotated_at.rfc3339
+    TF_VAR_discord_spotify_client_id_rotated_at     = time_static.discord_spotify_client_id_rotated_at.rfc3339
+    TF_VAR_discord_spotify_client_secret_rotated_at = time_static.discord_spotify_client_secret_rotated_at.rfc3339
+    TF_VAR_discord_youtube_api_key_rotated_at       = time_static.discord_youtube_api_key_rotated_at.rfc3339
+    TF_VAR_discord_vpn_private_key_rotated_at       = time_static.discord_vpn_private_key_rotated_at.rfc3339
+    TF_VAR_eastbay_contact_email_rotated_at         = time_static.eastbay_contact_email_rotated_at.rfc3339
+    TF_VAR_eastbay_contact_number_rotated_at        = time_static.eastbay_contact_number_rotated_at.rfc3339
+    TF_VAR_eastbay_email_host_user_rotated_at       = time_static.eastbay_email_host_user_rotated_at.rfc3339
+    TF_VAR_eastbay_email_host_password_rotated_at   = time_static.eastbay_email_host_password_rotated_at.rfc3339
+    TF_VAR_eastbay_flask_secret_key_rotated_at      = time_static.eastbay_flask_secret_key_rotated_at.rfc3339
+    TF_VAR_gitlab_api_key_rotated_at                = time_static.gitlab_api_key_rotated_at.rfc3339
+    TF_VAR_gitlab_ci_api_key_rotated_at             = time_static.gitlab_ci_api_key_rotated_at.rfc3339
+    TF_VAR_ssh_public_key_rotated_at                = time_static.ssh_public_key_rotated_at.rfc3339
+    TF_VAR_ci_app_private_key_rotated_at            = time_static.ci_app_private_key_rotated_at.rfc3339
 
   }
 }
@@ -472,6 +495,20 @@ locals {
     # See its description in variables.tf.
     TF_VAR_bart_api_key = var.bart_api_key
 
+    # discord's Spotify/YouTube search creds + VPN key, and eastbay's website
+    # secrets -- pushed as of 2026-09-21, consumed for real by apps/'s
+    # kubernetes_secret_v1.discord_search_creds/discord_vpn_key/eastbay_website_creds.
+    # See their descriptions in variables.tf.
+    TF_VAR_discord_spotify_client_id     = var.discord_spotify_client_id
+    TF_VAR_discord_spotify_client_secret = var.discord_spotify_client_secret
+    TF_VAR_discord_youtube_api_key       = var.discord_youtube_api_key
+    TF_VAR_discord_vpn_private_key       = var.discord_vpn_private_key
+    TF_VAR_eastbay_contact_email         = var.eastbay_contact_email
+    TF_VAR_eastbay_contact_number        = var.eastbay_contact_number
+    TF_VAR_eastbay_email_host_user       = var.eastbay_email_host_user
+    TF_VAR_eastbay_email_host_password   = var.eastbay_email_host_password
+    TF_VAR_eastbay_flask_secret_key      = var.eastbay_flask_secret_key
+
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
     # protected `main`, so
@@ -524,16 +561,25 @@ locals {
 
     # See admin_secrets_bundle for the rationale on the rotated_at
     # values — same source, different consumer (CI vs local .envrc).
-    TF_VAR_discord_bot_token_rotated_at        = time_static.discord_bot_token_rotated_at.rfc3339
-    TF_VAR_discord_management_token_rotated_at = time_static.discord_management_token_rotated_at.rfc3339
-    TF_VAR_cloudflare_api_token_rotated_at     = time_static.cloudflare_api_token_rotated_at.rfc3339
-    TF_VAR_cloudflare_dns01_token_rotated_at   = time_static.cloudflare_dns01_token_rotated_at.rfc3339
-    TF_VAR_openweather_api_key_rotated_at      = time_static.openweather_api_key_rotated_at.rfc3339
-    TF_VAR_bart_api_key_rotated_at             = time_static.bart_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_api_key_rotated_at           = time_static.gitlab_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_ci_api_key_rotated_at        = time_static.gitlab_ci_api_key_rotated_at.rfc3339
-    TF_VAR_ssh_public_key_rotated_at           = time_static.ssh_public_key_rotated_at.rfc3339
-    TF_VAR_ci_app_private_key_rotated_at       = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_discord_bot_token_rotated_at             = time_static.discord_bot_token_rotated_at.rfc3339
+    TF_VAR_discord_management_token_rotated_at      = time_static.discord_management_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_api_token_rotated_at          = time_static.cloudflare_api_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_dns01_token_rotated_at        = time_static.cloudflare_dns01_token_rotated_at.rfc3339
+    TF_VAR_openweather_api_key_rotated_at           = time_static.openweather_api_key_rotated_at.rfc3339
+    TF_VAR_bart_api_key_rotated_at                  = time_static.bart_api_key_rotated_at.rfc3339
+    TF_VAR_discord_spotify_client_id_rotated_at     = time_static.discord_spotify_client_id_rotated_at.rfc3339
+    TF_VAR_discord_spotify_client_secret_rotated_at = time_static.discord_spotify_client_secret_rotated_at.rfc3339
+    TF_VAR_discord_youtube_api_key_rotated_at       = time_static.discord_youtube_api_key_rotated_at.rfc3339
+    TF_VAR_discord_vpn_private_key_rotated_at       = time_static.discord_vpn_private_key_rotated_at.rfc3339
+    TF_VAR_eastbay_contact_email_rotated_at         = time_static.eastbay_contact_email_rotated_at.rfc3339
+    TF_VAR_eastbay_contact_number_rotated_at        = time_static.eastbay_contact_number_rotated_at.rfc3339
+    TF_VAR_eastbay_email_host_user_rotated_at       = time_static.eastbay_email_host_user_rotated_at.rfc3339
+    TF_VAR_eastbay_email_host_password_rotated_at   = time_static.eastbay_email_host_password_rotated_at.rfc3339
+    TF_VAR_eastbay_flask_secret_key_rotated_at      = time_static.eastbay_flask_secret_key_rotated_at.rfc3339
+    TF_VAR_gitlab_api_key_rotated_at                = time_static.gitlab_api_key_rotated_at.rfc3339
+    TF_VAR_gitlab_ci_api_key_rotated_at             = time_static.gitlab_ci_api_key_rotated_at.rfc3339
+    TF_VAR_ssh_public_key_rotated_at                = time_static.ssh_public_key_rotated_at.rfc3339
+    TF_VAR_ci_app_private_key_rotated_at            = time_static.ci_app_private_key_rotated_at.rfc3339
 
   }
 
@@ -551,6 +597,15 @@ locals {
     "TF_VAR_cloudflare_dns01_token_rotated_at",
     "TF_VAR_openweather_api_key_rotated_at",
     "TF_VAR_bart_api_key_rotated_at",
+    "TF_VAR_discord_spotify_client_id_rotated_at",
+    "TF_VAR_discord_spotify_client_secret_rotated_at",
+    "TF_VAR_discord_youtube_api_key_rotated_at",
+    "TF_VAR_discord_vpn_private_key_rotated_at",
+    "TF_VAR_eastbay_contact_email_rotated_at",
+    "TF_VAR_eastbay_contact_number_rotated_at",
+    "TF_VAR_eastbay_email_host_user_rotated_at",
+    "TF_VAR_eastbay_email_host_password_rotated_at",
+    "TF_VAR_eastbay_flask_secret_key_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
@@ -705,6 +760,15 @@ locals {
     "TF_VAR_cloudflare_dns01_token_rotated_at",
     "TF_VAR_openweather_api_key_rotated_at",
     "TF_VAR_bart_api_key_rotated_at",
+    "TF_VAR_discord_spotify_client_id_rotated_at",
+    "TF_VAR_discord_spotify_client_secret_rotated_at",
+    "TF_VAR_discord_youtube_api_key_rotated_at",
+    "TF_VAR_discord_vpn_private_key_rotated_at",
+    "TF_VAR_eastbay_contact_email_rotated_at",
+    "TF_VAR_eastbay_contact_number_rotated_at",
+    "TF_VAR_eastbay_email_host_user_rotated_at",
+    "TF_VAR_eastbay_email_host_password_rotated_at",
+    "TF_VAR_eastbay_flask_secret_key_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
