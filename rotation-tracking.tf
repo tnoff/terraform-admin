@@ -93,6 +93,21 @@ resource "time_static" "cloudflare_dns01_token_rotated_at" {
   }
 }
 
+# OpenWeather API key, shared by all three MagicMirror sites -- reaches the
+# cluster via apps/'s kubernetes_secret_v1.openweather_api_key (one resource,
+# for_each over the three mirror namespaces). Previously hand-sealed into
+# each site's mirror-api-keys SealedSecret (docker-apps); new as of
+# 2026-09-20, so its first apply stamps "today" same as any brand-new tfvar
+# (see Caveat #2 above). See docs/projects/sealed-secrets-terraform-admin-migration.md.
+resource "terraform_data" "openweather_api_key_version" {
+  triggers_replace = [sha256(var.openweather_api_key)]
+}
+resource "time_static" "openweather_api_key_rotated_at" {
+  triggers = {
+    version = terraform_data.openweather_api_key_version.id
+  }
+}
+
 # GitLab admin PAT — used by terraform-admin's gitlab provider.
 resource "terraform_data" "gitlab_api_key_version" {
   triggers_replace = [sha256(var.gitlab_api_key)]

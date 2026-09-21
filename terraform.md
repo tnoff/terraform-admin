@@ -62,6 +62,7 @@
 | [terraform_data.flux_app_private_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_ci_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
+| [terraform_data.openweather_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.ssh_public_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [time_static.backstage_app_private_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.ci_app_private_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
@@ -72,6 +73,7 @@
 | [time_static.flux_app_private_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_ci_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
+| [time_static.openweather_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.ssh_public_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [tls_private_key.mcp_readonly](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [tls_private_key.terraform_admin](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
@@ -106,6 +108,7 @@
 | <a name="input_mcp_readonly_user_name"></a> [mcp\_readonly\_user\_name](#input\_mcp\_readonly\_user\_name) | Name of the tenancy-wide read-only user backing the local OCI MCP server | `string` | `"mcp-readonly-bot"` | no |
 | <a name="input_oci_region"></a> [oci\_region](#input\_oci\_region) | OCI region | `string` | `"us-ashburn-1"` | no |
 | <a name="input_oci_tenancy_ocid"></a> [oci\_tenancy\_ocid](#input\_oci\_tenancy\_ocid) | OCID of the tenancy (all resources created in root compartment) | `string` | n/a | yes |
+| <a name="input_openweather_api_key"></a> [openweather\_api\_key](#input\_openweather\_api\_key) | Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s kubernetes\_secret\_v1.openweather\_api\_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-castro/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord\_bot\_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. BART\_API\_KEY, which shares castro/concord's mirror-api-keys SealedSecret, is unrelated and stays there -- no terraform-admin ownership case for it. | `string` | n/a | yes |
 | <a name="input_sealed_secrets_tls_crt_b64"></a> [sealed\_secrets\_tls\_crt\_b64](#input\_sealed\_secrets\_tls\_crt\_b64) | Base64 (as stored in the Secret .data) of the sealed-secrets controller key certificate (tls.crt). Source: kubectl -n sealed-secrets get secret sealed-secrets-keyptkzt -o jsonpath='{.data.tls\.crt}' | `string` | n/a | yes |
 | <a name="input_sealed_secrets_tls_key_b64"></a> [sealed\_secrets\_tls\_key\_b64](#input\_sealed\_secrets\_tls\_key\_b64) | Base64 (as stored in the Secret .data) of the sealed-secrets controller private key (tls.key). Source: kubectl -n sealed-secrets get secret sealed-secrets-keyptkzt -o jsonpath='{.data.tls\.key}' | `string` | n/a | yes |
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | SSH public key for OKE worker nodes | `string` | n/a | yes |
