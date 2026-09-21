@@ -192,13 +192,13 @@ variable "discord_vpn_private_key" {
 }
 
 variable "eastbay_contact_email" {
-  description = "Contact email address shown on the EastbayMassageAndLymph website. Not secret in the confidentiality sense (it's public-facing business info), sealed alongside the site's real secrets historically -- kept sensitive here for consistency with the rest of website-secrets, not because it needs protecting. Consumed by apps/'s kubernetes_secret_v1.eastbay_website_creds."
+  description = "Contact email address shown on the EastbayMassageAndLymph website. Not secret in the confidentiality sense (it's public-facing business info), sealed alongside the site's real secrets historically -- kept sensitive here for consistency with the rest of website-secrets, not because it needs protecting. Enter it plain -- main.tf base64-encodes it before pushing to CI (GitLab's masked-variable check rejects any value containing '@', which every email address has) and apps/'s kubernetes_secret_v1.eastbay_website_creds base64decode()s it back for the Secret."
   type        = string
   sensitive   = true
 }
 
 variable "eastbay_contact_number" {
-  description = "Contact phone number shown on the EastbayMassageAndLymph website. Same non-secret-but-bundled reasoning as eastbay_contact_email. Consumed by apps/'s kubernetes_secret_v1.eastbay_website_creds."
+  description = "Contact phone number shown on the EastbayMassageAndLymph website. Same non-secret-but-bundled reasoning as eastbay_contact_email. Enter it plain -- main.tf base64-encodes it before pushing to CI (a formatted phone number routinely fails GitLab's masked-variable charset check) and apps/'s kubernetes_secret_v1.eastbay_website_creds base64decode()s it back."
   type        = string
   sensitive   = true
 }

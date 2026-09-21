@@ -303,11 +303,20 @@ locals {
     TF_VAR_discord_spotify_client_secret = var.discord_spotify_client_secret
     TF_VAR_discord_youtube_api_key       = var.discord_youtube_api_key
     TF_VAR_discord_vpn_private_key       = var.discord_vpn_private_key
-    TF_VAR_eastbay_contact_email         = var.eastbay_contact_email
-    TF_VAR_eastbay_contact_number        = var.eastbay_contact_number
-    TF_VAR_eastbay_email_host_user       = var.eastbay_email_host_user
-    TF_VAR_eastbay_email_host_password   = var.eastbay_email_host_password
-    TF_VAR_eastbay_flask_secret_key      = var.eastbay_flask_secret_key
+    # base64-wrapped, not left plain like every other TF_VAR_ here: neither
+    # value fits GitLab's masked-variable charset (an email always has '@';
+    # a formatted phone number routinely carries punctuation the charset
+    # rejects), and unmasking a value just to satisfy that check means any
+    # stray echo of it -- a plan, an error, a debug step -- sits in CI job
+    # log history indefinitely, rotation or not. base64 keeps it masked
+    # (output is pure Base64-alphabet, safely >= 8 chars for any realistic
+    # email/phone number) instead of giving that up. terraform/apps'
+    # kubernetes_secret_v1.eastbay_website_creds base64decode()s it back.
+    TF_VAR_eastbay_contact_email       = base64encode(var.eastbay_contact_email)
+    TF_VAR_eastbay_contact_number      = base64encode(var.eastbay_contact_number)
+    TF_VAR_eastbay_email_host_user     = var.eastbay_email_host_user
+    TF_VAR_eastbay_email_host_password = var.eastbay_email_host_password
+    TF_VAR_eastbay_flask_secret_key    = var.eastbay_flask_secret_key
 
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
@@ -503,11 +512,20 @@ locals {
     TF_VAR_discord_spotify_client_secret = var.discord_spotify_client_secret
     TF_VAR_discord_youtube_api_key       = var.discord_youtube_api_key
     TF_VAR_discord_vpn_private_key       = var.discord_vpn_private_key
-    TF_VAR_eastbay_contact_email         = var.eastbay_contact_email
-    TF_VAR_eastbay_contact_number        = var.eastbay_contact_number
-    TF_VAR_eastbay_email_host_user       = var.eastbay_email_host_user
-    TF_VAR_eastbay_email_host_password   = var.eastbay_email_host_password
-    TF_VAR_eastbay_flask_secret_key      = var.eastbay_flask_secret_key
+    # base64-wrapped, not left plain like every other TF_VAR_ here: neither
+    # value fits GitLab's masked-variable charset (an email always has '@';
+    # a formatted phone number routinely carries punctuation the charset
+    # rejects), and unmasking a value just to satisfy that check means any
+    # stray echo of it -- a plan, an error, a debug step -- sits in CI job
+    # log history indefinitely, rotation or not. base64 keeps it masked
+    # (output is pure Base64-alphabet, safely >= 8 chars for any realistic
+    # email/phone number) instead of giving that up. terraform/apps'
+    # kubernetes_secret_v1.eastbay_website_creds base64decode()s it back.
+    TF_VAR_eastbay_contact_email       = base64encode(var.eastbay_contact_email)
+    TF_VAR_eastbay_contact_number      = base64encode(var.eastbay_contact_number)
+    TF_VAR_eastbay_email_host_user     = var.eastbay_email_host_user
+    TF_VAR_eastbay_email_host_password = var.eastbay_email_host_password
+    TF_VAR_eastbay_flask_secret_key    = var.eastbay_flask_secret_key
 
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
@@ -625,16 +643,6 @@ locals {
     # A GitLab service_account_id, not a credential -- same reasoning as
     # ci_app_id above, and likely under 8 characters too.
     "TF_VAR_gitlab_ci_service_account_id",
-    # Not secret -- both are already public on the website itself. Bundled
-    # into website-secrets/eastbay_website_creds for consistency with the
-    # rest of that Secret, not because either needs protecting. An email
-    # address always contains '@' (rejected outright) and a formatted phone
-    # number routinely fails on punctuation GitLab's masked-value charset
-    # doesn't allow -- apply failed on eastbay_contact_number with exactly
-    # this error before this line was added; eastbay_contact_email would
-    # have failed the same way on its next attempt.
-    "TF_VAR_eastbay_contact_email",
-    "TF_VAR_eastbay_contact_number",
   ]
 
   terraform_weekly_schedule = {
