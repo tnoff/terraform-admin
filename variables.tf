@@ -116,7 +116,7 @@ variable "cloudflare_account_id" {
 }
 
 variable "discord_bot_token" {
-  description = "The application bot's own Discord token -- the credential that runs as the live bot in docker-apps (role vidya-game-machine). Not relayed to terraform's CI: nothing there reads it. Held here only for rotation tracking (rotation-tracking.tf) and as the canonical value to copy from when re-sealing docker-apps/apps/discord/secrets-conf.yaml's DISCORD_TOKEN."
+  description = "The application bot's own Discord token -- the credential that runs as the live bot in docker-apps (role vidya-game-machine). Pushed to terraform's CI and consumed for real by apps/'s kubernetes_secret_v1.discord_bot_token, which creates the discord-bot-token Secret docker-apps' bot and dispatcher deployments read directly -- rotation no longer needs a manual re-seal of a docker-apps SealedSecret. (It briefly did NOT flow to CI, between the discord_management_token split and this incident: docker-apps/apps/discord/secrets-conf.yaml still hand-sealed DISCORD_TOKEN during that window, went stale on the next rotation, and crash-looped the bot. See AGENTS.md.)"
   type        = string
   sensitive   = true
 }
