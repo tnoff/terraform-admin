@@ -35,11 +35,10 @@ terraform apply
 terraform destroy   # tears down state buckets, IAM, KMS — only if you mean it
 ```
 
-State is local, written to `~/.local/state/terraform-admin/terraform.tfstate`
-(set in [provider.tf](provider.tf)), not the repo tree. That directory is a
-symlink to `~/Dropbox/Terraform-Backup/`, so every write is backed up to
-Dropbox automatically. Note this means the plaintext secrets in state leave the
-machine — see the security notes in [README.md](README.md#security-notes).
+State is local (see [provider.tf](provider.tf) for the configured path), not
+the repo tree. However you choose to back that path up, note it means the
+plaintext secrets in state travel with it — see the security notes in
+[README.md](README.md#security-notes).
 
 ## Pre-commit hooks
 
@@ -86,5 +85,6 @@ terraform apply
 ```
 
 This rotates the OCI API key, rewrites the PEM file, re-encodes
-`OCI_API_KEY_B64`, and pushes the new value to GitLab CI variables. Any local
-shells using the old `.envrc` need to re-source it.
+`OCI_API_KEY_B64`, and pushes the new value to `terraform`'s GitHub Actions
+secrets and GitLab CI variables. Any local shells using the old `.envrc`
+need to re-source it.

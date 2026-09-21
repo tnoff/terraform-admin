@@ -83,7 +83,6 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_alarm_email"></a> [alarm\_email](#input\_alarm\_email) | Email address for OCI alarm notifications | `string` | n/a | yes |
 | <a name="input_backstage_app_client_id"></a> [backstage\_app\_client\_id](#input\_backstage\_app\_client\_id) | Client ID of the tnoff-backstage GitHub App (Iv23li... form). Not a secret, and shown on the App settings page without generating anything. Backstage requires the key to be PRESENT (readGithubIntegrationConfig uses getString, not getOptionalString) but never uses it: SingleInstanceGithubCredentialsProvider builds its auth config from appId + privateKey alone. Supplied so config parsing succeeds. | `string` | n/a | yes |
 | <a name="input_backstage_app_id"></a> [backstage\_app\_id](#input\_backstage\_app\_id) | App ID of the tnoff-backstage GitHub App. Not a secret. From https://github.com/settings/apps/tnoff-backstage. | `number` | n/a | yes |
 | <a name="input_backstage_app_private_key_b64"></a> [backstage\_app\_private\_key\_b64](#input\_backstage\_app\_private\_key\_b64) | Base64 of the tnoff-backstage App private key PEM, single line. Base64 for the same reason ci\_app\_private\_key\_b64 is: a multi-line PEM does not survive a shell round-trip cleanly. Produce with `base64 -w0 tnoff-backstage.*.private-key.pem`. Set in admin/terraform.tfvars (gitignored); apps/ base64decodes it into the Secret the pod mounts. | `string` | n/a | yes |
@@ -118,7 +117,7 @@
 | <a name="input_terraform_app_installation_id"></a> [terraform\_app\_installation\_id](#input\_terraform\_app\_installation\_id) | Installation ID of the tnoff-terraform App on this account -- the trailing number in https://github.com/settings/installations/<id>. Not a secret. | `number` | n/a | yes |
 | <a name="input_terraform_app_private_key_b64"></a> [terraform\_app\_private\_key\_b64](#input\_terraform\_app\_private\_key\_b64) | Base64 of the tnoff-terraform App private key PEM, single line. Produce with `base64 -w0 tnoff-terraform.*.private-key.pem`. Set in admin/terraform.tfvars (gitignored); terraform/infra base64decodes it for the provider's app\_auth block. | `string` | n/a | yes |
 | <a name="input_vault_name"></a> [vault\_name](#input\_vault\_name) | Name prefix for the vault and KMS key | `string` | `"terraform-state"` | no |
-| <a name="input_workspaces"></a> [workspaces](#input\_workspaces) | List of workspace names to create state buckets for (admin state stays local) | `list(string)` | <pre>[<br/>  "discord",<br/>  "infra",<br/>  "oci",<br/>  "oci-alarms",<br/>  "bootstrap",<br/>  "apps",<br/>  "dns"<br/>]</pre> | no |
+| <a name="input_workspaces"></a> [workspaces](#input\_workspaces) | List of workspace names to create state buckets for (admin state stays local) | `list(string)` | <pre>[<br/>  "discord",<br/>  "infra",<br/>  "oci",<br/>  "bootstrap",<br/>  "apps",<br/>  "dns"<br/>]</pre> | no |
 
 ## Outputs
 

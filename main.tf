@@ -241,11 +241,15 @@ resource "oci_identity_policy" "admin_kms_object_storage" {
 }
 
 # ==============================================================================
-# Values pushed to the `terraform` GitLab project as CI/CD variables, AND
-# exported from .envrc for local dev. PEM goes via OCI_API_KEY_B64
-# (base64-encoded, single-line) — multi-line PEMs through env vars are
-# unreliable across shells, so CI's before_script decodes it to disk and
-# uses OCI_PRIVATE_KEY_PATH instead.
+# Values pushed to `terraform`'s GitHub Actions secrets/variables (the live
+# path — see terraform_github_secrets below) and its GitLab CI variables
+# (kept as a rollback path only, since .gitlab-ci.yml no longer exists in the
+# mirrored content — see module.terraform_gitlab's comment), AND exported
+# from .envrc for local dev. PEM goes via OCI_API_KEY_B64 (base64-encoded,
+# single-line) — multi-line PEMs through env vars are unreliable across
+# shells, so the terragrunt composite action's "Materialise the OCI API key"
+# step (tnoff/terraform's .github/actions/terragrunt) decodes it to disk in
+# CI and sets OCI_PRIVATE_KEY_PATH instead.
 # ==============================================================================
 
 locals {
@@ -255,8 +259,9 @@ locals {
     OCI_USER_OCID    = oci_identity_user.terraform_admin.id
     OCI_FINGERPRINT  = oci_identity_api_key.terraform_admin.fingerprint
 
-    # PEM as base64. CI before_script decodes it to a file at a known
-    # path and exports OCI_PRIVATE_KEY_PATH + TF_VAR_oci_private_key_path.
+    # PEM as base64. The terragrunt composite action decodes it to a file
+    # at a known path in CI and exports OCI_PRIVATE_KEY_PATH +
+    # TF_VAR_oci_private_key_path.
     OCI_API_KEY_B64 = base64encode(tls_private_key.terraform_admin.private_key_pem)
 
     # Same OCI auth values exposed as TF input variables so infra/ can
@@ -301,7 +306,6 @@ locals {
     TF_VAR_gitlab_ci_api_key             = var.gitlab_ci_api_key
     TF_VAR_gitlab_ci_service_account_id  = var.gitlab_ci_service_account_id
     TF_VAR_ssh_public_key                = var.ssh_public_key
-    TF_VAR_alarm_email                   = var.alarm_email
 
     # tnoff-backstage App -- the portal's read credential for catalog discovery
     # (Contents + Metadata read, nothing else). Needs to reach CI as well as
@@ -333,8 +337,9 @@ locals {
 
     # Sealed-secrets controller key (base64, single-line). Local .envrc ONLY —
     # deliberately absent from terraform_ci_vars below so the master key never
-    # lands in the `terraform` GitLab CI variables. Consumed by the operator-run
-    # bootstrap stack to seed the controller key on a green-field start. See
+    # lands in `terraform`'s CI variables, GitLab or GitHub (both are derived
+    # from terraform_ci_vars). Consumed by the operator-run bootstrap stack to
+    # seed the controller key on a green-field start. See
     # docs/projects/sealed-secrets-key-bootstrap.md.
     TF_VAR_sealed_secrets_tls_crt_b64 = var.sealed_secrets_tls_crt_b64
     TF_VAR_sealed_secrets_tls_key_b64 = var.sealed_secrets_tls_key_b64
@@ -386,7 +391,8 @@ locals {
       "export ${k}=${jsonencode(v)}"
     ],
     # PEM path differs between local and CI, so it's set here (local) and
-    # in CI's .gitlab-ci.yml before_script (CI). Not in admin_secrets_bundle.
+    # in the terragrunt composite action's "Materialise the OCI API key"
+    # step (CI). Not in admin_secrets_bundle.
     [
       "export OCI_PRIVATE_KEY_PATH=${jsonencode(abspath(var.terraform_admin_private_key_path))}",
       "export TF_VAR_oci_private_key_path=${jsonencode(abspath(var.terraform_admin_private_key_path))}",
@@ -465,7 +471,6 @@ locals {
     TF_VAR_gitlab_ci_api_key             = var.gitlab_ci_api_key
     TF_VAR_gitlab_ci_service_account_id  = var.gitlab_ci_service_account_id
     TF_VAR_ssh_public_key                = var.ssh_public_key
-    TF_VAR_alarm_email                   = var.alarm_email
 
     # tnoff-backstage App -- the portal's read credential for catalog discovery
     # (Contents + Metadata read, nothing else). Needs to reach CI as well as
@@ -511,7 +516,6 @@ locals {
   # GitLab masking requires single-line, ≥8 chars, no '@'. These can't be
   # masked; explicit allowlist so the rest stay masked by default.
   terraform_ci_vars_unmasked = [
-    "TF_VAR_alarm_email",
     "TF_VAR_ssh_public_key",
     "TF_VAR_cloudflare_account_id",
     # rotated_at timestamps are RFC3339 strings containing `:` which
@@ -646,7 +650,8 @@ module "terraform_gitlab" {
 # local.terraform_ci_vars_unmasked here would be wrong. That list exists
 # because GitLab can only mask a single-line value of >=8 characters with no
 # '@' -- a platform constraint, not a judgement about sensitivity.
-# TF_VAR_alarm_email is on it purely because of the '@'. GitHub has no such
+# TF_VAR_ssh_public_key is on it partly for that reason too -- the trailing
+# user@host comment on a public key contains an '@'. GitHub has no such
 # limit, so the default here is secret, and the exceptions are the values that
 # are genuinely public:
 #
