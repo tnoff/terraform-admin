@@ -108,6 +108,22 @@ resource "time_static" "openweather_api_key_rotated_at" {
   }
 }
 
+# BART_API_KEY (really a 511.org transit token), shared by mirror-castro and
+# mirror-concord -- reaches the cluster via apps/'s
+# kubernetes_secret_v1.bart_api_key (one resource, for_each over the two
+# namespaces). Previously hand-sealed alongside OPENWEATHER_API_KEY in each
+# site's mirror-api-keys SealedSecret (docker-apps); new as of 2026-09-21,
+# so its first apply stamps "today" same as any brand-new tfvar (see Caveat
+# #2 above). See docs/projects/sealed-secrets-terraform-admin-migration.md.
+resource "terraform_data" "bart_api_key_version" {
+  triggers_replace = [sha256(var.bart_api_key)]
+}
+resource "time_static" "bart_api_key_rotated_at" {
+  triggers = {
+    version = terraform_data.bart_api_key_version.id
+  }
+}
+
 # GitLab admin PAT — used by terraform-admin's gitlab provider.
 resource "terraform_data" "gitlab_api_key_version" {
   triggers_replace = [sha256(var.gitlab_api_key)]

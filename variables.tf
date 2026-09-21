@@ -141,7 +141,13 @@ variable "discord_management_token" {
 }
 
 variable "openweather_api_key" {
-  description = "Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s kubernetes_secret_v1.openweather_api_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-castro/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord_bot_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. BART_API_KEY, which shares castro/concord's mirror-api-keys SealedSecret, is unrelated and stays there -- no terraform-admin ownership case for it."
+  description = "Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s kubernetes_secret_v1.openweather_api_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-castro/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord_bot_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. See bart_api_key below for the same treatment applied to castro/concord's other mirror-api-keys entry."
+  type        = string
+  sensitive   = true
+}
+
+variable "bart_api_key" {
+  description = "Free-tier 511.org transit token (BART's own GTFS-RT feed needs no key; this is what MMM-BartTimes' apiKey config field actually authenticates against 511 with), shared by the mirror-castro/mirror-concord sites. Pushed to terraform's CI and consumed by apps/'s kubernetes_secret_v1.bart_api_key, which creates the mirror-bart-key Secret in each of those two namespaces directly -- previously hand-sealed as BART_API_KEY in each site's mirror-api-keys SealedSecret (docker-apps) alongside OPENWEATHER_API_KEY, a dual-seal-on-rotation risk in the same shape openweather_api_key above was corrected for; this variable closes the same gap for the key that shared its SealedSecret. See docs/projects/sealed-secrets-terraform-admin-migration.md."
   type        = string
   sensitive   = true
 }
