@@ -69,15 +69,27 @@ resource "time_static" "discord_management_token_rotated_at" {
   }
 }
 
-# Cloudflare API token — also lives in
-# docker-apps/infrastructure/configs/cert-manager/cloudflare-api-key.yaml
-# as api-key; rotation discipline is to re-seal that file too.
+# Cloudflare API token for terraform/dns's own provider. Terraform-only,
+# same reasoning as discord_management_token -- no docker-apps counterpart.
 resource "terraform_data" "cloudflare_api_token_version" {
   triggers_replace = [sha256(var.cloudflare_api_token)]
 }
 resource "time_static" "cloudflare_api_token_rotated_at" {
   triggers = {
     version = terraform_data.cloudflare_api_token_version.id
+  }
+}
+
+# Cloudflare API token for cert-manager's DNS01 solver -- the one that
+# actually reaches the cluster, via apps/'s kubernetes_secret_v1.cloudflare_api_key.
+# No docker-apps SealedSecret anymore as of the same incident that split
+# discord_token; see that variable's description in variables.tf.
+resource "terraform_data" "cloudflare_dns01_token_version" {
+  triggers_replace = [sha256(var.cloudflare_dns01_token)]
+}
+resource "time_static" "cloudflare_dns01_token_rotated_at" {
+  triggers = {
+    version = terraform_data.cloudflare_dns01_token_version.id
   }
 }
 

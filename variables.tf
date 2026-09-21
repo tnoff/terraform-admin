@@ -105,7 +105,13 @@ variable "mcp_readonly_private_key_path" {
 # ==============================================================================
 
 variable "cloudflare_api_token" {
-  description = "Cloudflare account API token"
+  description = "Cloudflare account API token used by terraform/dns's own cloudflare provider to manage DNS A records (tyler-north.com, castrovalleymirror.com, eastbaymassageandlymph.com). Terraform-only -- never reaches docker-apps or the cluster. See cloudflare_dns01_token for the separate token cert-manager's DNS01 solver uses, and terraform-admin/AGENTS.md's \"Two Discord bot tokens, not one\" for why these split the same way discord_token did: sharing one Cloudflare token between a human-run terraform apply and an in-cluster automated controller was already the pre-existing state (both used the same value, just via different sync paths), and this stops widening the same gap that broke Discord."
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudflare_dns01_token" {
+  description = "Cloudflare API token for cert-manager's DNS01 ACME solver -- a separate Cloudflare API token from cloudflare_api_token, scoped to the same zones (Zone:DNS:Edit + Zone:Zone:Read; Cloudflare tokens don't scope down to TXT-records-only). Pushed to terraform's CI and consumed by apps/'s kubernetes_secret_v1.cloudflare_api_key, which creates the cloudflare-api-key Secret in the cert-manager namespace directly -- same discord_bot_token pattern, chosen deliberately after that incident rather than reusing cloudflare_api_token for the cluster-facing copy."
   type        = string
   sensitive   = true
 }

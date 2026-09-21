@@ -269,8 +269,9 @@ locals {
     TF_VAR_oci_fingerprint  = oci_identity_api_key.terraform_admin.fingerprint
     TF_VAR_oci_api_key_b64  = base64encode(tls_private_key.terraform_admin.private_key_pem)
 
-    TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
-    TF_VAR_cloudflare_account_id = var.cloudflare_account_id
+    TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
+    TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token
+    TF_VAR_cloudflare_account_id  = var.cloudflare_account_id
 
     # discord_bot_token: back to being pushed, as of the incident on
     # 2026-09-21 -- see its description in variables.tf for why. It is now
@@ -359,6 +360,7 @@ locals {
     TF_VAR_discord_bot_token_rotated_at        = time_static.discord_bot_token_rotated_at.rfc3339
     TF_VAR_discord_management_token_rotated_at = time_static.discord_management_token_rotated_at.rfc3339
     TF_VAR_cloudflare_api_token_rotated_at     = time_static.cloudflare_api_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_dns01_token_rotated_at   = time_static.cloudflare_dns01_token_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at           = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_ci_api_key_rotated_at        = time_static.gitlab_ci_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at           = time_static.ssh_public_key_rotated_at.rfc3339
@@ -431,8 +433,9 @@ locals {
     TF_VAR_oci_fingerprint  = oci_identity_api_key.terraform_admin.fingerprint
     TF_VAR_oci_api_key_b64  = base64encode(tls_private_key.terraform_admin.private_key_pem)
 
-    TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
-    TF_VAR_cloudflare_account_id = var.cloudflare_account_id
+    TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
+    TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token
+    TF_VAR_cloudflare_account_id  = var.cloudflare_account_id
 
     # discord_bot_token: back to being pushed, as of the incident on
     # 2026-09-21 -- see its description in variables.tf for why. It is now
@@ -497,6 +500,7 @@ locals {
     TF_VAR_discord_bot_token_rotated_at        = time_static.discord_bot_token_rotated_at.rfc3339
     TF_VAR_discord_management_token_rotated_at = time_static.discord_management_token_rotated_at.rfc3339
     TF_VAR_cloudflare_api_token_rotated_at     = time_static.cloudflare_api_token_rotated_at.rfc3339
+    TF_VAR_cloudflare_dns01_token_rotated_at   = time_static.cloudflare_dns01_token_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at           = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_ci_api_key_rotated_at        = time_static.gitlab_ci_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at           = time_static.ssh_public_key_rotated_at.rfc3339
@@ -516,6 +520,7 @@ locals {
     "TF_VAR_discord_bot_token_rotated_at",
     "TF_VAR_discord_management_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
+    "TF_VAR_cloudflare_dns01_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
@@ -666,6 +671,7 @@ locals {
     "TF_VAR_discord_bot_token_rotated_at",
     "TF_VAR_discord_management_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
+    "TF_VAR_cloudflare_dns01_token_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
