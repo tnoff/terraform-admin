@@ -318,6 +318,13 @@ locals {
     TF_VAR_eastbay_email_host_password = var.eastbay_email_host_password
     TF_VAR_eastbay_flask_secret_key    = var.eastbay_flask_secret_key
 
+    # Grafana's bootstrap admin credential -- base64-wrapped defensively (see
+    # variables.tf; a short 'admin' username fails GitLab's >= 8 char check
+    # outright, and the password gets the same treatment on general
+    # principle). apps/'s kubernetes_secret_v1.grafana_admin decodes both.
+    TF_VAR_grafana_admin_user     = base64encode(var.grafana_admin_user)
+    TF_VAR_grafana_admin_password = base64encode(var.grafana_admin_password)
+
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
     # protected `main`, so
@@ -410,6 +417,8 @@ locals {
     TF_VAR_eastbay_email_host_user_rotated_at       = time_static.eastbay_email_host_user_rotated_at.rfc3339
     TF_VAR_eastbay_email_host_password_rotated_at   = time_static.eastbay_email_host_password_rotated_at.rfc3339
     TF_VAR_eastbay_flask_secret_key_rotated_at      = time_static.eastbay_flask_secret_key_rotated_at.rfc3339
+    TF_VAR_grafana_admin_user_rotated_at            = time_static.grafana_admin_user_rotated_at.rfc3339
+    TF_VAR_grafana_admin_password_rotated_at        = time_static.grafana_admin_password_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_ci_api_key_rotated_at             = time_static.gitlab_ci_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                = time_static.ssh_public_key_rotated_at.rfc3339
@@ -527,6 +536,13 @@ locals {
     TF_VAR_eastbay_email_host_password = var.eastbay_email_host_password
     TF_VAR_eastbay_flask_secret_key    = var.eastbay_flask_secret_key
 
+    # Grafana's bootstrap admin credential -- base64-wrapped defensively (see
+    # variables.tf; a short 'admin' username fails GitLab's >= 8 char check
+    # outright, and the password gets the same treatment on general
+    # principle). apps/'s kubernetes_secret_v1.grafana_admin decodes both.
+    TF_VAR_grafana_admin_user     = base64encode(var.grafana_admin_user)
+    TF_VAR_grafana_admin_password = base64encode(var.grafana_admin_password)
+
     # tnoff-ci GitHub App. The identity CI pushes with, replacing the admin
     # PAT that used to be here: assemble-changelog pushes straight to a
     # protected `main`, so
@@ -594,6 +610,8 @@ locals {
     TF_VAR_eastbay_email_host_user_rotated_at       = time_static.eastbay_email_host_user_rotated_at.rfc3339
     TF_VAR_eastbay_email_host_password_rotated_at   = time_static.eastbay_email_host_password_rotated_at.rfc3339
     TF_VAR_eastbay_flask_secret_key_rotated_at      = time_static.eastbay_flask_secret_key_rotated_at.rfc3339
+    TF_VAR_grafana_admin_user_rotated_at            = time_static.grafana_admin_user_rotated_at.rfc3339
+    TF_VAR_grafana_admin_password_rotated_at        = time_static.grafana_admin_password_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_gitlab_ci_api_key_rotated_at             = time_static.gitlab_ci_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                = time_static.ssh_public_key_rotated_at.rfc3339
@@ -624,6 +642,8 @@ locals {
     "TF_VAR_eastbay_email_host_user_rotated_at",
     "TF_VAR_eastbay_email_host_password_rotated_at",
     "TF_VAR_eastbay_flask_secret_key_rotated_at",
+    "TF_VAR_grafana_admin_user_rotated_at",
+    "TF_VAR_grafana_admin_password_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
@@ -787,6 +807,8 @@ locals {
     "TF_VAR_eastbay_email_host_user_rotated_at",
     "TF_VAR_eastbay_email_host_password_rotated_at",
     "TF_VAR_eastbay_flask_secret_key_rotated_at",
+    "TF_VAR_grafana_admin_user_rotated_at",
+    "TF_VAR_grafana_admin_password_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
