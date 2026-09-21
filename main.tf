@@ -625,6 +625,16 @@ locals {
     # A GitLab service_account_id, not a credential -- same reasoning as
     # ci_app_id above, and likely under 8 characters too.
     "TF_VAR_gitlab_ci_service_account_id",
+    # Not secret -- both are already public on the website itself. Bundled
+    # into website-secrets/eastbay_website_creds for consistency with the
+    # rest of that Secret, not because either needs protecting. An email
+    # address always contains '@' (rejected outright) and a formatted phone
+    # number routinely fails on punctuation GitLab's masked-value charset
+    # doesn't allow -- apply failed on eastbay_contact_number with exactly
+    # this error before this line was added; eastbay_contact_email would
+    # have failed the same way on its next attempt.
+    "TF_VAR_eastbay_contact_email",
+    "TF_VAR_eastbay_contact_number",
   ]
 
   terraform_weekly_schedule = {
