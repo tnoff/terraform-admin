@@ -343,26 +343,3 @@ variable "ssh_public_key" {
   type        = string
 }
 
-# ==============================================================================
-# Sealed-secrets controller key — the single backed-up controller key
-# (docs/projects/sealed-secrets-key-bootstrap.md). Held in admin LOCAL state
-# ONLY and surfaced to the operator-run `bootstrap` stack via TF_VAR_* in the
-# generated .envrc — deliberately NOT pushed to the `terraform` GitLab CI
-# variables (the master key must never live in CI). Values are the base64
-# strings straight from the live Secret's .data (single-line, env-var-safe,
-# exactly like OCI_API_KEY_B64); bootstrap base64-decodes them into the
-# kubernetes.io/tls Secret the controller adopts on a green-field start.
-# ==============================================================================
-
-variable "sealed_secrets_tls_crt_b64" {
-  description = "Base64 (as stored in the Secret .data) of the sealed-secrets controller key certificate (tls.crt). Source: kubectl -n sealed-secrets get secret sealed-secrets-keyptkzt -o jsonpath='{.data.tls\\.crt}'"
-  type        = string
-  sensitive   = true
-}
-
-variable "sealed_secrets_tls_key_b64" {
-  description = "Base64 (as stored in the Secret .data) of the sealed-secrets controller private key (tls.key). Source: kubectl -n sealed-secrets get secret sealed-secrets-keyptkzt -o jsonpath='{.data.tls\\.key}'"
-  type        = string
-  sensitive   = true
-}
-
