@@ -153,6 +153,75 @@ variable "bart_api_key" {
 }
 
 # ==============================================================================
+# discord's Spotify/YouTube search providers + VPN tunnel key, and eastbay's
+# website secrets -- the project's scope widened 2026-09-21 from "match an
+# existing terraform-admin variable" to "get every hand-sealed SealedSecret
+# out of discord/eastbay," full stop. These nine were previously left sealed
+# because none had a terraform-admin variable *yet* and none fanned out
+# across multiple namespaces -- both true, but no longer the bar. Pushed to
+# terraform's CI and consumed by apps/'s kubernetes_secret_v1.discord_search_creds,
+# kubernetes_secret_v1.discord_vpn_key, and kubernetes_secret_v1.eastbay_website_creds,
+# which create discord-search-creds/discord-vpn-key/eastbay-website-creds
+# directly -- discord-conf-secrets, vpn-secrets, and eastbaymassage's
+# website-secrets (docker-apps) are removed entirely, not left half-sealed.
+# See docs/projects/sealed-secrets-terraform-admin-migration.md.
+# ==============================================================================
+
+variable "discord_spotify_client_id" {
+  description = "Spotify application client ID, used by discord's search tier (and the bot/broker/downloader, which mirror its secret set) to resolve Spotify track/playlist URLs. Register an app at developer.spotify.com/dashboard. Consumed by apps/'s kubernetes_secret_v1.discord_search_creds."
+  type        = string
+  sensitive   = true
+}
+
+variable "discord_spotify_client_secret" {
+  description = "Spotify application client secret, paired with discord_spotify_client_id. Consumed by apps/'s kubernetes_secret_v1.discord_search_creds."
+  type        = string
+  sensitive   = true
+}
+
+variable "discord_youtube_api_key" {
+  description = "YouTube Data API key, used by discord's search tier (and the bot/broker/downloader) to resolve YouTube URLs and run searches. From console.cloud.google.com (YouTube Data API v3, API key credential). Consumed by apps/'s kubernetes_secret_v1.discord_search_creds."
+  type        = string
+  sensitive   = true
+}
+
+variable "discord_vpn_private_key" {
+  description = "WireGuard private key for the Mullvad VPN tunnel the downloader's gluetun sidecar runs its per-download SOCKS5 exits through (docs corpus project_discord_vpn_exit_attribution). Self-generated, not vendor-issued -- Mullvad only ever receives the public half when the device is registered. Consumed by apps/'s kubernetes_secret_v1.discord_vpn_key."
+  type        = string
+  sensitive   = true
+}
+
+variable "eastbay_contact_email" {
+  description = "Contact email address shown on the EastbayMassageAndLymph website. Not secret in the confidentiality sense (it's public-facing business info), sealed alongside the site's real secrets historically -- kept sensitive here for consistency with the rest of website-secrets, not because it needs protecting. Enter it plain -- main.tf base64-encodes it before pushing to CI (GitLab's masked-variable check rejects any value containing '@', which every email address has) and apps/'s kubernetes_secret_v1.eastbay_website_creds base64decode()s it back for the Secret."
+  type        = string
+  sensitive   = true
+}
+
+variable "eastbay_contact_number" {
+  description = "Contact phone number shown on the EastbayMassageAndLymph website. Same non-secret-but-bundled reasoning as eastbay_contact_email. Enter it plain -- main.tf base64-encodes it before pushing to CI (a formatted phone number routinely fails GitLab's masked-variable charset check) and apps/'s kubernetes_secret_v1.eastbay_website_creds base64decode()s it back."
+  type        = string
+  sensitive   = true
+}
+
+variable "eastbay_email_host_user" {
+  description = "SMTP username the EastbayMassageAndLymph website authenticates with to send contact-form email. Consumed by apps/'s kubernetes_secret_v1.eastbay_website_creds."
+  type        = string
+  sensitive   = true
+}
+
+variable "eastbay_email_host_password" {
+  description = "SMTP password/app-password paired with eastbay_email_host_user. Consumed by apps/'s kubernetes_secret_v1.eastbay_website_creds."
+  type        = string
+  sensitive   = true
+}
+
+variable "eastbay_flask_secret_key" {
+  description = "Flask session-signing secret for the EastbayMassageAndLymph website. Self-generated (e.g. python -c 'import secrets; print(secrets.token_hex(32))'), not vendor-issued -- there's no external dashboard value, just a random value the operator picks. Consumed by apps/'s kubernetes_secret_v1.eastbay_website_creds."
+  type        = string
+  sensitive   = true
+}
+
+# ==============================================================================
 # tnoff-flux GitHub App -- Flux's read credential for docker-apps.
 #
 # Separate from tnoff-ci on purpose. Flux needs Contents:read on ONE repo and

@@ -124,6 +124,91 @@ resource "time_static" "bart_api_key_rotated_at" {
   }
 }
 
+# discord's Spotify/YouTube search creds + VPN tunnel key, and eastbay's
+# website secrets -- new as of 2026-09-21, so their first apply each stamps
+# "today" same as any brand-new tfvar (see Caveat #2 above). See
+# docs/projects/sealed-secrets-terraform-admin-migration.md.
+resource "terraform_data" "discord_spotify_client_id_version" {
+  triggers_replace = [sha256(var.discord_spotify_client_id)]
+}
+resource "time_static" "discord_spotify_client_id_rotated_at" {
+  triggers = {
+    version = terraform_data.discord_spotify_client_id_version.id
+  }
+}
+
+resource "terraform_data" "discord_spotify_client_secret_version" {
+  triggers_replace = [sha256(var.discord_spotify_client_secret)]
+}
+resource "time_static" "discord_spotify_client_secret_rotated_at" {
+  triggers = {
+    version = terraform_data.discord_spotify_client_secret_version.id
+  }
+}
+
+resource "terraform_data" "discord_youtube_api_key_version" {
+  triggers_replace = [sha256(var.discord_youtube_api_key)]
+}
+resource "time_static" "discord_youtube_api_key_rotated_at" {
+  triggers = {
+    version = terraform_data.discord_youtube_api_key_version.id
+  }
+}
+
+resource "terraform_data" "discord_vpn_private_key_version" {
+  triggers_replace = [sha256(var.discord_vpn_private_key)]
+}
+resource "time_static" "discord_vpn_private_key_rotated_at" {
+  triggers = {
+    version = terraform_data.discord_vpn_private_key_version.id
+  }
+}
+
+resource "terraform_data" "eastbay_contact_email_version" {
+  triggers_replace = [sha256(var.eastbay_contact_email)]
+}
+resource "time_static" "eastbay_contact_email_rotated_at" {
+  triggers = {
+    version = terraform_data.eastbay_contact_email_version.id
+  }
+}
+
+resource "terraform_data" "eastbay_contact_number_version" {
+  triggers_replace = [sha256(var.eastbay_contact_number)]
+}
+resource "time_static" "eastbay_contact_number_rotated_at" {
+  triggers = {
+    version = terraform_data.eastbay_contact_number_version.id
+  }
+}
+
+resource "terraform_data" "eastbay_email_host_user_version" {
+  triggers_replace = [sha256(var.eastbay_email_host_user)]
+}
+resource "time_static" "eastbay_email_host_user_rotated_at" {
+  triggers = {
+    version = terraform_data.eastbay_email_host_user_version.id
+  }
+}
+
+resource "terraform_data" "eastbay_email_host_password_version" {
+  triggers_replace = [sha256(var.eastbay_email_host_password)]
+}
+resource "time_static" "eastbay_email_host_password_rotated_at" {
+  triggers = {
+    version = terraform_data.eastbay_email_host_password_version.id
+  }
+}
+
+resource "terraform_data" "eastbay_flask_secret_key_version" {
+  triggers_replace = [sha256(var.eastbay_flask_secret_key)]
+}
+resource "time_static" "eastbay_flask_secret_key_rotated_at" {
+  triggers = {
+    version = terraform_data.eastbay_flask_secret_key_version.id
+  }
+}
+
 # GitLab admin PAT — used by terraform-admin's gitlab provider.
 resource "terraform_data" "gitlab_api_key_version" {
   triggers_replace = [sha256(var.gitlab_api_key)]
