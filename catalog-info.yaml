@@ -28,3 +28,4 @@ spec:
   lifecycle: production
   dependsOn:
     - component:default/terraform-modules
+    - component:default/github-workflows
