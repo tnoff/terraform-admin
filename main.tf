@@ -375,18 +375,9 @@ locals {
     # the backstage-github-app-credentials Secret.
     TF_VAR_backstage_app_private_key_rotated_at = time_static.backstage_app_private_key_rotated_at.rfc3339
 
-    # Sealed-secrets controller key (base64, single-line). Local .envrc ONLY —
-    # deliberately absent from terraform_ci_vars below so the master key never
-    # lands in `terraform`'s CI variables, GitLab or GitHub (both are derived
-    # from terraform_ci_vars). Consumed by the operator-run bootstrap stack to
-    # seed the controller key on a green-field start. See
-    # docs/projects/sealed-secrets-key-bootstrap.md.
-    TF_VAR_sealed_secrets_tls_crt_b64 = var.sealed_secrets_tls_crt_b64
-    TF_VAR_sealed_secrets_tls_key_b64 = var.sealed_secrets_tls_key_b64
-
     # tnoff-flux App -- Flux's read credential for docker-apps, phase 7. Local
-    # .envrc ONLY, same reasoning as the sealed-secrets key above: consumed by
-    # the operator-run bootstrap stack, and nothing in CI has any use for it.
+    # .envrc ONLY: consumed by the operator-run bootstrap stack, and nothing
+    # in CI has any use for it.
     # See variables.tf for why this is a separate App from tnoff-ci.
     TF_VAR_flux_app_id              = var.flux_app_id
     TF_VAR_flux_app_installation_id = var.flux_app_installation_id
