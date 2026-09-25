@@ -909,3 +909,16 @@ module "terraform_repo" {
     CI_APP_PRIVATE_KEY = base64decode(var.ci_app_private_key_b64)
   }
 }
+
+# Second instance of the same cost called out above for CI_APP_*:
+# TECHDOCS_S3_ACCESS_KEY_ID, TECHDOCS_S3_SECRET_ACCESS_KEY,
+# TECHDOCS_S3_BUCKET_NAME, TECHDOCS_S3_ENDPOINT and TECHDOCS_S3_REGION are
+# managed by nothing, on this repo specifically -- admin is layer-0 and
+# deliberately has no data.terraform_remote_state.oci to read them from
+# (that would be circular: oci/ doesn't exist yet the first time admin
+# applies), and infra/ can't manage its own repo's secrets for the
+# housing-paradox reason above. Set by hand instead; see
+# tnoff/terraform's docs/DEVELOPMENT.md ("TechDocs publish") for the
+# exact commands and full explanation -- documented there rather than
+# here because that's where the operator running them actually is
+# (`cd oci/ && terragrunt output ...`), not in this repo.
