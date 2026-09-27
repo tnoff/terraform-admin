@@ -29,7 +29,7 @@ set -euo pipefail
 # different version are rejected there (output changes between minor versions --
 # 0.19.0 vs 0.20.0 moved the separator style). The assertion below enforces it,
 # and renovate.json's customManager bumps both pins in one PR.
-VERSION="0.19.0"
+VERSION="0.24.0"
 
 PRECOMMIT_PIN="$(grep -oE 'quay\.io/terraform-docs/terraform-docs:[0-9]+\.[0-9]+\.[0-9]+' \
   .pre-commit-config.yaml | head -n1 | cut -d: -f2 || true)"
