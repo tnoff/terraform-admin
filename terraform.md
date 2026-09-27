@@ -2,7 +2,7 @@
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.9 |
 | <a name="requirement_github"></a> [github](#requirement\_github) | ~> 6.0 |
 | <a name="requirement_gitlab"></a> [gitlab](#requirement\_gitlab) | ~> 19.0 |
@@ -14,7 +14,7 @@
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_github"></a> [github](#provider\_github) | ~> 6.0 |
 | <a name="provider_gitlab"></a> [gitlab](#provider\_gitlab) | ~> 19.0 |
 | <a name="provider_local"></a> [local](#provider\_local) | ~> 2.0 |
@@ -26,7 +26,7 @@
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://github.com/tnoff/terraform-modules.git//gitlab/repo | f674402180cd49f2a76c1e2b9a77128efc497af9 |
 | <a name="module_terraform_repo"></a> [terraform\_repo](#module\_terraform\_repo) | git::https://github.com/tnoff/terraform-modules.git//github/repo | f674402180cd49f2a76c1e2b9a77128efc497af9 |
 | <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | f674402180cd49f2a76c1e2b9a77128efc497af9 |
@@ -35,7 +35,7 @@
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [github_actions_secret.terraform](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_secret) | resource |
 | [github_actions_variable.terraform](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_variable) | resource |
 | [local_sensitive_file.envrc](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
@@ -108,7 +108,7 @@
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_backstage_app_client_id"></a> [backstage\_app\_client\_id](#input\_backstage\_app\_client\_id) | Client ID of the tnoff-backstage GitHub App (Iv23li... form). Not a secret, and shown on the App settings page without generating anything. Backstage requires the key to be PRESENT (readGithubIntegrationConfig uses getString, not getOptionalString) but never uses it: SingleInstanceGithubCredentialsProvider builds its auth config from appId + privateKey alone. Supplied so config parsing succeeds. | `string` | n/a | yes |
 | <a name="input_backstage_app_id"></a> [backstage\_app\_id](#input\_backstage\_app\_id) | App ID of the tnoff-backstage GitHub App. Not a secret. From https://github.com/settings/apps/tnoff-backstage. | `number` | n/a | yes |
 | <a name="input_backstage_app_private_key_b64"></a> [backstage\_app\_private\_key\_b64](#input\_backstage\_app\_private\_key\_b64) | Base64 of the tnoff-backstage App private key PEM, single line. Base64 for the same reason ci\_app\_private\_key\_b64 is: a multi-line PEM does not survive a shell round-trip cleanly. Produce with `base64 -w0 tnoff-backstage.*.private-key.pem`. Set in admin/terraform.tfvars (gitignored); apps/ base64decodes it into the Secret the pod mounts. | `string` | n/a | yes |
