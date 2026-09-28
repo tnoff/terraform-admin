@@ -817,14 +817,12 @@ locals {
 
   terraform_github_secrets = {
     for key, value in local.terraform_ci_vars : key => value
-    if !contains(local.terraform_github_excluded, key)
-    && !contains(local.terraform_github_public, key)
+    if !contains(local.terraform_github_excluded, key) && !contains(local.terraform_github_public, key)
   }
 
   terraform_github_variables = {
     for key, value in local.terraform_ci_vars : key => value
-    if !contains(local.terraform_github_excluded, key)
-    && contains(local.terraform_github_public, key)
+    if !contains(local.terraform_github_excluded, key) && contains(local.terraform_github_public, key)
   }
 }
 
@@ -900,6 +898,11 @@ module "terraform_repo" {
   is_public  = false
   auto_init  = true
   has_issues = true
+
+  # Public repos get Dependabot alerts unconditionally; private repos need
+  # this set explicitly. Free on every plan tier -- checked before landing
+  # this, not assumed.
+  enable_vulnerability_alerts = true
 
   # The same three secrets infra writes to every flipped repo, from the same
   # admin inputs infra receives them through.
