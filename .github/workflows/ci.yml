@@ -62,6 +62,44 @@ jobs:
     name: Workflow contracts
     uses: tnoff/github-workflows/.github/workflows/check-workflow-contracts.yml@f6569d2b6f242fb91759fe0ebfa990a99c09585b
 
+  # Checkov's Terraform-resource security rules, ported from
+  # terraform-modules#71-74 and terraform's own checkov job. Two things are
+  # specific to this repo:
+  #
+  #   --download-external-modules is required -- every real resource here
+  #   lives in a module pulled from terraform-modules via a git:: source.
+  #
+  #   checkov's bundled HCL parser (python-hcl2, not HashiCorp's own) could
+  #   not read main.tf at all before this PR -- a real upstream bug with `&&`
+  #   starting a continuation line inside a for-expression's `if` clause. The
+  #   two occurrences (terraform_github_secrets/terraform_github_variables)
+  #   are reformatted onto one line each in this same PR, verified both
+  #   `terraform fmt`-clean and semantically identical. Without that fix
+  #   checkov silently sees almost nothing in this repo -- main.tf is
+  #   essentially all of it.
+  #
+  # NOT in `result`'s needs below, on top of this repo's blanket advisory
+  # reasoning above: CKV_GIT_3 (vulnerability alerts disabled on
+  # module.terraform_repo's github_repository) is a real, open finding, not
+  # skipped -- fixing it is a GitHub-settings behavior change on the next
+  # apply, tracked separately rather than bundled into this scanner rollout.
+  # Folding an unresolved finding into `result` now would make that summary
+  # report red for a reason unrelated to whatever a given PR touches.
+  checkov:
+    name: Checkov (Terraform security scan)
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Run checkov
+        run: |
+          docker run --rm -v "${PWD}:/src" bridgecrew/checkov:3.3.20 \
+            -d /src --compact --quiet --download-external-modules true \
+            --skip-check CKV_OCI_7,CKV_GIT_4,CKV_GLB_1,CKV_GLB_3,CKV_GLB_4
+
   result:
     name: CI result
     # The fleet-standard single context. Advisory here for the plan reason

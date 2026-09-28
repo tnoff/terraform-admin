@@ -31,3 +31,6 @@ generated-output/
 
 # Ignore lock files (optional - some teams commit this)
 # .terraform.lock.hcl
+
+# checkov --download-external-modules local cache
+.external_modules/
