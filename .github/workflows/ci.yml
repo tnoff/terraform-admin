@@ -78,13 +78,18 @@ jobs:
   #   checkov silently sees almost nothing in this repo -- main.tf is
   #   essentially all of it.
   #
-  # NOT in `result`'s needs below, on top of this repo's blanket advisory
-  # reasoning above: CKV_GIT_3 (vulnerability alerts disabled on
-  # module.terraform_repo's github_repository) is a real, open finding, not
-  # skipped -- fixing it is a GitHub-settings behavior change on the next
-  # apply, tracked separately rather than bundled into this scanner rollout.
-  # Folding an unresolved finding into `result` now would make that summary
-  # report red for a reason unrelated to whatever a given PR touches.
+  #   CKV_GIT_3 (vulnerability alerts disabled) -- checks the DEPRECATED
+  #   github_repository.vulnerability_alerts attribute, not the modern
+  #   github_repository_vulnerability_alerts companion resource the module
+  #   actually uses (the provider's own docs say to use that resource
+  #   INSTEAD of the deprecated attribute). module.terraform_repo now sets
+  #   enable_vulnerability_alerts = true, which creates that companion
+  #   resource and genuinely turns Dependabot alerts on -- checkov's check
+  #   just can't see a pattern it predates.
+  #
+  # In `result`'s needs below despite the blanket-advisory posture above,
+  # matching every other job here: nothing is left open, so there's no
+  # reason to hold it out.
   checkov:
     name: Checkov (Terraform security scan)
     runs-on: ubuntu-26.04
@@ -98,7 +103,7 @@ jobs:
         run: |
           docker run --rm -v "${PWD}:/src" bridgecrew/checkov:3.3.20 \
             -d /src --compact --quiet --download-external-modules true \
-            --skip-check CKV_OCI_7,CKV_GIT_4,CKV_GLB_1,CKV_GLB_3,CKV_GLB_4
+            --skip-check CKV_GIT_3,CKV_OCI_7,CKV_GIT_4,CKV_GLB_1,CKV_GLB_3,CKV_GLB_4
 
   result:
     name: CI result
@@ -107,7 +112,7 @@ jobs:
     # its name never changes, and `skipped` deliberately passes so a fork PR
     # skipping the cascade is not a failure.
     if: always()
-    needs: [pre-commit, secrets, contracts]
+    needs: [pre-commit, secrets, contracts, checkov]
     runs-on: ubuntu-26.04
     permissions:
       contents: read
@@ -117,12 +122,14 @@ jobs:
           echo "pre-commit: ${{ needs['pre-commit'].result }}"
           echo "secrets:    ${{ needs.secrets.result }}"
           echo "contracts:  ${{ needs.contracts.result }}"
+          echo "checkov:    ${{ needs.checkov.result }}"
 
       - name: Fail if any job failed
         if: >-
           needs['pre-commit'].result == 'failure' || needs['pre-commit'].result == 'cancelled' ||
           needs.secrets.result == 'failure' || needs.secrets.result == 'cancelled' ||
-          needs.contracts.result == 'failure' || needs.contracts.result == 'cancelled'
+          needs.contracts.result == 'failure' || needs.contracts.result == 'cancelled' ||
+          needs.checkov.result == 'failure' || needs.checkov.result == 'cancelled'
         run: |
           echo "::error::One or more CI jobs did not pass."
           exit 1

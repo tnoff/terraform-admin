@@ -899,6 +899,11 @@ module "terraform_repo" {
   auto_init  = true
   has_issues = true
 
+  # Public repos get Dependabot alerts unconditionally; private repos need
+  # this set explicitly. Free on every plan tier -- checked before landing
+  # this, not assumed.
+  enable_vulnerability_alerts = true
+
   # The same three secrets infra writes to every flipped repo, from the same
   # admin inputs infra receives them through.
   action_secrets = {
