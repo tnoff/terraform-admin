@@ -331,3 +331,16 @@ resource "time_static" "backstage_app_private_key_rotated_at" {
     version = terraform_data.backstage_app_private_key_version.id
   }
 }
+
+# Backstage externalAccess static token for the local MCP client -- reaches
+# the cluster via apps/'s kubernetes_secret_v1.backstage_mcp_token. New as of
+# 2026-09-28, so its first apply stamps "today" same as any brand-new tfvar
+# (see Caveat #2 above).
+resource "terraform_data" "backstage_mcp_token_version" {
+  triggers_replace = [sha256(var.backstage_mcp_token)]
+}
+resource "time_static" "backstage_mcp_token_rotated_at" {
+  triggers = {
+    version = terraform_data.backstage_mcp_token_version.id
+  }
+}

@@ -295,6 +295,12 @@ locals {
     # See its description in variables.tf.
     TF_VAR_bart_api_key = var.bart_api_key
 
+    # Backstage externalAccess static token for the local MCP client -- pushed
+    # as of 2026-09-28, consumed for real by apps/'s
+    # kubernetes_secret_v1.backstage_mcp_token. See its description in
+    # variables.tf.
+    TF_VAR_backstage_mcp_token = var.backstage_mcp_token
+
     # discord's Spotify/YouTube search creds + VPN key, and eastbay's website
     # secrets -- pushed as of 2026-09-21, consumed for real by apps/'s
     # kubernetes_secret_v1.discord_search_creds/discord_vpn_key/eastbay_website_creds.
@@ -399,6 +405,7 @@ locals {
     TF_VAR_cloudflare_dns01_token_rotated_at        = time_static.cloudflare_dns01_token_rotated_at.rfc3339
     TF_VAR_openweather_api_key_rotated_at           = time_static.openweather_api_key_rotated_at.rfc3339
     TF_VAR_bart_api_key_rotated_at                  = time_static.bart_api_key_rotated_at.rfc3339
+    TF_VAR_backstage_mcp_token_rotated_at           = time_static.backstage_mcp_token_rotated_at.rfc3339
     TF_VAR_discord_spotify_client_id_rotated_at     = time_static.discord_spotify_client_id_rotated_at.rfc3339
     TF_VAR_discord_spotify_client_secret_rotated_at = time_static.discord_spotify_client_secret_rotated_at.rfc3339
     TF_VAR_discord_youtube_api_key_rotated_at       = time_static.discord_youtube_api_key_rotated_at.rfc3339
@@ -504,6 +511,12 @@ locals {
     # See its description in variables.tf.
     TF_VAR_bart_api_key = var.bart_api_key
 
+    # Backstage externalAccess static token for the local MCP client -- pushed
+    # as of 2026-09-28, consumed for real by apps/'s
+    # kubernetes_secret_v1.backstage_mcp_token. See its description in
+    # variables.tf.
+    TF_VAR_backstage_mcp_token = var.backstage_mcp_token
+
     # discord's Spotify/YouTube search creds + VPN key, and eastbay's website
     # secrets -- pushed as of 2026-09-21, consumed for real by apps/'s
     # kubernetes_secret_v1.discord_search_creds/discord_vpn_key/eastbay_website_creds.
@@ -592,6 +605,7 @@ locals {
     TF_VAR_cloudflare_dns01_token_rotated_at        = time_static.cloudflare_dns01_token_rotated_at.rfc3339
     TF_VAR_openweather_api_key_rotated_at           = time_static.openweather_api_key_rotated_at.rfc3339
     TF_VAR_bart_api_key_rotated_at                  = time_static.bart_api_key_rotated_at.rfc3339
+    TF_VAR_backstage_mcp_token_rotated_at           = time_static.backstage_mcp_token_rotated_at.rfc3339
     TF_VAR_discord_spotify_client_id_rotated_at     = time_static.discord_spotify_client_id_rotated_at.rfc3339
     TF_VAR_discord_spotify_client_secret_rotated_at = time_static.discord_spotify_client_secret_rotated_at.rfc3339
     TF_VAR_discord_youtube_api_key_rotated_at       = time_static.discord_youtube_api_key_rotated_at.rfc3339
@@ -624,6 +638,7 @@ locals {
     "TF_VAR_cloudflare_dns01_token_rotated_at",
     "TF_VAR_openweather_api_key_rotated_at",
     "TF_VAR_bart_api_key_rotated_at",
+    "TF_VAR_backstage_mcp_token_rotated_at",
     "TF_VAR_discord_spotify_client_id_rotated_at",
     "TF_VAR_discord_spotify_client_secret_rotated_at",
     "TF_VAR_discord_youtube_api_key_rotated_at",
@@ -789,6 +804,7 @@ locals {
     "TF_VAR_cloudflare_dns01_token_rotated_at",
     "TF_VAR_openweather_api_key_rotated_at",
     "TF_VAR_bart_api_key_rotated_at",
+    "TF_VAR_backstage_mcp_token_rotated_at",
     "TF_VAR_discord_spotify_client_id_rotated_at",
     "TF_VAR_discord_spotify_client_secret_rotated_at",
     "TF_VAR_discord_youtube_api_key_rotated_at",
