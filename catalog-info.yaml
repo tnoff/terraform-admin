@@ -29,3 +29,323 @@ spec:
   dependsOn:
     - component:default/terraform-modules
     - component:default/github-workflows
+
+---
+# Credentials this stack holds or originates, one Resource each. METADATA ONLY:
+# no value ever appears here. Derived from variables.tf and main.tf; when a
+# sensitive variable is added or retired there, add or remove its entry.
+#
+# type `credential` follows docker-apps' cloudflare-api-key, and the owner is
+# the same admin group. The edges are declared from this side with
+# `dependencyOf` so the consuming repos need no edits. Nothing here is
+# `spec.system`-scoped: most credentials cross systems, and giving them one
+# would crowd the service graphs.
+#
+# Deliberately omitted: non-secret variables (IDs, regions, names, the SSH public
+# key, the eastbay contact details, GitHub App/installation IDs) and the OCI
+# Vault/state-bucket machinery. In-cluster Secrets that terraform/apps derives
+# from OCI keys and bucket credentials (os-push creds, scanner configs,
+# flux_system_*) are plumbing, not originating credentials, so they are not
+# listed.
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: discord-bot-token
+  description: >-
+    The live Discord application bot's token (variable discord_bot_token). Flows to
+    terraform/apps, which creates the discord-bot-token Secret the bot and dispatcher
+    read directly. Distinct from discord-management-token on purpose: sharing one
+    token between the live bot and terraform's provider is what caused the earlier
+    crash-loop. Operator-rotated; rotation-tracked.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/discord-bot
+    - component:default/discord-dispatcher
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: discord-management-token
+  description: >-
+    Token for a separate Discord bot application used only by terraform/discord's
+    provider to manage server structure (variable discord_management_token).
+    Terraform-only: never reaches the cluster. Operator-rotated; rotation-tracked.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/terraform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: discord-search-credentials
+  description: >-
+    Spotify client ID and secret plus the YouTube Data API key behind discord's search
+    tier (variables discord_spotify_client_id, discord_spotify_client_secret,
+    discord_youtube_api_key). Created in-cluster as the discord-search-creds Secret by
+    terraform/apps. Vendor-issued; rotation-tracked.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/discord-bot
+    - component:default/discord-broker
+    - component:default/discord-search
+    - component:default/discord-downloader
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: discord-vpn-private-key
+  description: >-
+    WireGuard private key for the Mullvad tunnel the downloader's gluetun sidecar
+    routes per-download exits through (variable discord_vpn_private_key).
+    Self-generated; Mullvad only holds the public half. Created in-cluster as the
+    discord-vpn-key Secret by terraform/apps.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/discord-downloader
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: cloudflare-api-token
+  description: >-
+    Cloudflare API token terraform/dns uses to manage DNS records (variable
+    cloudflare_api_token). Terraform-only: deliberately separate from
+    cloudflare-dns01-token so a human-run apply and the in-cluster ACME solver never
+    share one credential.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/terraform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: cloudflare-dns01-token
+  description: >-
+    Cloudflare API token for cert-manager's DNS-01 solver (variable
+    cloudflare_dns01_token). Scoped to the same zones as cloudflare-api-token but a
+    separate token. terraform/apps materialises it as the cloudflare-api-key Secret in
+    the cert-manager namespace.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - resource:default/cloudflare-api-key
+    - component:default/cert-manager
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: openweather-api-key
+  description: >-
+    Free-tier OpenWeather API key shared by all three MagicMirror sites (variable
+    openweather_api_key). terraform/apps creates the mirror-openweather-key Secret in
+    each mirror namespace.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/mirror-sanjose
+    - component:default/mirror-castro
+    - component:default/mirror-concord
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bart-api-key
+  description: >-
+    511.org transit token that MMM-BartTimes authenticates with (variable
+    bart_api_key). Shared by the castro and concord sites; terraform/apps creates the
+    mirror-bart-key Secret in each.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/mirror-castro
+    - component:default/mirror-concord
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: eastbay-smtp-credentials
+  description: >-
+    SMTP username and password the Eastbay website uses to send contact-form email
+    (variables eastbay_email_host_user, eastbay_email_host_password). Part of the
+    eastbay-website-creds Secret created by terraform/apps.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/eastbay
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: eastbay-flask-secret-key
+  description: >-
+    Flask session-signing key for the Eastbay website (variable
+    eastbay_flask_secret_key). Self-generated random value, no vendor dashboard. Part
+    of the eastbay-website-creds Secret.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/eastbay
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: grafana-admin-credentials
+  description: >-
+    Grafana's bootstrap admin username and password (variables grafana_admin_user,
+    grafana_admin_password). Caveat: Grafana only reads them when first initialising
+    its user DB, so changing the variable does NOT change the live account; a real
+    rotation still goes through Grafana itself. Created as the grafana-admin-creds
+    Secret by terraform/apps; also read by the grafana-sa-bootstrap Job.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/grafana
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: backstage-github-app-key
+  description: >-
+    Private key of the tnoff-backstage GitHub App, which Backstage uses for catalog
+    discovery and TechDocs source reads (variable backstage_app_private_key_b64).
+    terraform/apps decodes it into the backstage-github-app-credentials Secret.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/backstage
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: backstage-mcp-token
+  description: >-
+    Static externalAccess token for Backstage's backend auth, used by the local
+    backstage MCP client over the bastion port-forward (variable backstage_mcp_token).
+    Created as the backstage-mcp-token Secret by terraform/apps. Any random string
+    works.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/backstage
+    - component:default/mcp-local
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: flux-github-app-key
+  description: >-
+    Private key of the tnoff-flux GitHub App, Flux's read-only credential for
+    docker-apps (variable flux_app_private_key_b64). Consumed only by the operator-run
+    terraform/bootstrap stack, never by CI. Flux mints its own short-lived
+    installation tokens from it, so nothing expires silently.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/docker-apps
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: terraform-github-app-key
+  description: >-
+    Private key of the tnoff-terraform GitHub App terraform/infra manages GitHub with
+    (variable terraform_app_private_key_b64). The most privileged of the three Apps
+    (Administration:write: creates repos, manages rulesets), which is why it is
+    separate from the CI and Flux Apps.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/terraform
+    - component:default/terraform-admin
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: ci-github-app-key
+  description: >-
+    Private key of the tnoff-ci GitHub App (variable ci_app_private_key_b64). Carries
+    Contents and Workflows write across the fleet and is a ruleset bypass actor, so
+    assemble-changelog can push to protected default branches. Mints installation
+    tokens in CI.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/github-workflows
+    - component:default/terraform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: gitlab-api-key
+  description: >-
+    GitLab personal access token for the admin user (variable gitlab_api_key). Used by
+    terraform-admin's own GitLab provider. Operator-rotated; rotation-tracked.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/terraform-admin
+    - component:default/terraform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: gitlab-ci-api-key
+  description: >-
+    GitLab access token for the tnoff-ci service account (variable gitlab_ci_api_key).
+    Pushed to terraform's CI variables. Operator-rotated; rotation-tracked.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/terraform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: terraform-admin-oci-api-key
+  description: >-
+    OCI API signing key for the terraform-admin IAM user, generated by this stack
+    (tls_private_key.terraform_admin) and written to generated-output/. Everything
+    else terraform does in OCI is applied with it; also reaches CI as OCI_API_KEY_B64.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/terraform
+    - component:default/terraform-modules
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: mcp-readonly-oci-api-key
+  description: >-
+    OCI API signing key for the tenancy-wide read-only mcp-readonly-bot user backing
+    the local OCI MCP server. Generated by this stack and written to
+    generated-output/. Read-only by IAM policy.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/mcp-local
