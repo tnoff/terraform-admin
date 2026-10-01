@@ -1,100 +1,70 @@
 # Terraform Admin
 
-Bootstrap Terraform configuration for the OCI tenancy that hosts everything else
-(the `terraform` workload repo's stacks: `oci/`, `apps/`, `discord/`, `dns/`,
-`infra/`, plus the operator-run `bootstrap/`).
+Bootstrap Terraform for the OCI tenancy that hosts everything else: the
+[`terraform`](https://github.com/tnoff/terraform) workload repo's stacks
+(`oci/`, `apps/`, `discord/`, `dns/`, `infra/`, plus the operator-run
+`bootstrap/`). It runs locally, on local state, and rarely.
 
 ## What this creates
 
-- The OCI `terraform-admin` IAM user, group, policy, and API key (used by every
-  other stack to auth against OCI)
-- A KMS vault + key that encrypts state at rest
+- The OCI `terraform-admin` IAM user, group, policy and API key every other
+  stack authenticates with, and a tenancy-wide read-only user for the local OCI
+  MCP server
+- A KMS vault and key that encrypt state at rest
 - One Object Storage bucket per entry in `var.workspaces`
-  ([variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf) — that list is the source of truth for which
-  stacks have a bucket, `terraform-state-<workspace>`), used as the remote
-  state backend by the other stacks
-- Every CI/CD credential the `terraform` workload repo's CI uses — pushed to
-  its GitHub Actions secrets/variables (the live path, since it went
-  GitHub-canonical) and to its `tnoff-projects/terraform` GitLab project's CI
-  variables (kept as a rollback path; see [AGENTS.md](AGENTS.md))
-- The GitLab project resource itself (branch protection, mirror settings) —
-  not the code's canonical home anymore, just a mirror `github-workflows`'
-  `fleet-mirror.yml` keeps in sync
-- Generated artifacts in `generated-output/` (gitignored):
-  - `terraform_admin_private_key.pem` — the admin API key
-  - `.envrc` — `export VAR=value` lines for every env var the workload stacks
-    need, ready for `direnv` or `set -a; . .envrc; set +a`
+  ([variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf)
+  is the source of truth), `terraform-state-<workspace>`, used as the remote
+  state backend by the workload stacks
+- The `terraform` GitHub repo and every CI credential its workflows use, as
+  GitHub Actions secrets and variables (plus a frozen GitLab mirror project with
+  the same values as CI variables, kept only as a rollback path)
+- Rotation timestamps for each operator-rotated input
+  (`rotation-tracking.tf`)
+- Generated files in `generated-output/` (gitignored): the admin API key PEM,
+  the MCP profile, and an `.envrc` with every environment variable the workload
+  stacks need
+
+Each credential this stack holds is catalogued as a Backstage `Resource` in
+[`catalog-info.yaml`](https://github.com/tnoff/terraform-admin/blob/main/catalog-info.yaml).
 
 ## Bootstrap pattern
 
-This repo uses **local state** because it creates the remote state backend that
-everything else uses. Standard chicken-and-egg pattern for IaC.
+This repo uses **local state** because it creates the remote state backend
+everything else uses. The state file lives outside the repo tree (see
+[provider.tf](https://github.com/tnoff/terraform-admin/blob/main/provider.tf)
+for the path) so it cannot be committed or wiped by `git clean`. Back it up
+yourself; losing it means losing clean management of the IAM user, KMS key and
+state buckets. See [Security notes](#security-notes).
 
-State lives outside the repo tree (see [provider.tf](https://github.com/tnoff/terraform-admin/blob/main/provider.tf) for the
-configured path) so it can't be committed or wiped by `git clean`. Back it up
-yourself — losing it means losing the ability to manage the IAM user / KMS
-key / state buckets cleanly. See [Security notes](#security-notes) for what
-the file contains and why that matters for whatever backup target you pick.
+How the three repos fit together, and how values reach the workload repo, is in
+[infra-bootstrap.md](https://github.com/tnoff/terraform-admin/blob/main/docs/infra-bootstrap.md). In short: CI gets GitHub Actions
+secrets and variables pushed by this stack; local runs source the generated
+`.envrc`:
 
-## Workload-repo handoff
+```sh
+ln -s ~/Code/terraform-admin/generated-output/.envrc ~/Code/terraform/.envrc
+cd ~/Code/terraform && direnv allow
+```
 
-After `terraform apply` here, the workload repo (`~/Code/terraform`) gets its
-auth two ways:
-
-- **In CI**: GitHub Actions secrets/variables pushed by
-  `github_actions_secret.terraform` / `github_actions_variable.terraform` →
-  exposed as env vars via `terraform`'s `.github/actions/terragrunt`
-  composite action, whose "Materialise the OCI API key" step decodes
-  `OCI_API_KEY_B64` to a file and exports `OCI_PRIVATE_KEY_PATH`. The same
-  values also still reach `terraform`'s GitLab CI variables (the
-  `terraform_gitlab` module's `pipeline_variables`), but only as a rollback
-  path — `terraform` went GitHub-canonical on 2026-09-04 and its
-  `.gitlab-ci.yml` no longer exists.
-- **Locally**: source the generated `.envrc` from `generated-output/` into
-  your shell. Simplest setup is a symlink in the workload repo so `direnv`
-  picks it up:
-
-  ```sh
-  ln -s ~/Code/terraform-admin/generated-output/.envrc ~/Code/terraform/.envrc
-  cd ~/Code/terraform && direnv allow
-  ```
-
-  Or `set -a; . ~/Code/terraform-admin/generated-output/.envrc; set +a` in
-  each shell.
+(or `set -a; . ~/Code/terraform-admin/generated-output/.envrc; set +a` per
+shell).
 
 ## Prerequisites
 
-- Terraform >= 1.9
+- Terraform `~> 1.9` and Docker (for the pre-commit hooks)
 - OCI CLI configured at `~/.oci/config` with a profile that can create IAM
-  users, KMS vaults, and Object Storage buckets in the target tenancy
-- A GitLab personal access token with `api` scope (provided via
-  `TF_VAR_gitlab_api_key`)
-- Four GitHub Apps already created (`tnoff-terraform`, `tnoff-ci`,
-  `tnoff-flux`, `tnoff-backstage`) with their IDs/keys on hand — see
-  [variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf) for what each replaces and why they're
-  separate Apps rather than one
+  users, KMS vaults and Object Storage buckets in the tenancy
+- A GitLab personal access token with `api` scope (`gitlab_api_key`)
+- Four GitHub Apps already created (`tnoff-terraform`, `tnoff-ci`, `tnoff-flux`,
+  `tnoff-backstage`) with their IDs and keys on hand; see
+  [variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf)
+  for what each is for and why they are separate
 
 ## Usage
 
-Inputs are passed as `TF_VAR_*` environment variables (no checked-in tfvars
-file). See [variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf) for the full, current list — it is
-the source of truth; the grouping below is current as of this writing but
-will drift, same as the previous version of this list did:
-
-- `oci_tenancy_ocid`
-- `cloudflare_api_token`, `cloudflare_dns01_token`, `cloudflare_account_id`
-- `discord_bot_token`, `discord_management_token`
-- `terraform_app_id`, `terraform_app_installation_id`,
-  `terraform_app_private_key_b64`
-- `flux_app_id`, `flux_app_installation_id`, `flux_app_private_key_b64`
-- `backstage_app_id`, `backstage_app_client_id`,
-  `backstage_app_private_key_b64`
-- `ci_app_id`, `ci_app_client_id`, `ci_app_private_key_b64`
-- `gitlab_api_key`, `gitlab_ci_api_key`, `gitlab_ci_service_account_id`
-- `ssh_public_key`
-- `sealed_secrets_tls_crt_b64`, `sealed_secrets_tls_key_b64`
-
-Apply:
+Inputs are `TF_VAR_*` environment variables (no checked-in tfvars); see
+[DEVELOPMENT.md](DEVELOPMENT.md#inputs). `variables.tf` is the complete,
+current list of inputs.
 
 ```bash
 terraform init
@@ -103,31 +73,26 @@ terraform apply
 ```
 
 After apply, `generated-output/.envrc` and
-`generated-output/terraform_admin_private_key.pem` are written to disk. Both
-are sensitive — do not commit.
+`generated-output/terraform_admin_private_key.pem` are on disk. Both are
+sensitive; do not commit them.
+
+To rotate a credential, see [secret-rotation.md](https://github.com/tnoff/terraform-admin/blob/main/docs/secret-rotation.md).
 
 ## Security notes
 
-- The state file is gitignored and kept outside the repo tree (not committed,
-  not wiped by `git clean`). It holds the **unencrypted** admin private key and
-  all sensitive `TF_VAR_*` values pushed to GitHub Actions and GitLab CI —
-  treat any backup or sync target for it with the same care you'd give those
-  credentials directly.
-- ⚠️ If you back this state up anywhere (cloud sync, another disk, etc.), the
-  plaintext secrets above travel with it. Prefer an encrypted target (e.g.
-  git-crypt, restic, or an encrypted volume) over a general-purpose sync
-  unless you already trust that destination with these credentials directly.
-  Acceptable to relax this only for a personal, single-user tenancy; do not
-  replicate for shared/production state.
-- State buckets have versioning enabled. Old versions archive after 30 days
-  and are deleted after 90.
-- KMS encryption is applied to every state bucket via the `terraform-state`
-  vault. The Object Storage service is granted use of the key via
-  `admin-kms-object-storage-policy`.
+- The state file holds the **unencrypted** admin private key and every
+  sensitive `TF_VAR_*` value pushed to GitHub Actions. Treat any backup or sync
+  target for it as you would those credentials: prefer an encrypted target
+  (git-crypt, restic, an encrypted volume) over a general-purpose sync. Relaxing
+  this is acceptable only for a personal, single-user tenancy.
+- State buckets have versioning enabled; old versions archive after 30 days and
+  are deleted after 90.
+- Every state bucket is KMS-encrypted via the `terraform-state` vault; Object
+  Storage is granted use of the key by `admin-kms-object-storage-policy`.
 
 ## Auto-generated reference
 
-[terraform.md](terraform.md) is generated by [terraform-docs](https://terraform-docs.io/)
-and lists every input, output, resource, and module. Do not edit by hand — the
-pre-commit hook will overwrite it. See [DEVELOPMENT.md](DEVELOPMENT.md) for how
-to regenerate.
+[terraform.md](terraform.md) is generated by
+[terraform-docs](https://terraform-docs.io/) and lists every input, output,
+resource and module. Do not edit it by hand; see
+[DEVELOPMENT.md](DEVELOPMENT.md) for how to regenerate.

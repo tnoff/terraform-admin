@@ -3,9 +3,8 @@
 ## Setup
 
 1. Install Terraform `~> 1.9` and Docker (used by the pre-commit hooks).
-2. Configure `~/.oci/config` with a profile that has full tenancy access. By
-   default the `DEFAULT` profile is used; override with the
-   `config_file_profile` variable.
+2. Configure `~/.oci/config` with a profile that has full tenancy access. The
+   `DEFAULT` profile is used unless you override `config_file_profile`.
 3. Install pre-commit and the hooks:
 
    ```bash
@@ -14,17 +13,19 @@
 
 ## Inputs
 
-All `TF_VAR_*` inputs (see [variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf)) are passed via
-environment. The typical pattern is to keep them in a private file outside
-the repo and source it before running terraform:
+All inputs (see
+[variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf))
+are passed as `TF_VAR_*` environment variables (a gitignored `terraform.tfvars`
+also works). The usual pattern is a private file outside the repo that you
+source first:
 
 ```bash
 set -a; . ~/.secrets/terraform-admin.env; set +a
 terraform plan
 ```
 
-There is no `terraform.tfvars` checked in — every secret value lives only in
-your environment and in the resulting state file.
+Nothing is checked in; every secret lives only in your environment and in the
+state file.
 
 ## Terraform commands
 
@@ -32,59 +33,57 @@ your environment and in the resulting state file.
 terraform init
 terraform plan
 terraform apply
-terraform destroy   # tears down state buckets, IAM, KMS — only if you mean it
+terraform destroy   # tears down state buckets, IAM, KMS: only if you mean it
 ```
 
-State is local (see [provider.tf](https://github.com/tnoff/terraform-admin/blob/main/provider.tf) for the configured path), not
-the repo tree. However you choose to back that path up, note it means the
-plaintext secrets in state travel with it — see the security notes in
-[README.md](README.md#security-notes).
+State is local, at the path configured in
+[provider.tf](https://github.com/tnoff/terraform-admin/blob/main/provider.tf),
+outside the repo tree. Whatever you back it up to receives the plaintext
+secrets in it; see the [security notes](README.md#security-notes).
 
-## Pre-commit hooks
+## Pre-commit and CI
 
-Configured in [.pre-commit-config.yaml](https://github.com/tnoff/terraform-admin/blob/main/.pre-commit-config.yaml). Both hooks
-run inside Docker containers so they pin exact versions:
+Both hooks in
+[.pre-commit-config.yaml](https://github.com/tnoff/terraform-admin/blob/main/.pre-commit-config.yaml)
+run in Docker containers so versions are pinned:
 
-- `terraform-fmt` — `hashicorp/terraform:1.11 fmt -recursive`
-- `terraform-docs` — `quay.io/terraform-docs/terraform-docs:0.19.0` regenerates
-  [terraform.md](terraform.md) in-place
-
-Run all hooks manually:
+- `terraform-fmt`: `hashicorp/terraform fmt -recursive`
+- `terraform-docs`: regenerates [terraform.md](terraform.md) in place
 
 ```bash
 pre-commit run --all-files
-```
-
-Run just the docs regeneration:
-
-```bash
 pre-commit run terraform-docs --all-files
 ```
 
-## Regenerating terraform.md
+`terraform.md` is generated; never edit it by hand. `.terraform-docs.yml`
+disables `lockfile` because `.terraform.lock.hcl` is gitignored and would give
+inconsistent provider versions between local and CI.
 
-`terraform.md` is auto-generated. Never edit it by hand. The
-[`.terraform-docs.yml`](https://github.com/tnoff/terraform-admin/blob/main/.terraform-docs.yml) config disables `lockfile` because
-`.terraform.lock.hcl` is gitignored and would produce inconsistent provider
-versions between local and CI runs.
+GitHub Actions run on pull requests: the pre-commit hooks (so a stale
+`terraform.md` fails), a trufflehog secret scan, workflow-contract checks and
+checkov, with `CI result` as the aggregate. Because the repo is private on a
+free plan these checks are advisory (nothing can block a merge). A weekly
+workflow runs Renovate and branch cleanup; `techdocs-publish.yml` publishes
+`docs/` to Backstage TechDocs. This stack is never applied by CI.
 
-## Adding a new workspace bucket
+## Adding a workspace state bucket
 
-Append the workspace name to `var.workspaces` (default list in
-[variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf)) and re-apply. The `terraform_state_buckets`
-module's `for_each` will create a new `terraform-state-<name>` bucket and the
-KMS policy will be extended to cover it.
+Append the workspace name to `var.workspaces` in `variables.tf` and apply. The
+`terraform_state_buckets` module's `for_each` creates
+`terraform-state-<name>` and the KMS policy is extended to cover it. Do this
+before the new `terraform` stack's first `init`.
 
-## Regenerating the admin API key
+## Rotating credentials
 
-Taint the TLS key and apply:
+See [docs/secret-rotation.md](https://github.com/tnoff/terraform-admin/blob/main/docs/secret-rotation.md), including how to
+regenerate the admin API key (`terraform apply -replace=tls_private_key.terraform_admin`).
+
+## Previewing the docs
 
 ```bash
-terraform taint tls_private_key.terraform_admin
-terraform apply
+docker run --rm -v "$PWD:/d" -w /d python:3.12-slim sh -c \
+  "pip install -q mkdocs-techdocs-core && mkdocs build --strict -d /tmp/site"
 ```
 
-This rotates the OCI API key, rewrites the PEM file, re-encodes
-`OCI_API_KEY_B64`, and pushes the new value to `terraform`'s GitHub Actions
-secrets and GitLab CI variables. Any local shells using the old `.envrc`
-need to re-source it.
+`docs/README.md`, `AGENTS.md`, `DEVELOPMENT.md`, `CONTRIBUTING.md` and
+`terraform.md` are symlinks to the root files so TechDocs can render them.

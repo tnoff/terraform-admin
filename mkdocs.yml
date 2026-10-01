@@ -8,9 +8,7 @@ nav:
   - Contributing: CONTRIBUTING.md
   - Terraform reference: terraform.md
   - Infrastructure bootstrap: infra-bootstrap.md
-  - Runbooks:
-      - Secret rotation: secret-rotation.md
-      - OCI API key generation: oci-api-key-generation.md
+  - Secret rotation: secret-rotation.md
 
 plugins:
   - techdocs-core
