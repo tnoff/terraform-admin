@@ -14,7 +14,7 @@
 
 ## Inputs
 
-All `TF_VAR_*` inputs (see [variables.tf](variables.tf)) are passed via
+All `TF_VAR_*` inputs (see [variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf)) are passed via
 environment. The typical pattern is to keep them in a private file outside
 the repo and source it before running terraform:
 
@@ -35,14 +35,14 @@ terraform apply
 terraform destroy   # tears down state buckets, IAM, KMS — only if you mean it
 ```
 
-State is local (see [provider.tf](provider.tf) for the configured path), not
+State is local (see [provider.tf](https://github.com/tnoff/terraform-admin/blob/main/provider.tf) for the configured path), not
 the repo tree. However you choose to back that path up, note it means the
 plaintext secrets in state travel with it — see the security notes in
 [README.md](README.md#security-notes).
 
 ## Pre-commit hooks
 
-Configured in [.pre-commit-config.yaml](.pre-commit-config.yaml). Both hooks
+Configured in [.pre-commit-config.yaml](https://github.com/tnoff/terraform-admin/blob/main/.pre-commit-config.yaml). Both hooks
 run inside Docker containers so they pin exact versions:
 
 - `terraform-fmt` — `hashicorp/terraform:1.11 fmt -recursive`
@@ -64,14 +64,14 @@ pre-commit run terraform-docs --all-files
 ## Regenerating terraform.md
 
 `terraform.md` is auto-generated. Never edit it by hand. The
-[`.terraform-docs.yml`](.terraform-docs.yml) config disables `lockfile` because
+[`.terraform-docs.yml`](https://github.com/tnoff/terraform-admin/blob/main/.terraform-docs.yml) config disables `lockfile` because
 `.terraform.lock.hcl` is gitignored and would produce inconsistent provider
 versions between local and CI runs.
 
 ## Adding a new workspace bucket
 
 Append the workspace name to `var.workspaces` (default list in
-[variables.tf](variables.tf)) and re-apply. The `terraform_state_buckets`
+[variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf)) and re-apply. The `terraform_state_buckets`
 module's `for_each` will create a new `terraform-state-<name>` bucket and the
 KMS policy will be extended to cover it.
 
