@@ -862,6 +862,20 @@ resource "github_actions_variable" "terraform" {
   value         = each.value
 }
 
+# Issue-triage labels, same set infra/repos.tf applies to every other GitHub
+# repo (local.triage_labels there). Duplicated rather than shared because this
+# stack and infra are separate states. Triage is manual -- the untriaged queue
+# is a search for open issues without `triaged` -- so keep `triaged` out of
+# issue templates, whose `labels:` field applies even for outside reporters.
+locals {
+  triage_labels = {
+    "priority/high"   = "d73a4a"
+    "priority/medium" = "fbca04"
+    "priority/low"    = "c5def5"
+    "triaged"         = "5319e7"
+  }
+}
+
 # ==============================================================================
 # The `terraform` repo itself.
 #
@@ -919,6 +933,8 @@ module "terraform_repo" {
   # this set explicitly. Free on every plan tier -- checked before landing
   # this, not assumed.
   enable_vulnerability_alerts = true
+
+  repo_labels = local.triage_labels
 
   # The same three secrets infra writes to every flipped repo, from the same
   # admin inputs infra receives them through.
