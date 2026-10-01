@@ -1,0 +1,16 @@
+site_name: 'terraform-admin'
+site_description: 'Admin-tier Terraform: the state backend, IAM and credentials every other stack is applied with'
+
+nav:
+  - Home: README.md
+  - Development: DEVELOPMENT.md
+  - Agents/Conventions: AGENTS.md
+  - Contributing: CONTRIBUTING.md
+  - Terraform reference: terraform.md
+  - Infrastructure bootstrap: infra-bootstrap.md
+  - Runbooks:
+      - Secret rotation: secret-rotation.md
+      - OCI API key generation: oci-api-key-generation.md
+
+plugins:
+  - techdocs-core

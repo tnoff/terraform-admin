@@ -10,7 +10,7 @@ Bootstrap Terraform configuration for the OCI tenancy that hosts everything else
   other stack to auth against OCI)
 - A KMS vault + key that encrypts state at rest
 - One Object Storage bucket per entry in `var.workspaces`
-  ([variables.tf](variables.tf) — that list is the source of truth for which
+  ([variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf) — that list is the source of truth for which
   stacks have a bucket, `terraform-state-<workspace>`), used as the remote
   state backend by the other stacks
 - Every CI/CD credential the `terraform` workload repo's CI uses — pushed to
@@ -30,7 +30,7 @@ Bootstrap Terraform configuration for the OCI tenancy that hosts everything else
 This repo uses **local state** because it creates the remote state backend that
 everything else uses. Standard chicken-and-egg pattern for IaC.
 
-State lives outside the repo tree (see [provider.tf](provider.tf) for the
+State lives outside the repo tree (see [provider.tf](https://github.com/tnoff/terraform-admin/blob/main/provider.tf) for the
 configured path) so it can't be committed or wiped by `git clean`. Back it up
 yourself — losing it means losing the ability to manage the IAM user / KMS
 key / state buckets cleanly. See [Security notes](#security-notes) for what
@@ -71,13 +71,13 @@ auth two ways:
   `TF_VAR_gitlab_api_key`)
 - Four GitHub Apps already created (`tnoff-terraform`, `tnoff-ci`,
   `tnoff-flux`, `tnoff-backstage`) with their IDs/keys on hand — see
-  [variables.tf](variables.tf) for what each replaces and why they're
+  [variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf) for what each replaces and why they're
   separate Apps rather than one
 
 ## Usage
 
 Inputs are passed as `TF_VAR_*` environment variables (no checked-in tfvars
-file). See [variables.tf](variables.tf) for the full, current list — it is
+file). See [variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf) for the full, current list — it is
 the source of truth; the grouping below is current as of this writing but
 will drift, same as the previous version of this list did:
 

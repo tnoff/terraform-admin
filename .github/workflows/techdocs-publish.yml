@@ -1,0 +1,45 @@
+name: Publish TechDocs
+
+# Builds this repo's mkdocs.yml + docs/ with @techdocs/cli and publishes
+# straight to the S3-compatible TechDocs storage bucket. The backstage
+# backend runs with techdocs.builder: external because it has no Docker, so
+# something else has to build and publish -- see docker-apps +
+# tnoff/backstage#20. Same setup as terraform-modules, github-workflows,
+# hathor, enheduanna, public-transit, oci-bastion-keepalive,
+# database-backup, magic-mirror-docker, and oke-security-scanner.
+#
+# TECHDOCS_S3_* is a fleet-wide action secret (module.github_actions_secrets
+# in infra/repos.tf, #92) -- no additional terraform wiring needed for it.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'catalog-info.yaml'
+      - '.github/workflows/techdocs-publish.yml'
+
+concurrency:
+  group: techdocs-publish
+  cancel-in-progress: false
+
+# Without this, permissions default to whatever the repo/org falls back to
+# (potentially write-all) instead of being pinned explicitly. This workflow
+# only reads the repo and forwards S3 secrets to the reusable callee, so
+# contents: read covers everything it does.
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Generate and publish
+    uses: tnoff/github-workflows/.github/workflows/techdocs-publish.yml@f6569d2b6f242fb91759fe0ebfa990a99c09585b
+    with:
+      entity_ref: default/Component/terraform-admin
+    secrets:
+      techdocs_s3_access_key_id: ${{ secrets.TECHDOCS_S3_ACCESS_KEY_ID }}
+      techdocs_s3_secret_access_key: ${{ secrets.TECHDOCS_S3_SECRET_ACCESS_KEY }}
+      techdocs_s3_bucket_name: ${{ secrets.TECHDOCS_S3_BUCKET_NAME }}
+      techdocs_s3_endpoint: ${{ secrets.TECHDOCS_S3_ENDPOINT }}
+      techdocs_s3_region: ${{ secrets.TECHDOCS_S3_REGION }}
