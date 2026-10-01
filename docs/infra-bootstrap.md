@@ -1,269 +1,111 @@
-# Infrastructure bootstrap & deployment
+# Infrastructure bootstrap and handoff
 
-How `terraform-modules`, `terraform-admin`, and `terraform` work together to
-provision and operate the OCI tenancy.
+How `terraform-admin` bootstraps the OCI tenancy and hands credentials to the
+`terraform` workload repo. For the list of what this stack creates see the
+[README](README.md); for rotating what it holds see
+[secret-rotation.md](secret-rotation.md).
 
-## TL;DR
+## The three repos
 
-- **terraform-modules** is a pure library of reusable Terraform modules
-  (oci, kubernetes, cloudflare, discord, github, gitlab). It produces no
-  infrastructure on its own.
-- **terraform-admin** is a single-root bootstrap with **local state**. Run
-  rarely, run locally. It creates the OCI tenancy scaffolding that everything
-  else depends on: the IAM admin user, the KMS vault, the state buckets, and
-  the `terraform` GitLab project itself (including all its CI/CD variables).
-- **terraform** is the workload, organized as Terragrunt stacks (`oci/`,
-  `discord/`, `infra/`, `bootstrap/`, `apps/`, `dns/`). Remote state lives in
-  the OCI buckets created by terraform-admin. CI plans on MR, auto-applies on
-  `main` — except `bootstrap/`, which is operator-run (see the callout under
-  *Operational flow*).
-  (The `oci-alarms/` stack was decommissioned — OKE alarms re-authored in
-  Grafana, ONS topic removed — and its state bucket was dropped from
-  `var.workspaces` on 2026-09-20.)
+- **`terraform-modules`** is a library of reusable Terraform modules (oci,
+  kubernetes, cloudflare, discord, github, gitlab). It creates nothing on its
+  own. Both other repos consume it through `git::` sources pinned to a commit
+  SHA (`?ref=<sha>`), bumped by Renovate.
+- **`terraform-admin`** (this repo) is a single Terraform root on **local
+  state**, applied by hand and rarely. It creates what everything else needs
+  before it can run: the OCI admin user and key, the KMS vault, one state
+  bucket per workspace, and the credentials and settings the workload repo's CI
+  authenticates with.
+- **`terraform`** is the workload: Terragrunt stacks (`oci/`, `discord/`,
+  `infra/`, `bootstrap/`, `apps/`, `dns/`) with remote state in the buckets
+  created here. Its CI plans on pull requests and applies on merge to `main`,
+  except `bootstrap/`, which is operator-applied through a bastion tunnel.
 
-## Roles
+## What this stack provisions
 
-### terraform-modules — the library
-- **Consumption pattern:**
-  `source = "git::https://gitlab.com/tnoff-projects/terraform-modules.git//<provider>/<module>?ref=<commit-sha>"`
-- **Versioning:** SHA-pinned, not tag-pinned. One stale `v0.0.1` tag exists
-  but isn't used; Renovate manages SHA bumps.
-- **Load-bearing modules:**
-  - OKE networking is **three single-purpose modules** — `oci/oke-vcn`
-    (VCN + gateways + route tables), `oci/oke-security-lists` (all security
-    lists from per-role CIDR lists), and `oci/oke-subnet` (one subnet per
-    instantiation). There is **no `oke-networking` facade module** anymore;
-    `oci/oke-networking` is now just a composition-recipe README (its
-    `main.tf`/`outputs.tf` were removed). The live `terraform` `oci/` stack
-    composes the three directly (`vcn → security-lists → subnets`), and their
-    outputs feed `oci/oke-cluster`, `oci/oke-node-pool`, and `oci/bastion`.
-  - `oci/oke-node-pool` — embeds a templated cloud-init that runs
-    `oci-growfs`, tunes kubelet image-GC, and caps `oracle-cloud-agent-updater`
-    memory. Must include the default OKE init script or nodes won't join. See
-    runbooks under `terraform-modules/oci/docs/`.
-  - `oci/iam-user` — single-value auth token / API key / customer secret
-    key per user. `enable_api_key` (added `836c49d`) force-creates the API
-    key when `user_public_key` is sourced from a sibling resource
-    (plan-time unknown). A slot-based rotation variant exists on the
-    `feat/iam-user-credential-rotation-slots` branch but has not been
-    merged; main still requires resource recreation for credential
-    rotation.
-  - `oci/secret-vault`, `oci/object-storage-bucket`, `oci/kms-policies` — the
-    primitives `terraform-admin` composes for the state-backend setup.
-- **CI does no release/tag step** — just fmt, validate, terraform-docs check,
-  trufflehog, Discord notify, Renovate.
+All in the tenancy root compartment (`main.tf`):
 
-### terraform-admin — the bootstrap
-- **State strategy:** local backend by design (`backend "local"` in
-  `provider.tf`). Gitignored. Chicken-and-egg: this is the root that creates
-  the state buckets every other root uses.
-- **What it provisions** (all in the root compartment, single flat root in
-  `main.tf`):
-  - KMS vault + AES-256 key for state encryption.
-  - One Object Storage bucket per workspace, name = `terraform-state-<workspace>`,
-    KMS-encrypted, versioning on. Workspaces are
-    `[discord, infra, oci, bootstrap, apps, dns]` (the
-    `bootstrap` bucket backs the operator-run cluster-foundation stack).
-  - IAM user `terraform-admin`, group `terraform-administrators`,
-    `manage all-resources` policy at the tenancy.
-  - KMS-use policy for the `objectstorage-<region>` service.
-  - 4096-bit RSA API key for the admin user, private half written to
-    `generated-output/terraform_admin_private_key.pem`.
-  - The `tnoff-projects/terraform` GitLab project itself, ~18 CI/CD
-    variables on it, and a weekly pipeline schedule.
-- **Auth:** OCI config-file profile (`~/.oci/config`) — runs under the
-  operator's own identity.
-- **State recovery:** losing `terraform.tfstate` means losing clean
-  management of the admin user, KMS key, and state buckets. Backups matter.
+- A KMS vault and AES key that encrypt state at rest, with an IAM policy that
+  lets Object Storage use the key.
+- One versioned, KMS-encrypted bucket per entry in `var.workspaces`, named
+  `terraform-state-<workspace>`. The list is the source of truth for which
+  stacks have a state backend.
+- IAM user `terraform-admin`, group `terraform-administrators`, a tenancy-wide
+  manage policy, and a 4096-bit RSA API key for it (private half written to
+  `generated-output/terraform_admin_private_key.pem`).
+- A tenancy-wide read-only user and key (`mcp-readonly-bot`) for the local OCI
+  MCP server.
+- The `terraform` repo itself on GitHub (`module.terraform_repo`) and the
+  GitHub Actions secrets and variables its CI uses, plus the repo's frozen
+  GitLab mirror project and its CI variables (a rollback path only).
+- The generated files in `generated-output/` (gitignored): the PEMs, a
+  `.envrc`, and the MCP profile.
 
-### terraform — the workload
-- **Orchestrator:** Terragrunt. Each top-level directory is a stack
-  containing one Terraform root and a thin `terragrunt.hcl` that includes
-  `root.hcl` from the repo root.
-- **Backend:** `root.hcl` generates an OCI Object Storage backend per stack:
-  bucket `terraform-state-${local.stack}`, namespace `tnoff`, region
-  `us-ashburn-1`, auth via the admin user's API key.
-- **Stacks (what each one deploys):**
-  - `oci/` — IAM, compartments, OKE cluster, OCIR, buckets, KMS.
-  - `discord/` — Discord server, roles, channels, webhooks.
-  - `infra/` — GitHub + GitLab repo management, GitHub Actions secrets,
-    GitHub→Discord webhooks.
-  - `bootstrap/` — the operator-run cluster-foundation stack: namespaces,
-    `flux-system-https`, the Flux install (Flux Operator + FluxInstance), and the
-    sealed-secrets controller key Secret. It also owned the `terraform-apps` SA/RBAC
-    until 2026-09-04, when that identity was retired. **Not** applied in CI — see the
-    callout under *Operational flow*.
-  - `apps/` — Kubernetes secrets written into namespaces created by
-    Flux from `docker-apps`: OCIR pull secrets (`oci-docker-cfg`),
-    Object Storage creds for the discord/grafana database backup jobs
-    and monitoring, Grafana SA tokens (`mcp-grafana`), GitLab PATs
-    (`mcp-gitlab`), security scanner OCI creds, and GitLab Runner
-    registration tokens. See workload deployment (docker-apps TechDocs).
-  - `dns/` — Cloudflare DNS records pointing at the OKE ingress LB IPs.
-    Reads the dynamic NLB IP from the `ingress-nginx` service deployed by
-    `docker-apps`. See workload deployment (docker-apps TechDocs).
-- **Module consumption:** all external sources are git refs to
-  terraform-modules at full commit SHAs. Currently four different SHAs
-  are in flight across the repo (most `oci/*` on one,
-  discord/cloudflare/github/k8s on another, `gitlab/repo` on a third,
-  and `oci/iam-user` for the security-scanner bot on a fourth) —
-  expected churn from per-module Renovate updates.
+The admin stack has **no outputs and no remote state**. Nothing reads its
+state; the handoff is only through pushed secrets and written files.
 
-## Tags & labels
+## State backend
 
-Provenance metadata is stamped on everything the workload stacks create, so
-terraform-owned resources are distinguishable and cost-attributable. Each
-layer keeps one shared local instead of per-resource literals:
+This stack's backend is **local** (`backend "local"` in `provider.tf`, at a path
+outside the repo tree). That is deliberate: it creates the buckets every other
+backend uses. Losing the file means losing clean management of the admin user,
+KMS key and state buckets, and it holds every secret in plaintext, so back it
+up somewhere you would trust with those credentials (see the
+[README](README.md#security-notes)). It authenticates with your own
+`~/.oci/config` profile, not the admin key it creates.
 
-- **OCI (`oci/`)** — `local.common_freeform_tags = { ManagedBy = "terraform" }`
-  is merged onto every taggable resource
-  (`merge(local.common_freeform_tags, { app = ..., service = ... })`).
-  Billable resources additionally carry `defined_tags` from the `Billing`
-  cost-tracking namespace (`Billing.app`, `Billing.service`,
-  `is_cost_tracking = true`). Coverage is 100% of taggable types — including
-  the `oci_identity_policy` resources in the `kms-policies` /
-  `object-storage-lifecycle-policies` modules, which gained a `freeform_tags`
-  variable specifically so they could be tagged.
-- **Kubernetes (`apps/`)** — `local.common_labels =
-  { "app.kubernetes.io/managed-by" = "terraform" }` is set on the
-  `metadata.labels` of every rendered Secret and ConfigMap. Pure inventory
-  metadata, not a selector; rotation timestamps stay *annotations*
-  (see custom annotation keys (docker-apps TechDocs)).
-- **GitLab (`infra/`)** — MR labels are IaC, not auto-created:
-  - `gitlab_group_label.dependencies` on the `tnoff-projects` group — every
-    project inherits it, so Renovate MRs (which request `dependencies` via the
-    shared `github-workflows//renovate/default` preset) land with a
-    consistently-defined label instead of a per-project auto-created one.
-  - `gitlab_project_label.docker_apps_image_bump` — the docker-apps-only
-    tag-bump label (project-scoped, not a group standard).
+The workload stacks use the OCI backend: `root.hcl` in `terraform` generates
+`terraform-state-<stack>` buckets from each directory name in namespace `tnoff`,
+region `us-ashburn-1`. State buckets are referenced by name only, so a new
+`terraform` stack needs its name added to `var.workspaces` here and an apply
+before its backend can initialise.
 
-**Gotcha — adopting a pre-existing label:** GitLab auto-creates a project
-label the first time automation applies it, so a plain `gitlab_project_label`
-create 409s on an already-existing one. Adopt it with an `import {}` block
-whose id is `{project_id}:{numeric_label_id}` (the numeric label id, not the
-name — read it from `glab api "projects/<enc>/labels"`). The MR's
-`plan:<stack>` job evaluates the import against the live label, so a green
-plan proves the id format; expect `Plan: 1 to import, 1 to add, N to change`
-(the change is usually just a `description` the auto-created label lacked).
+## Handoff to `terraform`
 
-## Handoff between terraform-admin and terraform
+Two channels carry the same values:
 
-There is **no `terraform_remote_state`** linkage between the two repos. The
-handoff is two-channel:
+**CI.** `main.tf` builds one map, `local.terraform_ci_vars` (OCI auth, every
+`TF_VAR_*` input the stacks need, and the `*_rotated_at` timestamps), and writes
+it to the `terraform` repo as `github_actions_secret.terraform` and
+`github_actions_variable.terraform`. Anything in `local.terraform_github_public`
+(public IDs, the SSH public key, the rotation timestamps) becomes an Actions
+*variable* so GitHub does not redact it from logs; everything else is a
+*secret*. The same map still feeds GitLab pipeline variables on the mirror
+project as a rollback path.
 
-1. **CI channel.** terraform-admin pushes OCI auth material and other
-   secrets directly into `terraform`'s GitHub Actions secrets/variables
-   (`github_actions_secret.terraform`, the live path since `terraform` went
-   GitHub-canonical on 2026-09-04) and, as a rollback path only, into the
-   `terraform` GitLab project as CI/CD variables via its `gitlab` provider. The workload CI's `before_script` base64-decodes
-   `OCI_API_KEY_B64` to a PEM file and exports `OCI_PRIVATE_KEY_PATH`.
-   → **Never set CI variables manually in the GitLab UI for `terraform`** —
-   they'll be overwritten on the next `terraform apply` in terraform-admin.
+In `terraform`'s workflows the `.github/actions/terragrunt` composite action
+exports `TF_VAR_*` and `OCI_*` secrets and variables as environment variables.
+It lowercases the `TF_VAR_` suffix (GitHub upper-cases secret names and
+terraform's lookup is case-sensitive), base64-decodes `OCI_API_KEY_B64` to a
+file, and exports `OCI_PRIVATE_KEY_PATH`. The workflows pass the whole
+`secrets`/`vars` context, so a new `TF_VAR_` added here needs no workflow edit.
 
-2. **Local channel.** terraform-admin writes `generated-output/.envrc`
-   (export lines for `OCI_*`, `TF_VAR_*`, etc.) and
-   `generated-output/terraform_admin_private_key.pem`. The convention is to
-   symlink that `.envrc` into `~/Code/terraform/.envrc` so direnv picks it up
-   when running Terragrunt locally.
+**Local.** The apply writes `generated-output/.envrc` with export lines for the
+same values, plus `OCI_PRIVATE_KEY_PATH` pointing at the PEM on disk. Symlink it
+into the workload repo so direnv loads it:
 
-State buckets are referenced by name only — `root.hcl` builds the bucket
-name from the stack's directory name. If you add a new stack to `terraform`
-you must also add it to `var.workspaces` in terraform-admin and re-apply,
-or the backend will fail to find its bucket.
-
-## Operational flow
-
-```
-terraform-modules (library, no state)
-        │
-        ├──── consumed by ────▶  terraform-admin (local state, run rarely)
-        │                              │
-        │                              │ creates: buckets, IAM user, KMS,
-        │                              │          GitLab CI variables
-        │                              ▼
-        └──── consumed by ────▶  terraform (remote state in OCI buckets)
-                                       │
-                                       │ apply DAG (serial in CI):
-                                       ▼
-                  oci  →  discord  →  infra  →  apps  →  dns
+```bash
+ln -s ~/Code/terraform-admin/generated-output/.envrc ~/Code/terraform/.envrc
+cd ~/Code/terraform && direnv allow
 ```
 
-~~CI runner split: `oci`, `discord`, and `infra` run on the default `self-hosted`
-runner with API-key auth. `dns` and `apps` need in-cluster Kubernetes API access, so they
-run on a separate ref-protected `oke-elevated` runner as the `terraform-apps`
-ServiceAccount inside OKE.~~
+Never edit the CI secrets or variables for `tnoff/terraform` by hand; the next
+apply here overwrites them. The exceptions are values this stack does not manage,
+chiefly `TECHDOCS_S3_*` (see the terraform repo's AGENTS.md) and this repo's own
+`CI_APP_*` secrets.
 
-**Superseded 2026-09-04. There is no runner split, and no self-hosted runner.** All five
-stacks run on GitHub-hosted runners (`.github/workflows/{ci,apply}.yml`). `oci`,
-`discord` and `infra` need only API-key auth, as before. `dns` and `apps` open an **OCI
-Bastion port-forwarding session** to the cluster's private API endpoint and write a
-CA-pinned kubeconfig at `~/.kube/config` with context `oci-kms` — which is exactly where
-their kubernetes provider already looked when no in-cluster token is present, so neither
-stack needed a terraform change. The `terraform-apps` ServiceAccount is deleted; CI
-authenticates as the CI OCI user, which OKE's webhook authorizer maps to cluster-admin.
+## Bring-up
 
-> **Shipped 2026-07-13** (SA/RBAC removed 2026-09-04). The `bootstrap` stack owns
-> namespaces + ~~the `terraform-apps` SA/RBAC +~~ Flux install + the sealed-secrets controller key
-> Secret (seeded from the single consolidated key, held as
-> `sealed_secrets_tls_{crt,key}_b64` tfvars sourced via the operator's `.envrc`
-> only — see [`projects/sealed-secrets-key-bootstrap.md`](https://github.com/tnoff/docs/blob/main/projects/sealed-secrets-key-bootstrap.md)), so the cluster
-> foundation is reproducible from terraform instead of a manual `flux
-> bootstrap`. Because the OKE API is private and the only runners are
-> in-cluster (Flux-deployed), `bootstrap` **cannot run in CI** — it is
-> **operator-run locally via the bastion tunnel + `oci-kms` kubeconfig**
-> (the same path the first `apps`/`dns` apply uses). Cold-start becomes an
-> operator-run local sequence `oci → infra → bootstrap`, then Flux brings up
-> the in-cluster runners and `apps`/`dns` take over in CI. The `oci-kms`
-> admin identity is independent of the scoped SA, which is why `bootstrap`
-> can create the very SA `apps` later runs as. See
-> repo ownership boundary (docker-apps TechDocs),
-> [`projects/cluster-bootstrap-stack.md`](https://github.com/tnoff/docs/blob/main/projects/cluster-bootstrap-stack.md), and cluster access (oci-bastion-keepalive TechDocs) (bastion).
-
-### Initial bring-up
-
-1. Set up `~/.oci/config` with the bootstrap operator's profile.
-2. In `terraform-admin/`: `terraform init && terraform apply`. Inspect
+1. Configure `~/.oci/config` with a profile that can create IAM users, vaults
+   and buckets, and export the inputs (see [DEVELOPMENT.md](DEVELOPMENT.md)).
+2. In this repo: `terraform init && terraform apply`. Inspect
    `generated-output/`.
-3. Symlink `~/Code/terraform-admin/generated-output/.envrc` →
-   `~/Code/terraform/.envrc`.
-4. In `terraform/<stack>/`: `terragrunt init && terragrunt apply`, in DAG
-   order.
+3. Symlink the `.envrc` into `terraform` as above.
+4. In `terraform`, apply the stacks in order (`terragrunt run --all apply`).
+   `apps/`, `dns/` and `bootstrap/` need a live bastion tunnel and the
+   `oci-kms` kubeconfig context.
 
-### Day-to-day
-
-- **Workload change:** MR to `terraform`. CI plans on MR, auto-applies on
-  merge to `main`.
-- **Module change:** MR to `terraform-modules`. Renovate (or a manual MR)
-  then bumps the `?ref=<sha>` pins in `terraform`.
-- **Admin-tier change** (new workspace, new CI variable, rotated secret):
-  edit `terraform-admin/`, apply locally.
-
-## Gotchas worth knowing
-
-- **`terraform-modules/README.md` provider table is stale** — claims OCI
-  `~> 6.20`; actual modules pin `~> 8.0`. (The module index does now list
-  `gitlab/repo`.)
-- **Four different terraform-modules SHAs** currently coexist in
-  `terraform` (one even within `oci/` itself, where the security-scanner
-  bot user lags the rest). This is normal under per-module Renovate but
-  worth knowing before chasing "why is this ref different from that ref."
-- **`terraform-admin` has no outputs** — all handoff is via written files
-  and pushed CI variables, not `terraform_remote_state`.
-- **`oci/oke-node-pool` cloud-init is load-bearing** — see the runbooks at
-  `terraform-modules/oci/docs/` (disk pressure, OSMS memory). The IAM
-  rotation runbook only exists on the unmerged
-  `feat/iam-user-credential-rotation-slots` branch.
-
----
-
-## Verified against
-
-| Project | SHA | Date |
-|---|---|---|
-| `terraform` | `eaa9770` | 2026-07-14 |
-| `terraform-admin` | `63ad554` | 2026-07-14 |
-| `terraform-modules` | `f77e71e` | 2026-07-14 |
-
-*Related: workload deployment (docker-apps TechDocs) (Flux GitOps on top of the cluster this
-layer provisions), image promotion (docker-apps TechDocs) (producer → consumer image bumps
-that use the CI trigger token created here).*
+Day to day, workload changes are pull requests to `terraform`, module changes
+are pull requests to `terraform-modules` followed by a ref bump, and admin-tier
+changes (a new workspace bucket, a new CI secret, a rotated credential) are
+edits here applied locally.

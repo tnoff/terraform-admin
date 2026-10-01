@@ -16,6 +16,11 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'README.md'
+      - 'AGENTS.md'
+      - 'DEVELOPMENT.md'
+      - 'CONTRIBUTING.md'
+      - 'terraform.md'
       - 'mkdocs.yml'
       - 'catalog-info.yaml'
       - '.github/workflows/techdocs-publish.yml'
