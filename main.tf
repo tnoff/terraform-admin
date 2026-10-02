@@ -427,6 +427,85 @@ resource "oci_identity_policy" "dns_ci" {
 }
 
 # ==============================================================================
+# IAM Resources - state-only CI users (infra/ and discord/)
+#
+# Neither stack uses the OCI provider; they authenticated as terraform-admin only
+# to reach their state buckets (infra/ also reads the oci and discord states).
+# Each gets a user with `manage objects` on its own state bucket, `read objects`
+# on the stacks it reads, and nothing else (tnoff/terraform#116). Keyed by stack
+# in var.state_ci_users; the credentials reach CI as INFRA_CI_OCI_* and
+# DISCORD_CI_OCI_*.
+# ==============================================================================
+
+resource "tls_private_key" "state_ci" {
+  for_each  = var.state_ci_users
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "oci_identity_user" "state_ci" {
+  for_each       = var.state_ci_users
+  compartment_id = var.oci_tenancy_ocid
+  description    = "Scoped user for terraform's ${each.key}/ CI job: its state bucket only"
+  name           = each.value.user_name
+
+  freeform_tags = {
+    "Purpose"   = "terraform-${each.key}-ci"
+    "ManagedBy" = "terraform"
+    "Workspace" = "admin"
+  }
+}
+
+resource "oci_identity_api_key" "state_ci" {
+  for_each  = var.state_ci_users
+  user_id   = oci_identity_user.state_ci[each.key].id
+  key_value = tls_private_key.state_ci[each.key].public_key_pem
+}
+
+resource "oci_identity_group" "state_ci" {
+  for_each       = var.state_ci_users
+  compartment_id = var.oci_tenancy_ocid
+  description    = "Scoped group for terraform's ${each.key}/ CI job"
+  name           = each.value.group_name
+
+  freeform_tags = {
+    "Purpose"   = "terraform-${each.key}-ci"
+    "ManagedBy" = "terraform"
+    "Workspace" = "admin"
+  }
+}
+
+resource "oci_identity_user_group_membership" "state_ci" {
+  for_each = var.state_ci_users
+  group_id = oci_identity_group.state_ci[each.key].id
+  user_id  = oci_identity_user.state_ci[each.key].id
+}
+
+resource "oci_identity_policy" "state_ci" {
+  for_each       = var.state_ci_users
+  compartment_id = var.oci_tenancy_ocid
+  description    = "Scoped policy for terraform's ${each.key}/ CI job: state buckets only"
+  name           = "terraform-${each.key}-ci-policy"
+
+  statements = concat(
+    [
+      "Allow group ${oci_identity_group.state_ci[each.key].name} to manage objects in tenancy where any {${join(", ", [for w in each.value.state_write_workspaces : "target.bucket.name = '${var.state_bucket_prefix}-${w}'"])}}",
+    ],
+    # An empty `any {}` is invalid, so a stack that reads no other state gets no
+    # read statement at all.
+    length(each.value.state_read_workspaces) == 0 ? [] : [
+      "Allow group ${oci_identity_group.state_ci[each.key].name} to read objects in tenancy where any {${join(", ", [for w in each.value.state_read_workspaces : "target.bucket.name = '${var.state_bucket_prefix}-${w}'"])}}",
+    ],
+  )
+
+  freeform_tags = {
+    "Purpose"   = "terraform-${each.key}-ci"
+    "ManagedBy" = "terraform"
+    "Workspace" = "admin"
+  }
+}
+
+# ==============================================================================
 # Values pushed to `terraform`'s GitHub Actions secrets/variables (the live
 # path — see terraform_github_secrets below) and its GitLab CI variables
 # (kept as a rollback path only, since .gitlab-ci.yml no longer exists in the
@@ -693,6 +772,15 @@ locals {
     DNS_CI_OCI_USER_OCID   = oci_identity_user.dns_ci.id
     DNS_CI_OCI_FINGERPRINT = oci_identity_api_key.dns_ci.fingerprint
     DNS_CI_OCI_API_KEY_B64 = base64encode(tls_private_key.dns_ci.private_key_pem)
+
+    # The infra/ and discord/ jobs' own identities (tnoff/terraform#116).
+    INFRA_CI_OCI_USER_OCID   = oci_identity_user.state_ci["infra"].id
+    INFRA_CI_OCI_FINGERPRINT = oci_identity_api_key.state_ci["infra"].fingerprint
+    INFRA_CI_OCI_API_KEY_B64 = base64encode(tls_private_key.state_ci["infra"].private_key_pem)
+
+    DISCORD_CI_OCI_USER_OCID   = oci_identity_user.state_ci["discord"].id
+    DISCORD_CI_OCI_FINGERPRINT = oci_identity_api_key.state_ci["discord"].fingerprint
+    DISCORD_CI_OCI_API_KEY_B64 = base64encode(tls_private_key.state_ci["discord"].private_key_pem)
 
     TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
     TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token
