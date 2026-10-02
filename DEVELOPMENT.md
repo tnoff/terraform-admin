@@ -16,16 +16,20 @@
 All inputs (see
 [variables.tf](https://github.com/tnoff/terraform-admin/blob/main/variables.tf))
 are passed as `TF_VAR_*` environment variables (a gitignored `terraform.tfvars`
-also works). The usual pattern is a private file outside the repo that you
-source first:
+also works, but leaves plaintext on disk). The usual pattern is a
+gpg-encrypted file outside the repo, decrypted straight into the shell so the
+plaintext never touches disk:
 
 ```bash
-set -a; . ~/.secrets/terraform-admin.env; set +a
+source <(gpg -d ~/.local/state/terraform-admin/.terraform-secrets.sh.gpg)
 terraform plan
 ```
 
-Nothing is checked in; every secret lives only in your environment and in the
-state file.
+The decrypted file consists of `export TF_VAR_...` lines, so no `set -a` is
+needed. To create or edit it, decrypt to a tmpfs path such as `/dev/shm`, edit,
+re-encrypt with `gpg --symmetric --cipher-algo AES256 -o ….gpg`, and `shred -u`
+the temporary file. Nothing is checked in; every secret lives only in your
+environment, the state file and that encrypted file.
 
 ## Terraform commands
 
@@ -38,8 +42,16 @@ terraform destroy   # tears down state buckets, IAM, KMS: only if you mean it
 
 State is local, at the path configured in
 [provider.tf](https://github.com/tnoff/terraform-admin/blob/main/provider.tf),
-outside the repo tree. Whatever you back it up to receives the plaintext
-secrets in it; see the [security notes](README.md#security-notes).
+outside the repo tree. It holds plaintext secrets, so back it up only to an
+encrypted target. After every apply (which changes the state and rewrites
+`generated-output/`), snapshot it with restic:
+
+```bash
+export RESTIC_REPOSITORY=<your restic repo> RESTIC_PASSWORD_FILE=~/.config/restic/pass
+restic backup ~/.local/state/terraform-admin
+```
+
+See the [security notes](README.md#security-notes).
 
 ## Pre-commit and CI
 
