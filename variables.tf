@@ -118,15 +118,45 @@ variable "cluster_ci_group_name" {
 }
 
 variable "cluster_ci_state_write_workspaces" {
-  description = "State buckets (workspaces) the cluster CI user may read AND write. Every other entry in var.workspaces is read-only to it, because apps/ and dns/ read those stacks' outputs through terraform_remote_state."
+  description = "State buckets (workspaces) the apps/ CI user may read AND write. Just its own."
   type        = list(string)
-  default     = ["apps", "dns"]
+  default     = ["apps"]
+}
+
+variable "cluster_ci_state_read_workspaces" {
+  description = "State buckets the apps/ CI user may only read, because apps/ renders values from those stacks' outputs through terraform_remote_state. Object storage cannot scope a read to a state file's outputs, so every entry exposes that whole state file; keep it to what apps/ really reads."
+  type        = list(string)
+  default     = ["discord", "infra", "oci", "bootstrap"]
 }
 
 variable "cluster_ci_compartment_name" {
   description = "Name of the compartment holding the OKE cluster and its bastion"
   type        = string
   default     = "apps"
+}
+
+# ==============================================================================
+# DNS CI user -- the identity terraform's apply:dns / plan:dns jobs run as. Split
+# from the apps/ user because dns/ reads no other stack's state, so it needs
+# write on its own bucket and nothing else. See tnoff/terraform#116.
+# ==============================================================================
+
+variable "dns_ci_user_name" {
+  description = "Name of the scoped OCI user the dns/ CI job runs as"
+  type        = string
+  default     = "terraform-dns-ci"
+}
+
+variable "dns_ci_group_name" {
+  description = "Name of the group holding the dns CI user's policy"
+  type        = string
+  default     = "terraform-dns-ci"
+}
+
+variable "dns_ci_state_write_workspaces" {
+  description = "State buckets the dns/ CI user may read AND write. dns/ reads no other stack's state."
+  type        = list(string)
+  default     = ["dns"]
 }
 
 # ==============================================================================

@@ -149,6 +149,7 @@ writes the private half to `generated-output/`.
 |---|---|---|
 | `terraform-admin` user | `tls_private_key.terraform_admin` | `generated-output/terraform_admin_private_key.pem`; `OCI_API_KEY_B64` and `OCI_FINGERPRINT` in CI and `.envrc` |
 | `terraform-cluster-ci` user | `tls_private_key.cluster_ci` | `CLUSTER_CI_OCI_API_KEY_B64` and `CLUSTER_CI_OCI_FINGERPRINT` in CI only. The user OCID (`CLUSTER_CI_OCI_USER_OCID`, and `TF_VAR_cluster_ci_user_ocid` in `.envrc`) does not change on rotation |
+| `terraform-dns-ci` user | `tls_private_key.dns_ci` | `DNS_CI_OCI_API_KEY_B64` and `DNS_CI_OCI_FINGERPRINT` in CI only. Same shape as `terraform-cluster-ci` |
 | `mcp-readonly-bot` user | `tls_private_key.mcp_readonly` | `generated-output/mcp_readonly_api_key.pem` and a ready-made `mcp_readonly_oci_config` profile |
 
 Rotate with a targeted replace:
@@ -157,6 +158,7 @@ Rotate with a targeted replace:
 terraform apply -replace=tls_private_key.terraform_admin
 terraform apply -replace=tls_private_key.mcp_readonly
 terraform apply -replace=tls_private_key.cluster_ci
+terraform apply -replace=tls_private_key.dns_ci
 ```
 
 This is destroy-then-recreate, so there is a short window where the old key is
