@@ -85,6 +85,17 @@ To rotate a credential, see [secret-rotation.md](https://github.com/tnoff/terraf
   target for it as you would those credentials: prefer an encrypted target
   (git-crypt, restic, an encrypted volume) over a general-purpose sync. Relaxing
   this is acceptable only for a personal, single-user tenancy.
+- Local layout: the state lives in a real `0700` directory,
+  `~/.local/state/terraform-admin/`, never in a synced folder. The `TF_VAR_*`
+  inputs are kept there only as a `gpg --symmetric` file
+  (`.terraform-secrets.sh.gpg`) and loaded with
+  `source <(gpg -d …)`, so the plaintext never touches disk. The off-box copy is a
+  [restic](https://restic.net) repository (client-side encryption), so a sync
+  provider only ever holds ciphertext. The restic password and the gpg passphrase
+  live in a password manager, not in the sync folder.
+- `generated-output/` (the `.envrc` and PEMs this stack writes) is gitignored but
+  is still plaintext on the local disk; full-disk encryption is the control for
+  it.
 - State buckets have versioning enabled; old versions archive after 30 days and
   are deleted after 90.
 - Every state bucket is KMS-encrypted via the `terraform-state` vault; Object

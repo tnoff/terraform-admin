@@ -50,7 +50,7 @@ This stack's backend is **local** (`backend "local"` in `provider.tf`, at a path
 outside the repo tree). That is deliberate: it creates the buckets every other
 backend uses. Losing the file means losing clean management of the admin user,
 KMS key and state buckets, and it holds every secret in plaintext, so back it
-up somewhere you would trust with those credentials (see the
+up only to an encrypted target such as a restic repository (see the
 [README](README.md#security-notes)). It authenticates with your own
 `~/.oci/config` profile, not the admin key it creates.
 
