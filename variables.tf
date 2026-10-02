@@ -126,7 +126,12 @@ variable "cluster_ci_state_write_workspaces" {
 variable "cluster_ci_state_read_workspaces" {
   description = "State buckets the apps/ CI user may only read, because apps/ renders values from those stacks' outputs through terraform_remote_state. Object storage cannot scope a read to a state file's outputs, so every entry exposes that whole state file; keep it to what apps/ really reads."
   type        = list(string)
-  default     = ["discord", "infra", "oci", "bootstrap"]
+  # Only the stacks apps/ declares a terraform_remote_state for. infra and
+  # bootstrap came off in tnoff/terraform#129: their states hold deploy tokens,
+  # Actions secret values and the Flux GitHub App key, and apps/ read one
+  # timestamp and one namespace list from them. Do not add a stack back here
+  # without a reason that survives that.
+  default = ["discord", "oci"]
 }
 
 variable "cluster_ci_compartment_name" {
