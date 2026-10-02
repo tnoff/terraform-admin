@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Local wrapper for running terraform in this stack.
+#
+# - Loads the TF_VAR_* inputs from a gpg-encrypted file straight into the
+#   environment, so the plaintext never touches disk.
+# - After any command that can change state, snapshots the state directory with
+#   restic (client-side encrypted), even if terraform failed part-way.
+#
+# Usage: bin/tf plan | bin/tf apply | bin/tf state list ...
+#
+# Environment (all optional):
+#   TF_SECRETS_GPG   encrypted inputs file
+#                    (default: ~/.local/state/terraform-admin/.terraform-secrets.sh.gpg)
+#   TF_NO_SECRETS=1  skip loading the inputs (for state/output commands)
+#   TF_NO_BACKUP=1   skip the restic snapshot
+#   RESTIC_REPOSITORY / RESTIC_PASSWORD_FILE
+#                    restic settings. If unset, the repository path is read from
+#                    ~/.config/restic/repository and the password from
+#                    ~/.config/restic/pass.
+set -euo pipefail
+
+STATE_DIR="${HOME}/.local/state/terraform-admin"
+SECRETS_GPG="${TF_SECRETS_GPG:-${STATE_DIR}/.terraform-secrets.sh.gpg}"
+RESTIC_CONF="${XDG_CONFIG_HOME:-${HOME}/.config}/restic"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+die() { echo "tf: $*" >&2; exit 1; }
+
+# Commands that can change state (or the files written next to it).
+mutating() {
+  case "${1:-}" in
+    apply|destroy|import|refresh|taint|untaint) return 0 ;;
+    state) case "${2:-}" in mv|rm|push|replace-provider) return 0 ;; esac ;;
+    workspace) case "${2:-}" in new|delete) return 0 ;; esac ;;
+  esac
+  return 1
+}
+
+backup() {
+  command -v restic >/dev/null || die "restic not installed; state NOT backed up"
+  export RESTIC_PASSWORD_FILE="${RESTIC_PASSWORD_FILE:-${RESTIC_CONF}/pass}"
+  if [[ -z "${RESTIC_REPOSITORY:-}" ]]; then
+    [[ -r "${RESTIC_CONF}/repository" ]] || die "no RESTIC_REPOSITORY and no ${RESTIC_CONF}/repository; state NOT backed up"
+    RESTIC_REPOSITORY="$(<"${RESTIC_CONF}/repository")"
+    export RESTIC_REPOSITORY
+  fi
+  [[ -r "${RESTIC_PASSWORD_FILE}" ]] || die "restic password file ${RESTIC_PASSWORD_FILE} missing; state NOT backed up"
+  echo "tf: backing up ${STATE_DIR}" >&2
+  restic backup --tag terraform-admin --quiet "${STATE_DIR}"
+  restic forget --tag terraform-admin --keep-last 20 --prune --quiet
+}
+
+[[ -d "${STATE_DIR}" ]] || die "state directory ${STATE_DIR} not found"
+[[ "$(terraform -chdir="${REPO_ROOT}" state list 2>/dev/null | wc -l)" -gt 0 ]] ||
+  die "terraform sees an empty state; refusing to run (wrong state path?)"
+
+if [[ -z "${TF_NO_SECRETS:-}" ]]; then
+  [[ -r "${SECRETS_GPG}" ]] || die "encrypted inputs ${SECRETS_GPG} not found"
+  # shellcheck disable=SC1090
+  source <(gpg --quiet --decrypt "${SECRETS_GPG}") || die "could not decrypt ${SECRETS_GPG}"
+fi
+
+status=0
+(cd "${REPO_ROOT}" && terraform "$@") || status=$?
+
+if [[ -z "${TF_NO_BACKUP:-}" ]] && mutating "$@"; then
+  backup || { echo "tf: BACKUP FAILED (terraform exit ${status})" >&2; exit 1; }
+fi
+exit "${status}"
