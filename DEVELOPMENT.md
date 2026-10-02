@@ -51,6 +51,19 @@ export RESTIC_REPOSITORY=<your restic repo> RESTIC_PASSWORD_FILE=~/.config/resti
 restic backup ~/.local/state/terraform-admin
 ```
 
+`bin/tf` does both steps: it decrypts the inputs into the environment, runs
+`terraform` with your arguments, and snapshots the state directory with restic
+after any command that can change state (`apply`, `destroy`, `import`,
+`state mv|rm|push`, ...), even if terraform fails part-way. It reads the restic
+repository from `RESTIC_REPOSITORY` or `~/.config/restic/repository` and the
+password from `~/.config/restic/pass`. Set `TF_NO_SECRETS=1` for state/output
+commands that need no inputs, or `TF_NO_BACKUP=1` to skip the snapshot.
+
+```bash
+bin/tf plan
+bin/tf apply
+```
+
 See the [security notes](README.md#security-notes).
 
 ## Pre-commit and CI
