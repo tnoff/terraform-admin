@@ -101,6 +101,35 @@ variable "mcp_readonly_private_key_path" {
 }
 
 # ==============================================================================
+# Cluster CI user -- the identity terraform's apply:apps / apply:dns jobs (and
+# their plan jobs) authenticate as. See tnoff/terraform#116.
+# ==============================================================================
+
+variable "cluster_ci_user_name" {
+  description = "Name of the scoped OCI user the apps/ and dns/ CI jobs run as"
+  type        = string
+  default     = "terraform-cluster-ci"
+}
+
+variable "cluster_ci_group_name" {
+  description = "Name of the group holding the cluster CI user's policy"
+  type        = string
+  default     = "terraform-cluster-ci"
+}
+
+variable "cluster_ci_state_write_workspaces" {
+  description = "State buckets (workspaces) the cluster CI user may read AND write. Every other entry in var.workspaces is read-only to it, because apps/ and dns/ read those stacks' outputs through terraform_remote_state."
+  type        = list(string)
+  default     = ["apps", "dns"]
+}
+
+variable "cluster_ci_compartment_name" {
+  description = "Name of the compartment holding the OKE cluster and its bastion"
+  type        = string
+  default     = "apps"
+}
+
+# ==============================================================================
 # External Secrets — admin/ holds these and pushes them to `terraform`'s
 # GitHub Actions secrets and GitLab CI/CD variables (see terraform_ci_vars in
 # main.tf). Manually rotated by editing this stack's tfvars (or env vars) and
