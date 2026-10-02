@@ -956,13 +956,16 @@ module "terraform_gitlab" {
 
   schedules = local.terraform_weekly_schedule
 
-  pipeline_variables = {
+  # Off by default: see var.gitlab_ci_variables_enabled. This was the largest
+  # copy of the CI secrets outside GitHub -- the admin OCI API key and every
+  # TF_VAR_* value -- sitting in a project that runs nothing.
+  pipeline_variables = var.gitlab_ci_variables_enabled ? {
     for key, value in local.terraform_ci_vars :
     key => {
       value  = value
       masked = !contains(local.terraform_ci_vars_unmasked, key)
     }
-  }
+  } : {}
 }
 
 # ==============================================================================

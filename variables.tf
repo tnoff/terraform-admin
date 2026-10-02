@@ -438,3 +438,23 @@ variable "ssh_public_key" {
   type        = string
 }
 
+# ==============================================================================
+# GitLab CI variables for the `terraform` mirror project
+# ==============================================================================
+
+# GitHub is canonical. The GitLab `terraform` project is a frozen mirror: the
+# repo has no .gitlab-ci.yml and the hourly fleet-mirror workflow keeps GitLab's
+# copy equal to GitHub's, so no pipeline can run there. But this project's CI
+# variables held the admin OCI API key and every TF_VAR_* secret, so anyone able
+# to push a .gitlab-ci.yml to it (the tnoff-ci service account is a Maintainer)
+# could run a pipeline with them. That is the same path as the 2026-09-04 push
+# that applied commits GitHub never had. Off by default.
+#
+# To restore GitLab CI as a rollback: put .gitlab-ci.yml back, set this to true
+# and apply. The map of values (local.terraform_ci_vars) is untouched and still
+# feeds the GitHub Actions secrets either way.
+variable "gitlab_ci_variables_enabled" {
+  description = "Write local.terraform_ci_vars into the GitLab terraform mirror project's CI variables. Off: the mirror is frozen and runs no pipelines. See the comment above for how to restore."
+  type        = bool
+  default     = false
+}

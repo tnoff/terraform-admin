@@ -52,6 +52,12 @@ The two platforms need different classification, so do not share a list:
 A new value goes in `terraform_ci_vars`; add it to the matching list only if it
 is not sensitive.
 
+The GitLab consumer is **off by default** (`var.gitlab_ci_variables_enabled`,
+false): the mirror is frozen and runs no pipelines, and leaving the admin OCI key
+in its CI variables was a standing exposure for no benefit. The map still feeds
+GitHub either way. Set it true (and restore `.gitlab-ci.yml`) to roll back to
+GitLab CI.
+
 ### Why this stack owns `terraform`'s repo settings and secrets
 
 A stack must not own the repository, or the credentials, that its own CI runs
