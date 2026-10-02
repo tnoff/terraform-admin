@@ -249,7 +249,8 @@ resource "oci_identity_policy" "admin_kms_object_storage" {
 # cluster-admin, so a compromised apps/ or dns/ job could rewrite IAM or touch
 # any workload. This user can do exactly four things:
 #
-#   1. open and delete bastion sessions (the tunnel to the private API),
+#   1. open and delete bastion sessions (the tunnel to the private API); that
+#      includes reading the compute and network resources a session is built on,
 #   2. authenticate to the OKE API (`use clusters`; NOT `manage`, which is what
 #      OKE turns into cluster-admin),
 #   3. read and write the apps/ and dns/ state buckets,
@@ -320,7 +321,18 @@ resource "oci_identity_policy" "cluster_ci" {
 
   statements = [
     "Allow group ${oci_identity_group.cluster_ci.name} to manage bastion-session in compartment ${var.cluster_ci_compartment_name}",
-    "Allow group ${oci_identity_group.cluster_ci.name} to read bastion in compartment ${var.cluster_ci_compartment_name}",
+    # CreateSession and DeleteSession need BASTION_USE (`use bastion`, which also
+    # covers listing and reading the bastion), and CreateSession reads the
+    # target's compute and network resources. These are the exact permissions in
+    # Oracle's Bastion policy reference, as narrow resource types rather than the
+    # documentation examples' `manage virtual-network-family`.
+    "Allow group ${oci_identity_group.cluster_ci.name} to use bastion in compartment ${var.cluster_ci_compartment_name}",
+    "Allow group ${oci_identity_group.cluster_ci.name} to read instances in compartment ${var.cluster_ci_compartment_name}",
+    "Allow group ${oci_identity_group.cluster_ci.name} to read instance-agent-plugins in compartment ${var.cluster_ci_compartment_name}",
+    "Allow group ${oci_identity_group.cluster_ci.name} to read vnic-attachments in compartment ${var.cluster_ci_compartment_name}",
+    "Allow group ${oci_identity_group.cluster_ci.name} to read vnics in compartment ${var.cluster_ci_compartment_name}",
+    "Allow group ${oci_identity_group.cluster_ci.name} to read subnets in compartment ${var.cluster_ci_compartment_name}",
+    "Allow group ${oci_identity_group.cluster_ci.name} to read vcns in compartment ${var.cluster_ci_compartment_name}",
     "Allow group ${oci_identity_group.cluster_ci.name} to use clusters in compartment ${var.cluster_ci_compartment_name}",
     "Allow group ${oci_identity_group.cluster_ci.name} to manage objects in tenancy where any {${join(", ", [for w in var.cluster_ci_state_write_workspaces : "target.bucket.name = '${var.state_bucket_prefix}-${w}'"])}}",
     "Allow group ${oci_identity_group.cluster_ci.name} to read objects in tenancy where any {${join(", ", [for w in local.cluster_ci_state_read_workspaces : "target.bucket.name = '${var.state_bucket_prefix}-${w}'"])}}",
