@@ -45,23 +45,28 @@
 | [oci_identity_api_key.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_api_key.dns_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_api_key.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
+| [oci_identity_api_key.state_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_api_key.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_group.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_group.dns_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_group.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
+| [oci_identity_group.state_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_group.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_policy.admin_kms_object_storage](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.dns_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
+| [oci_identity_policy.state_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_user.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
 | [oci_identity_user.dns_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
 | [oci_identity_user.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
+| [oci_identity_user.state_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
 | [oci_identity_user.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
 | [oci_identity_user_group_membership.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user_group_membership) | resource |
 | [oci_identity_user_group_membership.dns_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user_group_membership) | resource |
 | [oci_identity_user_group_membership.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user_group_membership) | resource |
+| [oci_identity_user_group_membership.state_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user_group_membership) | resource |
 | [oci_identity_user_group_membership.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user_group_membership) | resource |
 | [terraform_data.backstage_app_private_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.backstage_mcp_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
@@ -114,6 +119,7 @@
 | [tls_private_key.cluster_ci](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [tls_private_key.dns_ci](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [tls_private_key.mcp_readonly](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
+| [tls_private_key.state_ci](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [tls_private_key.terraform_admin](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [gitlab_group.personal](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/data-sources/group) | data source |
 | [oci_identity_tenancy.current](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_tenancy) | data source |
@@ -171,6 +177,7 @@
 | <a name="input_openweather_api_key"></a> [openweather\_api\_key](#input\_openweather\_api\_key) | Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s kubernetes\_secret\_v1.openweather\_api\_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-castro/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord\_bot\_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. See bart\_api\_key below for the same treatment applied to castro/concord's other mirror-api-keys entry. | `string` | n/a | yes |
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | SSH public key for OKE worker nodes | `string` | n/a | yes |
 | <a name="input_state_bucket_prefix"></a> [state\_bucket\_prefix](#input\_state\_bucket\_prefix) | Prefix for state bucket names | `string` | `"terraform-state"` | no |
+| <a name="input_state_ci_users"></a> [state\_ci\_users](#input\_state\_ci\_users) | Scoped OCI users for CI stacks that need nothing from OCI but their state bucket. Keyed by stack. state\_write\_workspaces are read and written; state\_read\_workspaces are read-only, and each one exposes that whole state file, so list only stacks the stack reads through terraform\_remote\_state. | <pre>map(object({<br/>    user_name              = string<br/>    group_name             = string<br/>    state_write_workspaces = list(string)<br/>    state_read_workspaces  = list(string)<br/>  }))</pre> | <pre>{<br/>  "discord": {<br/>    "group_name": "terraform-discord-ci",<br/>    "state_read_workspaces": [],<br/>    "state_write_workspaces": [<br/>      "discord"<br/>    ],<br/>    "user_name": "terraform-discord-ci"<br/>  },<br/>  "infra": {<br/>    "group_name": "terraform-infra-ci",<br/>    "state_read_workspaces": [<br/>      "oci",<br/>      "discord"<br/>    ],<br/>    "state_write_workspaces": [<br/>      "infra"<br/>    ],<br/>    "user_name": "terraform-infra-ci"<br/>  }<br/>}</pre> | no |
 | <a name="input_terraform_admin_group_name"></a> [terraform\_admin\_group\_name](#input\_terraform\_admin\_group\_name) | Name of the Terraform admin group | `string` | `"terraform-administrators"` | no |
 | <a name="input_terraform_admin_private_key_path"></a> [terraform\_admin\_private\_key\_path](#input\_terraform\_admin\_private\_key\_path) | Path where the Terraform admin private key will be saved | `string` | `"generated-output/terraform_admin_private_key.pem"` | no |
 | <a name="input_terraform_admin_user_name"></a> [terraform\_admin\_user\_name](#input\_terraform\_admin\_user\_name) | Name of the Terraform admin user for infrastructure management | `string` | `"terraform-admin"` | no |

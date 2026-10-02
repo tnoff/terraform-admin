@@ -458,3 +458,36 @@ variable "gitlab_ci_variables_enabled" {
   type        = bool
   default     = false
 }
+
+# ==============================================================================
+# State-only CI users: infra/ and discord/
+#
+# Neither stack uses the OCI provider. discord/ reads no other stack's state;
+# infra/ reads the oci and discord states. They used the admin identity only to
+# reach state buckets, so each gets a user that can do exactly that and nothing
+# else (tnoff/terraform#116). Only the oci/ jobs still need terraform-admin.
+# ==============================================================================
+
+variable "state_ci_users" {
+  description = "Scoped OCI users for CI stacks that need nothing from OCI but their state bucket. Keyed by stack. state_write_workspaces are read and written; state_read_workspaces are read-only, and each one exposes that whole state file, so list only stacks the stack reads through terraform_remote_state."
+  type = map(object({
+    user_name              = string
+    group_name             = string
+    state_write_workspaces = list(string)
+    state_read_workspaces  = list(string)
+  }))
+  default = {
+    infra = {
+      user_name              = "terraform-infra-ci"
+      group_name             = "terraform-infra-ci"
+      state_write_workspaces = ["infra"]
+      state_read_workspaces  = ["oci", "discord"]
+    }
+    discord = {
+      user_name              = "terraform-discord-ci"
+      group_name             = "terraform-discord-ci"
+      state_write_workspaces = ["discord"]
+      state_read_workspaces  = []
+    }
+  }
+}
