@@ -48,11 +48,11 @@ jobs:
   # hosted runners have Docker. Both hooks pass against this repo's HEAD.
   pre-commit:
     name: pre-commit
-    uses: tnoff/github-workflows/.github/workflows/pre-commit.yml@b1932282111367882be5ad0730eecbe379be3fe0
+    uses: tnoff/github-workflows/.github/workflows/pre-commit.yml@adea087c43d56fd13d5b1abf2d5f2ba3e695784d  # pre-commit-v1.0.0
 
   secrets:
     name: Scan for secrets
-    uses: tnoff/github-workflows/.github/workflows/trufflehog.yml@b1932282111367882be5ad0730eecbe379be3fe0
+    uses: tnoff/github-workflows/.github/workflows/trufflehog.yml@adea087c43d56fd13d5b1abf2d5f2ba3e695784d  # trufflehog-v1.0.0
 
   # The check this repo was missing. scheduled.yml pins three reusable
   # workflows; a `uses:` whose inputs or secrets stop matching the pinned
@@ -60,7 +60,7 @@ jobs:
   # with no PR CI at all there was nothing that could ever have caught it.
   contracts:
     name: Workflow contracts
-    uses: tnoff/github-workflows/.github/workflows/check-workflow-contracts.yml@b1932282111367882be5ad0730eecbe379be3fe0
+    uses: tnoff/github-workflows/.github/workflows/check-workflow-contracts.yml@adea087c43d56fd13d5b1abf2d5f2ba3e695784d  # check-workflow-contracts-v1.0.0
 
   # Checkov's Terraform-resource security rules, ported from
   # terraform-modules#71-74 and terraform's own checkov job. Two things are
