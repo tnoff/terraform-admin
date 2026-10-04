@@ -63,7 +63,7 @@ spec:
   type: credential
   owner: group:default/admin
   dependencyOf:
-    - component:default/discord-bot
+    - component:default/discord-gateway
     - component:default/discord-dispatcher
 ---
 apiVersion: backstage.io/v1alpha1
@@ -93,7 +93,7 @@ spec:
   type: credential
   owner: group:default/admin
   dependencyOf:
-    - component:default/discord-bot
+    - component:default/discord-gateway
     - component:default/discord-broker
     - component:default/discord-search
     - component:default/discord-downloader
