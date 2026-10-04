@@ -47,6 +47,10 @@
 | [oci_identity_api_key.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_api_key.state_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_api_key.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
+| [oci_identity_domains_app.oidc_spike_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
+| [oci_identity_domains_group.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
+| [oci_identity_domains_identity_propagation_trust.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_identity_propagation_trust) | resource |
+| [oci_identity_domains_user.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_group.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_group.dns_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_group.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
@@ -56,6 +60,7 @@
 | [oci_identity_policy.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.dns_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
+| [oci_identity_policy.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.state_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_user.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
@@ -122,6 +127,7 @@
 | [tls_private_key.state_ci](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [tls_private_key.terraform_admin](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [gitlab_group.personal](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/data-sources/group) | data source |
+| [oci_identity_domains.default](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_domains) | data source |
 | [oci_identity_tenancy.current](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_tenancy) | data source |
 | [oci_objectstorage_namespace.this](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/objectstorage_namespace) | data source |
 
@@ -174,6 +180,9 @@
 | <a name="input_mcp_readonly_user_name"></a> [mcp\_readonly\_user\_name](#input\_mcp\_readonly\_user\_name) | Name of the tenancy-wide read-only user backing the local OCI MCP server | `string` | `"mcp-readonly-bot"` | no |
 | <a name="input_oci_region"></a> [oci\_region](#input\_oci\_region) | OCI region | `string` | `"us-ashburn-1"` | no |
 | <a name="input_oci_tenancy_ocid"></a> [oci\_tenancy\_ocid](#input\_oci\_tenancy\_ocid) | OCID of the tenancy (all resources created in root compartment) | `string` | n/a | yes |
+| <a name="input_oidc_spike_branch"></a> [oidc\_spike\_branch](#input\_oidc\_spike\_branch) | The one branch of the repo behind oidc\_spike\_sub\_prefix whose push runs map to the spike service user | `string` | `"spike/oidc-federation"` | no |
+| <a name="input_oidc_spike_state_read_workspaces"></a> [oidc\_spike\_state\_read\_workspaces](#input\_oidc\_spike\_state\_read\_workspaces) | State buckets the spike service user may READ (not write). Read-only on purpose: it tests whether a plan-only identity can use the OCI backend, lock included. | `list(string)` | <pre>[<br/>  "dns"<br/>]</pre> | no |
+| <a name="input_oidc_spike_sub_prefix"></a> [oidc\_spike\_sub\_prefix](#input\_oidc\_spike\_sub\_prefix) | The `sub` claim prefix of the GitHub repo whose Actions tokens the spike trust accepts. With immutable subjects on it embeds owner and repo IDs; read it from `gh api repos/<owner>/<repo>/actions/oidc/customization/sub` (sub\_claim\_prefix). | `string` | `"repo:tnoff@1326564/terraform@1356736164"` | no |
 | <a name="input_openweather_api_key"></a> [openweather\_api\_key](#input\_openweather\_api\_key) | Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s kubernetes\_secret\_v1.openweather\_api\_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-castro/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord\_bot\_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. See bart\_api\_key below for the same treatment applied to castro/concord's other mirror-api-keys entry. | `string` | n/a | yes |
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | SSH public key for OKE worker nodes | `string` | n/a | yes |
 | <a name="input_state_bucket_prefix"></a> [state\_bucket\_prefix](#input\_state\_bucket\_prefix) | Prefix for state bucket names | `string` | `"terraform-state"` | no |
@@ -189,5 +198,10 @@
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+| ---- | ----------- |
+| <a name="output_oidc_spike_domain_endpoint"></a> [oidc\_spike\_domain\_endpoint](#output\_oidc\_spike\_domain\_endpoint) | Identity domain URL the token exchange is POSTed to (<this>/oauth2/v1/token) |
+| <a name="output_oidc_spike_exchange_client_id"></a> [oidc\_spike\_exchange\_client\_id](#output\_oidc\_spike\_exchange\_client\_id) | Client id of the spike's token-exchange app |
+| <a name="output_oidc_spike_exchange_client_secret"></a> [oidc\_spike\_exchange\_client\_secret](#output\_oidc\_spike\_exchange\_client\_secret) | Client secret of the spike's token-exchange app. Set it on tnoff/terraform by hand: terraform output -raw oidc\_spike\_exchange\_client\_secret \| gh secret set OCI\_EXCHANGE\_CLIENT\_SECRET --repo tnoff/terraform |
+| <a name="output_oidc_spike_service_user_ocid"></a> [oidc\_spike\_service\_user\_ocid](#output\_oidc\_spike\_service\_user\_ocid) | OCID of the spike service user, for binding in cluster RBAC when the OKE leg of the spike runs |
 <!-- END_TF_DOCS -->
