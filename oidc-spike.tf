@@ -17,18 +17,23 @@
 #                  state bucket, nothing else.
 #
 # The only identity mapped is a push to the spike branch of the terraform repo.
-# `sub` for that is `repo:<owner>/<repo>:ref:refs/heads/<branch>`; a
-# pull_request run would instead carry `repo:<owner>/<repo>:pull_request`.
+# tnoff/terraform has immutable subject claims on (see `gh api
+# repos/tnoff/terraform/actions/oidc/customization/sub`), so `sub` carries the
+# owner and repo IDs, not their names: for a push it is
+# `<prefix>:ref:refs/heads/<branch>`, observed in a real run as
+# `repo:tnoff@1326564/terraform@1356736164:ref:refs/heads/spike/oidc-federation`.
+# A pull_request run would carry `<prefix>:pull_request`. Matching on the IDs
+# also means a renamed or re-created repo of the same name cannot inherit this.
 # ==============================================================================
 
-variable "oidc_spike_repo" {
-  description = "GitHub repository (owner/name) whose Actions OIDC tokens the spike trust accepts"
+variable "oidc_spike_sub_prefix" {
+  description = "The `sub` claim prefix of the GitHub repo whose Actions tokens the spike trust accepts. With immutable subjects on it embeds owner and repo IDs; read it from `gh api repos/<owner>/<repo>/actions/oidc/customization/sub` (sub_claim_prefix)."
   type        = string
-  default     = "tnoff/terraform"
+  default     = "repo:tnoff@1326564/terraform@1356736164"
 }
 
 variable "oidc_spike_branch" {
-  description = "The one branch of oidc_spike_repo whose push runs map to the spike service user"
+  description = "The one branch of the repo behind oidc_spike_sub_prefix whose push runs map to the spike service user"
   type        = string
   default     = "spike/oidc-federation"
 }
@@ -41,7 +46,7 @@ variable "oidc_spike_state_read_workspaces" {
 
 locals {
   oidc_spike_issuer = "https://token.actions.githubusercontent.com"
-  oidc_spike_sub    = "repo:${var.oidc_spike_repo}:ref:refs/heads/${var.oidc_spike_branch}"
+  oidc_spike_sub    = "${var.oidc_spike_sub_prefix}:ref:refs/heads/${var.oidc_spike_branch}"
 }
 
 # The identity domain the trust, app and service user live in. The tenancy has a
