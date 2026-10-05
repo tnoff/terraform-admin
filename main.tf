@@ -544,6 +544,10 @@ locals {
     TF_VAR_cluster_ci_user_ocid = oci_identity_user.cluster_ci.id
     TF_VAR_dns_ci_user_ocid     = oci_identity_user.dns_ci.id
 
+    # The GitHub OIDC spike's federated service user (oidc-spike.tf), bound by
+    # bootstrap/ the same way. Delete with oidc-spike.tf if the spike is a no-go.
+    TF_VAR_oidc_spike_user_ocid = oci_identity_domains_user.oidc_spike.ocid
+
     TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
     TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token
     TF_VAR_cloudflare_account_id  = var.cloudflare_account_id
