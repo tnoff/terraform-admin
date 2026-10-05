@@ -782,6 +782,14 @@ locals {
     DISCORD_CI_OCI_FINGERPRINT = oci_identity_api_key.state_ci["discord"].fingerprint
     DISCORD_CI_OCI_API_KEY_B64 = base64encode(tls_private_key.state_ci["discord"].private_key_pem)
 
+    # The GitHub OIDC spike's token-exchange app (tnoff/terraform#135, see
+    # oidc-spike.tf). Not OCI_*-prefixed, for the same reason as the scoped
+    # users above. The secret is only useful together with a GitHub token the
+    # trust accepts. Delete these three with oidc-spike.tf if the spike is a no-go.
+    OIDC_EXCHANGE_DOMAIN_URL    = local.oidc_spike_domain_endpoint
+    OIDC_EXCHANGE_CLIENT_ID     = oci_identity_domains_app.oidc_spike_exchange.name
+    OIDC_EXCHANGE_CLIENT_SECRET = oci_identity_domains_app.oidc_spike_exchange.client_secret
+
     TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
     TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token
     TF_VAR_cloudflare_account_id  = var.cloudflare_account_id
