@@ -2,9 +2,10 @@
 # GitHub OIDC -> OCI identity propagation: SPIKE (tnoff/terraform#135)
 #
 # Lets a GitHub Actions job exchange its signed OIDC token for a one-hour OCI
-# session token (UPST) instead of holding an API key. Additive and self-
-# contained: nothing else in this stack references these resources, and the
-# whole spike is removed by deleting this file (go/no-go in the issue).
+# session token (UPST) instead of holding an API key. Self-contained apart from
+# one reference: the exchange app's id and secret are pushed to tnoff/terraform
+# through `terraform_ci_vars` in main.tf (the `OIDC_EXCHANGE_*` entries). A
+# no-go is deleting this file and those three entries (go/no-go in the issue).
 #
 # Shape:
 #   exchange app   confidential app the job authenticates to /oauth2/v1/token
@@ -153,7 +154,7 @@ output "oidc_spike_exchange_client_id" {
 }
 
 output "oidc_spike_exchange_client_secret" {
-  description = "Client secret of the spike's token-exchange app. Set it on tnoff/terraform by hand: terraform output -raw oidc_spike_exchange_client_secret | gh secret set OCI_EXCHANGE_CLIENT_SECRET --repo tnoff/terraform"
+  description = "Client secret of the spike's token-exchange app. Already pushed to tnoff/terraform as OIDC_EXCHANGE_CLIENT_SECRET via terraform_ci_vars; this output is for reading it locally."
   value       = oci_identity_domains_app.oidc_spike_exchange.client_secret
   sensitive   = true
 }
