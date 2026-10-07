@@ -31,6 +31,33 @@ re-encrypt with `gpg --symmetric --cipher-algo AES256 -o ….gpg`, and `shred -u
 the temporary file. Nothing is checked in; every secret lives only in your
 environment, the state file and that encrypted file.
 
+### Updating the secrets file
+
+Full cycle: decrypt to tmpfs, edit, re-encrypt to a `.new` file, swap it in and
+shred the plaintext. Encrypting to `.new` first means a failed run or mistyped
+passphrase cannot clobber the existing file.
+
+```bash
+SECRETS=~/.local/state/terraform-admin/.terraform-secrets.sh.gpg
+PLAIN=/dev/shm/terraform-secrets.sh
+
+# 1. decrypt to tmpfs (plaintext never touches disk)
+(umask 077; gpg --decrypt -o "$PLAIN" "$SECRETS")
+
+# 2. edit the `export TF_VAR_...` lines
+"${EDITOR:-vi}" "$PLAIN"
+
+# 3. re-encrypt to a temporary file, 4. replace the original, 5. shred plaintext
+gpg --symmetric --cipher-algo AES256 -o "$SECRETS.new" "$PLAIN" &&
+  mv "$SECRETS.new" "$SECRETS" &&
+  shred -u "$PLAIN"
+```
+
+Use the same passphrase `bin/tf` expects. Before shredding, you can check the
+new file with `gpg -d "$SECRETS.new" >/dev/null` (it prompts and exits non-zero
+on a wrong passphrase). To start from a fresh plaintext file instead of editing,
+skip steps 1 and 2 and point `$PLAIN` at that file.
+
 ## Terraform commands
 
 ```bash
