@@ -310,6 +310,48 @@ variable "grafana_admin_password" {
   sensitive   = true
 }
 
+variable "hathor_vpn_private_key" {
+  description = "WireGuard private key for the Mullvad tunnel hathor's sync CronJob runs through its gluetun sidecar. Mint a NEW Mullvad device for it (mullvad.net/en/account/wireguard-config) and never reuse discord_vpn_private_key: two peers sharing one key knock each other offline. Self-generated, not vendor-issued -- Mullvad only ever receives the public half. Consumed by apps/'s kubernetes_secret_v1.hathor_vpn_key."
+  type        = string
+  sensitive   = true
+}
+
+variable "hathor_vpn_addresses" {
+  description = "WireGuard Address (CIDR, e.g. 10.x.x.x/32) Mullvad assigned to the hathor device, from the same downloaded config as hathor_vpn_private_key. It is tied to that device, so rotating the key means replacing this too. An identifier rather than a secret, kept sensitive with the rest of the VPN inputs. Consumed by apps/'s kubernetes_secret_v1.hathor_vpn_key as WIREGUARD_ADDRESSES."
+  type        = string
+  sensitive   = true
+}
+
+variable "hathor_url_token" {
+  description = "Long random URL-path token the hathor nginx server requires in /hathor/<token>/..., which is the only authentication on that public endpoint. Generate one with `openssl rand -hex 32`. It appears in ingress and nginx access logs, so treat a leak as rotating this one value. Consumed by apps/'s kubernetes_secret_v1.hathor_url_token."
+  type        = string
+  sensitive   = true
+}
+
+variable "hathor_google_api_key" {
+  description = "Google API key hathor uses for the YouTube Data API v3 (console.cloud.google.com, API key credential). Consumed by apps/'s kubernetes_secret_v1.hathor_api_keys as GOOGLE_API_KEY."
+  type        = string
+  sensitive   = true
+}
+
+variable "hathor_twitch_client_id" {
+  description = "Twitch application client ID hathor uses for the Helix API (dev.twitch.tv/console). A public identifier, paired with hathor_twitch_client_secret. Consumed by apps/'s kubernetes_secret_v1.hathor_api_keys as TWITCH_CLIENT_ID."
+  type        = string
+  sensitive   = true
+}
+
+variable "hathor_twitch_client_secret" {
+  description = "Twitch application client secret, paired with hathor_twitch_client_id. Consumed by apps/'s kubernetes_secret_v1.hathor_api_keys as TWITCH_CLIENT_SECRET."
+  type        = string
+  sensitive   = true
+}
+
+variable "hathor_youtube_cookies_b64" {
+  description = "Base64, as ONE line (`base64 -w0 cookies.txt`), of the Netscape-format YouTube cookies.txt yt-dlp reads. A cookies file is multi-line and multi-line env vars are flaky across shells, so it travels base64-encoded and apps/'s kubernetes_secret_v1.hathor_youtube_cookies base64decode()s it back; the hathor pod mounts it as a FILE. Cookies expire, so expect to replace this one regularly."
+  type        = string
+  sensitive   = true
+}
+
 # ==============================================================================
 # tnoff-flux GitHub App -- Flux's read credential for docker-apps.
 #

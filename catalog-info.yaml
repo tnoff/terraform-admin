@@ -116,6 +116,65 @@ spec:
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
+  name: hathor-vpn-private-key
+  description: >-
+    WireGuard private key for the Mullvad tunnel hathor's sync CronJob runs through
+    its gluetun sidecar (variable hathor_vpn_private_key, with its address in
+    hathor_vpn_addresses). A separate Mullvad device from discord-vpn-private-key.
+    Created in-cluster as the hathor-vpn-key Secret by terraform/apps.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/hathor
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: hathor-url-token
+  description: >-
+    Long random URL-path token that is the only authentication on hathor's public
+    download endpoint (variable hathor_url_token). Created in-cluster as the
+    hathor-url-token Secret by terraform/apps. Rotate on any leak.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/hathor
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: hathor-api-keys
+  description: >-
+    Google (YouTube Data API) and Twitch (Helix) credentials hathor reads from its
+    environment (variables hathor_google_api_key, hathor_twitch_client_id,
+    hathor_twitch_client_secret). Created in-cluster as the hathor-api-keys Secret
+    by terraform/apps.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/hathor
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: hathor-youtube-cookies
+  description: >-
+    Netscape-format YouTube cookies file yt-dlp reads, mounted into the hathor pod
+    as a file (variable hathor_youtube_cookies_b64, base64 on the way in). Expires,
+    so it is replaced regularly. Created in-cluster as the hathor-youtube-cookies
+    Secret by terraform/apps.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/hathor
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
   name: cloudflare-api-token
   description: >-
     Cloudflare API token terraform/dns uses to manage DNS records (variable
