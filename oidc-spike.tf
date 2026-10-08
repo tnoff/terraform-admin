@@ -6,7 +6,7 @@
 # two references in main.tf: the exchange app's id and secret are pushed to
 # tnoff/terraform through `terraform_ci_vars` (the `OIDC_EXCHANGE_*` entries),
 # and the service user's OCID is exported to the operator .envrc as
-# TF_VAR_oidc_spike_user_ocid for terraform/bootstrap. A no-go is deleting this
+# TF_VAR_oidc_spike_group_ocid for terraform/bootstrap. A no-go is deleting this
 # file and those four lines (go/no-go in the issue).
 #
 # Shape:
@@ -173,6 +173,6 @@ output "oidc_spike_exchange_client_secret" {
 }
 
 output "oidc_spike_service_user_ocid" {
-  description = "OCID of the spike service user, for binding in cluster RBAC when the OKE leg of the spike runs"
+  description = "OCID of the spike service user. Informational: OKE reports it as the serviceUserOCID extra of `kubectl auth whoami`, but RBAC binds the group (TF_VAR_oidc_spike_group_ocid), not this."
   value       = oci_identity_domains_user.oidc_spike.ocid
 }
