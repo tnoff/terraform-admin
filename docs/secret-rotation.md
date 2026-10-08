@@ -61,6 +61,10 @@ consumer column names the stack that renders it.
 | `eastbay_contact_email`, `eastbay_contact_number`, `eastbay_email_host_user`, `eastbay_email_host_password`, `eastbay_flask_secret_key` | Business details; SMTP account; `python -c 'import secrets; print(secrets.token_hex(32))'` | `apps/` -> `eastbay-website-creds` |
 | `grafana_admin_user`, `grafana_admin_password` | Chosen by the operator | `apps/` -> `grafana-admin-creds` (see caveat) |
 | `backstage_mcp_token` | `openssl rand -hex 24` | `apps/` -> `backstage-mcp-token` |
+| `hathor_vpn_private_key`, `hathor_vpn_addresses`, `hathor_vpn_server_hostnames` | A **new** Mullvad WireGuard device (mullvad.net/en/account/wireguard-config; never the discord device's): `PrivateKey` and `Address` from the same file, replaced together. The hostnames are a comma-separated list of Mullvad WireGuard servers that exist in gluetun's server list | `apps/` -> `hathor-vpn-key` |
+| `hathor_url_token` | `openssl rand -hex 32`. The only auth on the hathor endpoint; rotate on any leak | `apps/` -> `hathor-url-token` |
+| `hathor_google_api_key`, `hathor_twitch_client_id`, `hathor_twitch_client_secret` | Google Cloud console (YouTube Data API v3); dev.twitch.tv console | `apps/` -> `hathor-api-keys` |
+| `hathor_youtube_cookies_b64` | A Netscape-format cookies file stripped to YouTube only (`scripts/filter_cookies.py cookies.txt --b64` in tnoff/docker-apps, which also prints the one-line base64; a raw browser export holds a login for every site). Expires; replace regularly | `apps/` -> `hathor-youtube-cookies` |
 | `gitlab_api_key`, `gitlab_ci_api_key` | GitLab personal access token (admin user); token for the `tnoff-ci` service account | `infra/` GitLab provider and mirror token (CI only) |
 | `ssh_public_key` | `ssh-keygen` | `oci/` OKE node cloud-init |
 

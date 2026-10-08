@@ -575,6 +575,20 @@ locals {
     # variables.tf.
     TF_VAR_backstage_mcp_token = var.backstage_mcp_token
 
+    # hathor (docker-apps apps/hathor/): Mullvad device key + address for its
+    # gluetun sidecar (and the server pool it picks from), the URL-path token that is the whole auth on its public
+    # endpoint, its Google/Twitch API creds, and the yt-dlp cookies file (already
+    # base64, one line). Consumed by apps/'s kubernetes_secret_v1.hathor_*. See
+    # their descriptions in variables.tf.
+    TF_VAR_hathor_vpn_private_key      = var.hathor_vpn_private_key
+    TF_VAR_hathor_vpn_addresses        = var.hathor_vpn_addresses
+    TF_VAR_hathor_vpn_server_hostnames = var.hathor_vpn_server_hostnames
+    TF_VAR_hathor_url_token            = var.hathor_url_token
+    TF_VAR_hathor_google_api_key       = var.hathor_google_api_key
+    TF_VAR_hathor_twitch_client_id     = var.hathor_twitch_client_id
+    TF_VAR_hathor_twitch_client_secret = var.hathor_twitch_client_secret
+    TF_VAR_hathor_youtube_cookies_b64  = var.hathor_youtube_cookies_b64
+
     # discord's Spotify/YouTube search creds + VPN key, and eastbay's website
     # secrets -- pushed as of 2026-09-21, consumed for real by apps/'s
     # kubernetes_secret_v1.discord_search_creds/discord_vpn_key/eastbay_website_creds.
@@ -680,6 +694,11 @@ locals {
     TF_VAR_openweather_api_key_rotated_at           = time_static.openweather_api_key_rotated_at.rfc3339
     TF_VAR_bart_api_key_rotated_at                  = time_static.bart_api_key_rotated_at.rfc3339
     TF_VAR_backstage_mcp_token_rotated_at           = time_static.backstage_mcp_token_rotated_at.rfc3339
+    TF_VAR_hathor_vpn_private_key_rotated_at        = time_static.hathor_vpn_private_key_rotated_at.rfc3339
+    TF_VAR_hathor_url_token_rotated_at              = time_static.hathor_url_token_rotated_at.rfc3339
+    TF_VAR_hathor_google_api_key_rotated_at         = time_static.hathor_google_api_key_rotated_at.rfc3339
+    TF_VAR_hathor_twitch_client_secret_rotated_at   = time_static.hathor_twitch_client_secret_rotated_at.rfc3339
+    TF_VAR_hathor_youtube_cookies_rotated_at        = time_static.hathor_youtube_cookies_rotated_at.rfc3339
     TF_VAR_discord_spotify_client_id_rotated_at     = time_static.discord_spotify_client_id_rotated_at.rfc3339
     TF_VAR_discord_spotify_client_secret_rotated_at = time_static.discord_spotify_client_secret_rotated_at.rfc3339
     TF_VAR_discord_youtube_api_key_rotated_at       = time_static.discord_youtube_api_key_rotated_at.rfc3339
@@ -821,6 +840,20 @@ locals {
     # variables.tf.
     TF_VAR_backstage_mcp_token = var.backstage_mcp_token
 
+    # hathor (docker-apps apps/hathor/): Mullvad device key + address for its
+    # gluetun sidecar (and the server pool it picks from), the URL-path token that is the whole auth on its public
+    # endpoint, its Google/Twitch API creds, and the yt-dlp cookies file (already
+    # base64, one line). Consumed by apps/'s kubernetes_secret_v1.hathor_*. See
+    # their descriptions in variables.tf.
+    TF_VAR_hathor_vpn_private_key      = var.hathor_vpn_private_key
+    TF_VAR_hathor_vpn_addresses        = var.hathor_vpn_addresses
+    TF_VAR_hathor_vpn_server_hostnames = var.hathor_vpn_server_hostnames
+    TF_VAR_hathor_url_token            = var.hathor_url_token
+    TF_VAR_hathor_google_api_key       = var.hathor_google_api_key
+    TF_VAR_hathor_twitch_client_id     = var.hathor_twitch_client_id
+    TF_VAR_hathor_twitch_client_secret = var.hathor_twitch_client_secret
+    TF_VAR_hathor_youtube_cookies_b64  = var.hathor_youtube_cookies_b64
+
     # discord's Spotify/YouTube search creds + VPN key, and eastbay's website
     # secrets -- pushed as of 2026-09-21, consumed for real by apps/'s
     # kubernetes_secret_v1.discord_search_creds/discord_vpn_key/eastbay_website_creds.
@@ -910,6 +943,11 @@ locals {
     TF_VAR_openweather_api_key_rotated_at           = time_static.openweather_api_key_rotated_at.rfc3339
     TF_VAR_bart_api_key_rotated_at                  = time_static.bart_api_key_rotated_at.rfc3339
     TF_VAR_backstage_mcp_token_rotated_at           = time_static.backstage_mcp_token_rotated_at.rfc3339
+    TF_VAR_hathor_vpn_private_key_rotated_at        = time_static.hathor_vpn_private_key_rotated_at.rfc3339
+    TF_VAR_hathor_url_token_rotated_at              = time_static.hathor_url_token_rotated_at.rfc3339
+    TF_VAR_hathor_google_api_key_rotated_at         = time_static.hathor_google_api_key_rotated_at.rfc3339
+    TF_VAR_hathor_twitch_client_secret_rotated_at   = time_static.hathor_twitch_client_secret_rotated_at.rfc3339
+    TF_VAR_hathor_youtube_cookies_rotated_at        = time_static.hathor_youtube_cookies_rotated_at.rfc3339
     TF_VAR_discord_spotify_client_id_rotated_at     = time_static.discord_spotify_client_id_rotated_at.rfc3339
     TF_VAR_discord_spotify_client_secret_rotated_at = time_static.discord_spotify_client_secret_rotated_at.rfc3339
     TF_VAR_discord_youtube_api_key_rotated_at       = time_static.discord_youtube_api_key_rotated_at.rfc3339
@@ -943,6 +981,11 @@ locals {
     "TF_VAR_openweather_api_key_rotated_at",
     "TF_VAR_bart_api_key_rotated_at",
     "TF_VAR_backstage_mcp_token_rotated_at",
+    "TF_VAR_hathor_vpn_private_key_rotated_at",
+    "TF_VAR_hathor_url_token_rotated_at",
+    "TF_VAR_hathor_google_api_key_rotated_at",
+    "TF_VAR_hathor_twitch_client_secret_rotated_at",
+    "TF_VAR_hathor_youtube_cookies_rotated_at",
     "TF_VAR_discord_spotify_client_id_rotated_at",
     "TF_VAR_discord_spotify_client_secret_rotated_at",
     "TF_VAR_discord_youtube_api_key_rotated_at",
@@ -1112,6 +1155,11 @@ locals {
     "TF_VAR_openweather_api_key_rotated_at",
     "TF_VAR_bart_api_key_rotated_at",
     "TF_VAR_backstage_mcp_token_rotated_at",
+    "TF_VAR_hathor_vpn_private_key_rotated_at",
+    "TF_VAR_hathor_url_token_rotated_at",
+    "TF_VAR_hathor_google_api_key_rotated_at",
+    "TF_VAR_hathor_twitch_client_secret_rotated_at",
+    "TF_VAR_hathor_youtube_cookies_rotated_at",
     "TF_VAR_discord_spotify_client_id_rotated_at",
     "TF_VAR_discord_spotify_client_secret_rotated_at",
     "TF_VAR_discord_youtube_api_key_rotated_at",

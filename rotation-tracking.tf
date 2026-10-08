@@ -230,6 +230,51 @@ resource "time_static" "grafana_admin_password_rotated_at" {
   }
 }
 
+resource "terraform_data" "hathor_vpn_private_key_version" {
+  triggers_replace = [sha256(var.hathor_vpn_private_key)]
+}
+resource "time_static" "hathor_vpn_private_key_rotated_at" {
+  triggers = {
+    version = terraform_data.hathor_vpn_private_key_version.id
+  }
+}
+
+resource "terraform_data" "hathor_url_token_version" {
+  triggers_replace = [sha256(var.hathor_url_token)]
+}
+resource "time_static" "hathor_url_token_rotated_at" {
+  triggers = {
+    version = terraform_data.hathor_url_token_version.id
+  }
+}
+
+resource "terraform_data" "hathor_google_api_key_version" {
+  triggers_replace = [sha256(var.hathor_google_api_key)]
+}
+resource "time_static" "hathor_google_api_key_rotated_at" {
+  triggers = {
+    version = terraform_data.hathor_google_api_key_version.id
+  }
+}
+
+resource "terraform_data" "hathor_twitch_client_secret_version" {
+  triggers_replace = [sha256(var.hathor_twitch_client_secret)]
+}
+resource "time_static" "hathor_twitch_client_secret_rotated_at" {
+  triggers = {
+    version = terraform_data.hathor_twitch_client_secret_version.id
+  }
+}
+
+resource "terraform_data" "hathor_youtube_cookies_version" {
+  triggers_replace = [sha256(var.hathor_youtube_cookies_b64)]
+}
+resource "time_static" "hathor_youtube_cookies_rotated_at" {
+  triggers = {
+    version = terraform_data.hathor_youtube_cookies_version.id
+  }
+}
+
 # GitLab admin PAT — used by terraform-admin's gitlab provider.
 resource "terraform_data" "gitlab_api_key_version" {
   triggers_replace = [sha256(var.gitlab_api_key)]
