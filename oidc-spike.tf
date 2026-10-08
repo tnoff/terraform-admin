@@ -3,9 +3,11 @@
 #
 # Lets a GitHub Actions job exchange its signed OIDC token for a one-hour OCI
 # session token (UPST) instead of holding an API key. Self-contained apart from
-# one reference: the exchange app's id and secret are pushed to tnoff/terraform
-# through `terraform_ci_vars` in main.tf (the `OIDC_EXCHANGE_*` entries). A
-# no-go is deleting this file and those three entries (go/no-go in the issue).
+# two references in main.tf: the exchange app's id and secret are pushed to
+# tnoff/terraform through `terraform_ci_vars` (the `OIDC_EXCHANGE_*` entries),
+# and the service user's OCID is exported to the operator .envrc as
+# TF_VAR_oidc_spike_user_ocid for terraform/bootstrap. A no-go is deleting this
+# file and those four lines (go/no-go in the issue).
 #
 # Shape:
 #   exchange app   confidential app the job authenticates to /oauth2/v1/token
@@ -85,12 +87,23 @@ resource "oci_identity_domains_group" "oidc_spike" {
 
 resource "oci_identity_policy" "oidc_spike" {
   compartment_id = var.oci_tenancy_ocid
-  description    = "Throwaway policy for the GitHub OIDC federation spike: read-only on state buckets"
+  description    = "Throwaway policy for the GitHub OIDC federation spike: read-only on state buckets, plus the bastion/OKE path"
   name           = "terraform-oidc-spike-policy"
 
-  statements = [
-    "Allow group ${oci_identity_domains_group.oidc_spike.display_name} to read objects in tenancy where any {${join(", ", [for w in var.oidc_spike_state_read_workspaces : "target.bucket.name = '${var.state_bucket_prefix}-${w}'"])}}",
-  ]
+  # The cluster path is the same set the cluster/dns CI users hold (see
+  # local.cluster_path_grants), so the spike can open a bastion session and ask
+  # OKE to authenticate its token. What it may then DO in the cluster is bound
+  # in terraform/bootstrap (operator-applied), not here: read Services in
+  # ingress-nginx, nothing else.
+  statements = concat(
+    [
+      "Allow group ${oci_identity_domains_group.oidc_spike.display_name} to read objects in tenancy where any {${join(", ", [for w in var.oidc_spike_state_read_workspaces : "target.bucket.name = '${var.state_bucket_prefix}-${w}'"])}}",
+    ],
+    [
+      for grant in local.cluster_path_grants :
+      "Allow group ${oci_identity_domains_group.oidc_spike.display_name} to ${grant} in compartment ${var.cluster_ci_compartment_name}"
+    ],
+  )
 
   freeform_tags = {
     "Purpose"   = "terraform-oidc-spike"
