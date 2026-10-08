@@ -221,5 +221,5 @@
 | <a name="output_oidc_spike_domain_endpoint"></a> [oidc\_spike\_domain\_endpoint](#output\_oidc\_spike\_domain\_endpoint) | Identity domain URL the token exchange is POSTed to (<this>/oauth2/v1/token) |
 | <a name="output_oidc_spike_exchange_client_id"></a> [oidc\_spike\_exchange\_client\_id](#output\_oidc\_spike\_exchange\_client\_id) | Client id of the spike's token-exchange app |
 | <a name="output_oidc_spike_exchange_client_secret"></a> [oidc\_spike\_exchange\_client\_secret](#output\_oidc\_spike\_exchange\_client\_secret) | Client secret of the spike's token-exchange app. Already pushed to tnoff/terraform as OIDC\_EXCHANGE\_CLIENT\_SECRET via terraform\_ci\_vars; this output is for reading it locally. |
-| <a name="output_oidc_spike_service_user_ocid"></a> [oidc\_spike\_service\_user\_ocid](#output\_oidc\_spike\_service\_user\_ocid) | OCID of the spike service user, for binding in cluster RBAC when the OKE leg of the spike runs |
+| <a name="output_oidc_spike_service_user_ocid"></a> [oidc\_spike\_service\_user\_ocid](#output\_oidc\_spike\_service\_user\_ocid) | OCID of the spike service user. Informational: OKE reports it as the serviceUserOCID extra of `kubectl auth whoami`, but RBAC binds the group (TF\_VAR\_oidc\_spike\_group\_ocid), not this. |
 <!-- END_TF_DOCS -->

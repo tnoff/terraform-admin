@@ -544,9 +544,12 @@ locals {
     TF_VAR_cluster_ci_user_ocid = oci_identity_user.cluster_ci.id
     TF_VAR_dns_ci_user_ocid     = oci_identity_user.dns_ci.id
 
-    # The GitHub OIDC spike's federated service user (oidc-spike.tf), bound by
-    # bootstrap/ the same way. Delete with oidc-spike.tf if the spike is a no-go.
-    TF_VAR_oidc_spike_user_ocid = oci_identity_domains_user.oidc_spike.ocid
+    # The GitHub OIDC spike's domain group (oidc-spike.tf). Unlike the API-key
+    # users above, bootstrap/ binds this one as a Group: OKE presents a federated
+    # service user to Kubernetes under the GitHub `sub` as its username, with the
+    # IAM group OCID in its groups, so the user OCID matches nothing in RBAC.
+    # Delete with oidc-spike.tf if the spike is a no-go.
+    TF_VAR_oidc_spike_group_ocid = oci_identity_domains_group.oidc_spike.ocid
 
     TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
     TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token
