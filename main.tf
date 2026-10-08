@@ -572,12 +572,13 @@ locals {
     TF_VAR_backstage_mcp_token = var.backstage_mcp_token
 
     # hathor (docker-apps apps/hathor/): Mullvad device key + address for its
-    # gluetun sidecar, the URL-path token that is the whole auth on its public
+    # gluetun sidecar (and the server pool it picks from), the URL-path token that is the whole auth on its public
     # endpoint, its Google/Twitch API creds, and the yt-dlp cookies file (already
     # base64, one line). Consumed by apps/'s kubernetes_secret_v1.hathor_*. See
     # their descriptions in variables.tf.
     TF_VAR_hathor_vpn_private_key      = var.hathor_vpn_private_key
     TF_VAR_hathor_vpn_addresses        = var.hathor_vpn_addresses
+    TF_VAR_hathor_vpn_server_hostnames = var.hathor_vpn_server_hostnames
     TF_VAR_hathor_url_token            = var.hathor_url_token
     TF_VAR_hathor_google_api_key       = var.hathor_google_api_key
     TF_VAR_hathor_twitch_client_id     = var.hathor_twitch_client_id
@@ -836,12 +837,13 @@ locals {
     TF_VAR_backstage_mcp_token = var.backstage_mcp_token
 
     # hathor (docker-apps apps/hathor/): Mullvad device key + address for its
-    # gluetun sidecar, the URL-path token that is the whole auth on its public
+    # gluetun sidecar (and the server pool it picks from), the URL-path token that is the whole auth on its public
     # endpoint, its Google/Twitch API creds, and the yt-dlp cookies file (already
     # base64, one line). Consumed by apps/'s kubernetes_secret_v1.hathor_*. See
     # their descriptions in variables.tf.
     TF_VAR_hathor_vpn_private_key      = var.hathor_vpn_private_key
     TF_VAR_hathor_vpn_addresses        = var.hathor_vpn_addresses
+    TF_VAR_hathor_vpn_server_hostnames = var.hathor_vpn_server_hostnames
     TF_VAR_hathor_url_token            = var.hathor_url_token
     TF_VAR_hathor_google_api_key       = var.hathor_google_api_key
     TF_VAR_hathor_twitch_client_id     = var.hathor_twitch_client_id

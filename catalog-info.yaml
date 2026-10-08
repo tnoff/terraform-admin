@@ -120,7 +120,7 @@ metadata:
   description: >-
     WireGuard private key for the Mullvad tunnel hathor's sync CronJob runs through
     its gluetun sidecar (variable hathor_vpn_private_key, with its address in
-    hathor_vpn_addresses). A separate Mullvad device from discord-vpn-private-key.
+    hathor_vpn_addresses and the server pool in hathor_vpn_server_hostnames). A separate Mullvad device from discord-vpn-private-key.
     Created in-cluster as the hathor-vpn-key Secret by terraform/apps.
 spec:
   type: credential

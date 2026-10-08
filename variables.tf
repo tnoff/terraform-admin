@@ -322,6 +322,12 @@ variable "hathor_vpn_addresses" {
   sensitive   = true
 }
 
+variable "hathor_vpn_server_hostnames" {
+  description = "Comma-separated Mullvad WireGuard server hostnames gluetun picks ONE from for the life of the hathor sync pod (gluetun's SERVER_HOSTNAMES). Names must exist in the gluetun image's server list: Mullvad renumbers servers and gluetun only logs a warning for names it does not know, silently shrinking the pool. Kept out of the manifest in docker-apps. Consumed by apps/'s kubernetes_secret_v1.hathor_vpn_key as SERVER_HOSTNAMES, so it rides on hathor_vpn_private_key's rotation stamp."
+  type        = string
+  sensitive   = true
+}
+
 variable "hathor_url_token" {
   description = "Long random URL-path token the hathor nginx server requires in /hathor/<token>/..., which is the only authentication on that public endpoint. Generate one with `openssl rand -hex 32`. It appears in ingress and nginx access logs, so treat a leak as rotating this one value. Consumed by apps/'s kubernetes_secret_v1.hathor_url_token."
   type        = string
