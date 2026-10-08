@@ -126,7 +126,7 @@ spec:
   type: credential
   owner: group:default/admin
   dependencyOf:
-    - component:default/hathor
+    - component:default/hathor-podcasts
 ---
 apiVersion: backstage.io/v1alpha1
 kind: Resource
@@ -140,7 +140,7 @@ spec:
   type: credential
   owner: group:default/admin
   dependencyOf:
-    - component:default/hathor
+    - component:default/hathor-podcasts
 ---
 apiVersion: backstage.io/v1alpha1
 kind: Resource
@@ -155,7 +155,7 @@ spec:
   type: credential
   owner: group:default/admin
   dependencyOf:
-    - component:default/hathor
+    - component:default/hathor-podcasts
 ---
 apiVersion: backstage.io/v1alpha1
 kind: Resource
@@ -170,7 +170,7 @@ spec:
   type: credential
   owner: group:default/admin
   dependencyOf:
-    - component:default/hathor
+    - component:default/hathor-podcasts
 ---
 apiVersion: backstage.io/v1alpha1
 kind: Resource
