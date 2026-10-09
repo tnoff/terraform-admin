@@ -96,6 +96,36 @@ locals {
         cluster_path = false
       }
     }
+
+    # oci/ is the stack the admin key exists for: it manages IAM, networking, OKE,
+    # buckets, vaults and OCIR. The apply identity therefore holds
+    # `manage all-resources`, reachable only by a push-to-main run of
+    # apply-oci.yml. The plan identity is reachable by ANY job (see the header), so
+    # it gets READ on the resource families the stack manages and nothing broader:
+    # not `read all-resources`, which would let a pull request read every state
+    # bucket's objects and vault secrets. It reads the oci state bucket only. If a
+    # plan fails with a 404 on a family, add that family here; OCI reports an
+    # unauthorised read as not found.
+    oci = {
+      plan = {
+        description  = "Federated service user for oci/ PR plans (GitHub pull_request runs): read-only"
+        state_verb   = "read"
+        workspaces   = ["oci"]
+        cluster_path = false
+        tenancy_grants = [
+          "read users", "read groups", "read policies", "read compartments", "read tag-namespaces",
+          "read virtual-network-family", "read cluster-family", "read bastion-family",
+          "read vaults", "read keys", "read repos", "read buckets", "read objectstorage-namespaces",
+        ]
+      }
+      apply = {
+        description    = "Federated service user for oci/ applies (GitHub push-to-main runs): manage all-resources"
+        state_verb     = "manage"
+        workspaces     = ["oci"]
+        cluster_path   = false
+        tenancy_grants = ["manage all-resources"]
+      }
+    }
   }
 
   # One entry per identity, keyed "<stack>-<mode>". The names are unchanged from
@@ -155,6 +185,10 @@ resource "oci_identity_policy" "oidc" {
     [
       for grant in(each.value.cluster_path ? local.cluster_path_grants : []) :
       "Allow group ${oci_identity_domains_group.oidc[each.key].display_name} to ${grant} in compartment ${var.cluster_ci_compartment_name}"
+    ],
+    [
+      for grant in try(each.value.tenancy_grants, []) :
+      "Allow group ${oci_identity_domains_group.oidc[each.key].display_name} to ${grant} in tenancy"
     ],
   )
 
