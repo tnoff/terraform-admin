@@ -48,8 +48,10 @@
 | [oci_identity_api_key.state_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_api_key.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_domains_app.oidc_spike_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
+| [oci_identity_domains_group.dns_oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_group.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_identity_propagation_trust.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_identity_propagation_trust) | resource |
+| [oci_identity_domains_user.dns_oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_domains_user.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_group.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_group.dns_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
@@ -59,6 +61,7 @@
 | [oci_identity_policy.admin_kms_object_storage](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.dns_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
+| [oci_identity_policy.dns_oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.state_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
@@ -171,6 +174,8 @@
 | <a name="input_dns_ci_group_name"></a> [dns\_ci\_group\_name](#input\_dns\_ci\_group\_name) | Name of the group holding the dns CI user's policy | `string` | `"terraform-dns-ci"` | no |
 | <a name="input_dns_ci_state_write_workspaces"></a> [dns\_ci\_state\_write\_workspaces](#input\_dns\_ci\_state\_write\_workspaces) | State buckets the dns/ CI user may read AND write. dns/ reads no other stack's state. | `list(string)` | <pre>[<br/>  "dns"<br/>]</pre> | no |
 | <a name="input_dns_ci_user_name"></a> [dns\_ci\_user\_name](#input\_dns\_ci\_user\_name) | Name of the scoped OCI user the dns/ CI job runs as | `string` | `"terraform-dns-ci"` | no |
+| <a name="input_dns_oidc_apply_write_workspaces"></a> [dns\_oidc\_apply\_write\_workspaces](#input\_dns\_oidc\_apply\_write\_workspaces) | State buckets the dns apply user (push-to-main runs) may READ AND WRITE. | `list(string)` | <pre>[<br/>  "dns"<br/>]</pre> | no |
+| <a name="input_dns_oidc_plan_read_workspaces"></a> [dns\_oidc\_plan\_read\_workspaces](#input\_dns\_oidc\_plan\_read\_workspaces) | State buckets the dns plan user (pull\_request runs) may READ. Read-only on purpose. | `list(string)` | <pre>[<br/>  "dns"<br/>]</pre> | no |
 | <a name="input_eastbay_contact_email"></a> [eastbay\_contact\_email](#input\_eastbay\_contact\_email) | Contact email address shown on the EastbayMassageAndLymph website. Not secret in the confidentiality sense (it's public-facing business info), sealed alongside the site's real secrets historically -- kept sensitive here for consistency with the rest of website-secrets, not because it needs protecting. Enter it plain -- main.tf base64-encodes it before pushing to CI (GitLab's masked-variable check rejects any value containing '@', which every email address has) and apps/'s kubernetes\_secret\_v1.eastbay\_website\_creds base64decode()s it back for the Secret. | `string` | n/a | yes |
 | <a name="input_eastbay_contact_number"></a> [eastbay\_contact\_number](#input\_eastbay\_contact\_number) | Contact phone number shown on the EastbayMassageAndLymph website. Same non-secret-but-bundled reasoning as eastbay\_contact\_email. Enter it plain -- main.tf base64-encodes it before pushing to CI (a formatted phone number routinely fails GitLab's masked-variable charset check) and apps/'s kubernetes\_secret\_v1.eastbay\_website\_creds base64decode()s it back. | `string` | n/a | yes |
 | <a name="input_eastbay_email_host_password"></a> [eastbay\_email\_host\_password](#input\_eastbay\_email\_host\_password) | SMTP password/app-password paired with eastbay\_email\_host\_user. Consumed by apps/'s kubernetes\_secret\_v1.eastbay\_website\_creds. | `string` | n/a | yes |

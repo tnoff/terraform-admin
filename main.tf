@@ -550,6 +550,10 @@ locals {
     # IAM group OCID in its groups, so the user OCID matches nothing in RBAC.
     # Delete with oidc-spike.tf if the spike is a no-go.
     TF_VAR_oidc_spike_group_ocid = oci_identity_domains_group.oidc_spike.ocid
+    # The dns OIDC identities (github-oidc-dns.tf). bootstrap/ binds both groups
+    # to read Services in ingress-nginx; .envrc ONLY, bootstrap never runs in CI.
+    TF_VAR_dns_plan_oidc_group_ocid  = oci_identity_domains_group.dns_oidc["plan"].ocid
+    TF_VAR_dns_apply_oidc_group_ocid = oci_identity_domains_group.dns_oidc["apply"].ocid
 
     TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
     TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token

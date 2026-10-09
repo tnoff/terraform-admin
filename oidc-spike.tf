@@ -50,6 +50,12 @@ variable "oidc_spike_state_read_workspaces" {
 locals {
   oidc_spike_issuer = "https://token.actions.githubusercontent.com"
   oidc_spike_sub    = "${var.oidc_spike_sub_prefix}:ref:refs/heads/${var.oidc_spike_branch}"
+
+  # The two `sub`s the dns identities in github-oidc-dns.tf are chosen by. A
+  # pull_request `sub` carries no branch or PR number, so it is the same for
+  # every PR in the repo.
+  oidc_pull_request_sub = "${var.oidc_spike_sub_prefix}:pull_request"
+  oidc_main_push_sub    = "${var.oidc_spike_sub_prefix}:ref:refs/heads/main"
 }
 
 # The identity domain the trust, app and service user live in. The tenancy has a
@@ -136,7 +142,7 @@ resource "oci_identity_domains_identity_propagation_trust" "oidc_spike" {
   idcs_endpoint = local.oidc_spike_domain_endpoint
   schemas       = ["urn:ietf:params:scim:schemas:oracle:idcs:IdentityPropagationTrust"]
   name          = "github-actions-oidc-spike"
-  description   = "Maps one GitHub Actions branch to the spike service user (tnoff/terraform#135)"
+  description   = "Maps GitHub Actions subs to OCI service users: the spike branch, and the dns plan (pull_request) and apply (push to main) users (tnoff/terraform#135)"
   type          = "JWT"
   active        = true
 
@@ -153,6 +159,18 @@ resource "oci_identity_domains_identity_propagation_trust" "oidc_spike" {
   impersonation_service_users {
     rule  = "sub eq ${local.oidc_spike_sub}"
     value = oci_identity_domains_user.oidc_spike.id
+  }
+
+  # dns/ in CI, by who is asking (see github-oidc-dns.tf). Each `sub` maps to
+  # exactly one user; anything unmatched is refused.
+  impersonation_service_users {
+    rule  = "sub eq ${local.oidc_pull_request_sub}"
+    value = oci_identity_domains_user.dns_oidc["plan"].id
+  }
+
+  impersonation_service_users {
+    rule  = "sub eq ${local.oidc_main_push_sub}"
+    value = oci_identity_domains_user.dns_oidc["apply"].id
   }
 }
 
