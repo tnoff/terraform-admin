@@ -125,6 +125,7 @@ metadata:
 spec:
   type: credential
   owner: group:default/admin
+  system: hathor
   dependencyOf:
     - component:default/hathor-podcasts
 ---
@@ -139,6 +140,7 @@ metadata:
 spec:
   type: credential
   owner: group:default/admin
+  system: hathor
   dependencyOf:
     - component:default/hathor-podcasts
 ---
@@ -154,6 +156,7 @@ metadata:
 spec:
   type: credential
   owner: group:default/admin
+  system: hathor
   dependencyOf:
     - component:default/hathor-podcasts
 ---
@@ -169,6 +172,7 @@ metadata:
 spec:
   type: credential
   owner: group:default/admin
+  system: hathor
   dependencyOf:
     - component:default/hathor-podcasts
 ---
