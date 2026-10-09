@@ -78,6 +78,24 @@ locals {
         cluster_path = true
       }
     }
+
+    # discord/ reads no other stack's state and does not touch the cluster, so each
+    # identity gets its own state bucket and nothing else: what terraform-discord-ci
+    # holds today, split by who is asking.
+    discord = {
+      plan = {
+        description  = "Federated service user for discord/ PR plans (GitHub pull_request runs): read-only"
+        state_verb   = "read"
+        workspaces   = ["discord"]
+        cluster_path = false
+      }
+      apply = {
+        description  = "Federated service user for discord/ applies (GitHub push-to-main runs)"
+        state_verb   = "manage"
+        workspaces   = ["discord"]
+        cluster_path = false
+      }
+    }
   }
 
   # One entry per identity, keyed "<stack>-<mode>". The names are unchanged from
