@@ -172,6 +172,18 @@ resource "oci_identity_domains_identity_propagation_trust" "oidc_spike" {
     rule  = "sub eq ${local.oidc_main_push_sub}"
     value = oci_identity_domains_user.dns_oidc["apply"].id
   }
+
+  # Phase 0 experiment (oidc-phase0.tf), appended AFTER the sub rules on purpose.
+  # Both map to users with no permissions at all.
+  impersonation_service_users {
+    rule  = "aud eq ${local.oidc_phase0_aud}"
+    value = oci_identity_domains_user.oidc_phase0["aud"].id
+  }
+
+  impersonation_service_users {
+    rule  = "job_workflow_ref eq ${local.oidc_phase0_jwr}"
+    value = oci_identity_domains_user.oidc_phase0["jwr"].id
+  }
 }
 
 output "oidc_spike_domain_endpoint" {

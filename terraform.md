@@ -52,6 +52,7 @@
 | [oci_identity_domains_group.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_identity_propagation_trust.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_identity_propagation_trust) | resource |
 | [oci_identity_domains_user.dns_oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
+| [oci_identity_domains_user.oidc_phase0](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_domains_user.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_group.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_group.dns_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
