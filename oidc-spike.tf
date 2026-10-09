@@ -142,7 +142,7 @@ resource "oci_identity_domains_identity_propagation_trust" "oidc_spike" {
   idcs_endpoint = local.oidc_spike_domain_endpoint
   schemas       = ["urn:ietf:params:scim:schemas:oracle:idcs:IdentityPropagationTrust"]
   name          = "github-actions-oidc-spike"
-  description   = "Maps GitHub Actions subs to OCI service users: the spike branch, and the dns plan (pull_request) and apply (push to main) users (tnoff/terraform#135)"
+  description   = "Maps GitHub Actions tokens to OCI service users: the spike branch and, per stack, a plan and an apply identity (tnoff/terraform#135)"
   type          = "JWT"
   active        = true
 
@@ -163,26 +163,28 @@ resource "oci_identity_domains_identity_propagation_trust" "oidc_spike" {
 
   # dns/ in CI, by who is asking (see github-oidc-dns.tf). Each `sub` maps to
   # exactly one user; anything unmatched is refused.
+  # dns/ in CI, TRANSITIONAL: the first version selected by `sub`. These map to the
+  # same users as the per-stack rules below, so a token matching both is not an
+  # overlap that matters (same user). Remove once the workflows use the new rules.
   impersonation_service_users {
     rule  = "sub eq ${local.oidc_pull_request_sub}"
-    value = oci_identity_domains_user.dns_oidc["plan"].id
+    value = oci_identity_domains_user.oidc["dns-plan"].id
   }
 
   impersonation_service_users {
     rule  = "sub eq ${local.oidc_main_push_sub}"
-    value = oci_identity_domains_user.dns_oidc["apply"].id
+    value = oci_identity_domains_user.oidc["dns-apply"].id
   }
 
-  # Phase 0 experiment (oidc-phase0.tf), appended AFTER the sub rules on purpose.
-  # Both map to users with no permissions at all.
-  impersonation_service_users {
-    rule  = "aud eq ${local.oidc_phase0_aud}"
-    value = oci_identity_domains_user.oidc_phase0["aud"].id
-  }
+  # Per-stack identities (github-oidc.tf): `aud` for plan, `job_workflow_ref` at
+  # main for apply. Read the header there before adding or changing a rule.
+  dynamic "impersonation_service_users" {
+    for_each = local.oidc_identities
 
-  impersonation_service_users {
-    rule  = "job_workflow_ref eq ${local.oidc_phase0_jwr}"
-    value = oci_identity_domains_user.oidc_phase0["jwr"].id
+    content {
+      rule  = impersonation_service_users.value.rule
+      value = oci_identity_domains_user.oidc[impersonation_service_users.key].id
+    }
   }
 }
 
