@@ -51,11 +51,8 @@ locals {
   oidc_spike_issuer = "https://token.actions.githubusercontent.com"
   oidc_spike_sub    = "${var.oidc_spike_sub_prefix}:ref:refs/heads/${var.oidc_spike_branch}"
 
-  # The two `sub`s the dns identities in github-oidc-dns.tf are chosen by. A
-  # pull_request `sub` carries no branch or PR number, so it is the same for
-  # every PR in the repo.
-  oidc_pull_request_sub = "${var.oidc_spike_sub_prefix}:pull_request"
-  oidc_main_push_sub    = "${var.oidc_spike_sub_prefix}:ref:refs/heads/main"
+  # The `sub` of a push to main. Only kept for the one transitional rule below.
+  oidc_main_push_sub = "${var.oidc_spike_sub_prefix}:ref:refs/heads/main"
 }
 
 # The identity domain the trust, app and service user live in. The tenancy has a
@@ -161,16 +158,14 @@ resource "oci_identity_domains_identity_propagation_trust" "oidc_spike" {
     value = oci_identity_domains_user.oidc_spike.id
   }
 
-  # dns/ in CI, by who is asking (see github-oidc-dns.tf). Each `sub` maps to
-  # exactly one user; anything unmatched is refused.
-  # dns/ in CI, TRANSITIONAL: the first version selected by `sub`. These map to the
-  # same users as the per-stack rules below, so a token matching both is not an
-  # overlap that matters (same user). Remove once the workflows use the new rules.
-  impersonation_service_users {
-    rule  = "sub eq ${local.oidc_pull_request_sub}"
-    value = oci_identity_domains_user.oidc["dns-plan"].id
-  }
-
+  # TRANSITIONAL. dns/'s apply used to be selected by `sub`; it is now selected by
+  # the `job_workflow_ref` rule below (github-oidc.tf). This rule maps to the same
+  # user, so a push-to-main token matching both is harmless, and it means a green
+  # `apply:dns` does NOT yet prove the new rule. Remove it on its own once that
+  # rule is the only one, then let the next push to main that triggers apply:dns
+  # run: green proves the new rule alone; a 401 means re-add this one.
+  # (The matching `sub ...:pull_request` rule for plans is gone: plans are
+  # selected by the `aud` rule below, proven live on its own.)
   impersonation_service_users {
     rule  = "sub eq ${local.oidc_main_push_sub}"
     value = oci_identity_domains_user.oidc["dns-apply"].id
