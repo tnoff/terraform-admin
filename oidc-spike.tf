@@ -50,9 +50,6 @@ variable "oidc_spike_state_read_workspaces" {
 locals {
   oidc_spike_issuer = "https://token.actions.githubusercontent.com"
   oidc_spike_sub    = "${var.oidc_spike_sub_prefix}:ref:refs/heads/${var.oidc_spike_branch}"
-
-  # The `sub` of a push to main. Only kept for the one transitional rule below.
-  oidc_main_push_sub = "${var.oidc_spike_sub_prefix}:ref:refs/heads/main"
 }
 
 # The identity domain the trust, app and service user live in. The tenancy has a
@@ -156,19 +153,6 @@ resource "oci_identity_domains_identity_propagation_trust" "oidc_spike" {
   impersonation_service_users {
     rule  = "sub eq ${local.oidc_spike_sub}"
     value = oci_identity_domains_user.oidc_spike.id
-  }
-
-  # TRANSITIONAL. dns/'s apply used to be selected by `sub`; it is now selected by
-  # the `job_workflow_ref` rule below (github-oidc.tf). This rule maps to the same
-  # user, so a push-to-main token matching both is harmless, and it means a green
-  # `apply:dns` does NOT yet prove the new rule. Remove it on its own once that
-  # rule is the only one, then let the next push to main that triggers apply:dns
-  # run: green proves the new rule alone; a 401 means re-add this one.
-  # (The matching `sub ...:pull_request` rule for plans is gone: plans are
-  # selected by the `aud` rule below, proven live on its own.)
-  impersonation_service_users {
-    rule  = "sub eq ${local.oidc_main_push_sub}"
-    value = oci_identity_domains_user.oidc["dns-apply"].id
   }
 
   # Per-stack identities (github-oidc.tf): `aud` for plan, `job_workflow_ref` at
