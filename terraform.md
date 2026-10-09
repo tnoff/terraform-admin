@@ -48,11 +48,10 @@
 | [oci_identity_api_key.state_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_api_key.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_domains_app.oidc_spike_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
-| [oci_identity_domains_group.dns_oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
+| [oci_identity_domains_group.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_group.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_identity_propagation_trust.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_identity_propagation_trust) | resource |
-| [oci_identity_domains_user.dns_oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
-| [oci_identity_domains_user.oidc_phase0](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
+| [oci_identity_domains_user.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_domains_user.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_group.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_group.dns_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
@@ -62,8 +61,8 @@
 | [oci_identity_policy.admin_kms_object_storage](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.cluster_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.dns_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
-| [oci_identity_policy.dns_oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
+| [oci_identity_policy.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.state_ci](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
@@ -204,6 +203,7 @@
 | <a name="input_mcp_readonly_user_name"></a> [mcp\_readonly\_user\_name](#input\_mcp\_readonly\_user\_name) | Name of the tenancy-wide read-only user backing the local OCI MCP server | `string` | `"mcp-readonly-bot"` | no |
 | <a name="input_oci_region"></a> [oci\_region](#input\_oci\_region) | OCI region | `string` | `"us-ashburn-1"` | no |
 | <a name="input_oci_tenancy_ocid"></a> [oci\_tenancy\_ocid](#input\_oci\_tenancy\_ocid) | OCID of the tenancy (all resources created in root compartment) | `string` | n/a | yes |
+| <a name="input_oidc_github_repo"></a> [oidc\_github\_repo](#input\_oidc\_github\_repo) | GitHub repository (owner/name) whose reusable apply workflows the apply rules are bound to | `string` | `"tnoff/terraform"` | no |
 | <a name="input_oidc_spike_branch"></a> [oidc\_spike\_branch](#input\_oidc\_spike\_branch) | The one branch of the repo behind oidc\_spike\_sub\_prefix whose push runs map to the spike service user | `string` | `"spike/oidc-federation"` | no |
 | <a name="input_oidc_spike_state_read_workspaces"></a> [oidc\_spike\_state\_read\_workspaces](#input\_oidc\_spike\_state\_read\_workspaces) | State buckets the spike service user may READ (not write). Read-only on purpose: it tests whether a plan-only identity can use the OCI backend, lock included. | `list(string)` | <pre>[<br/>  "dns"<br/>]</pre> | no |
 | <a name="input_oidc_spike_sub_prefix"></a> [oidc\_spike\_sub\_prefix](#input\_oidc\_spike\_sub\_prefix) | The `sub` claim prefix of the GitHub repo whose Actions tokens the spike trust accepts. With immutable subjects on it embeds owner and repo IDs; read it from `gh api repos/<owner>/<repo>/actions/oidc/customization/sub` (sub\_claim\_prefix). | `string` | `"repo:tnoff@1326564/terraform@1356736164"` | no |
