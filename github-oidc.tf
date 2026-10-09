@@ -29,6 +29,16 @@
 #
 # apps/ is deliberately not here yet: it reads the secret-bearing oci and discord
 # state, so a PR-reachable identity for it needs the grant decision first.
+#
+# Removing an identity takes TWO applies. Identity Domains refuses to delete a
+# user that a trust rule still points at (DeleteUser returned 400 with no
+# message when the Phase 0 users were removed in the same apply as the rules that
+# referenced them), and Terraform does not order the trust's update before the
+# delete of a resource that has left the configuration: it orders destroys after
+# destroys, not after updates. So drop the identity's rule (keep the user) in one
+# apply, then delete the user in the next. If it happens anyway, `terraform apply
+# -target=oci_identity_domains_identity_propagation_trust.oidc_spike` first, then
+# a full apply.
 # ==============================================================================
 
 variable "oidc_github_repo" {
