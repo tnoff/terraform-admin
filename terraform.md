@@ -46,16 +46,13 @@
 | [oci_identity_api_key.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_domains_app.oidc_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
 | [oci_identity_domains_group.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
-| [oci_identity_domains_group.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_identity_propagation_trust.github_actions](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_identity_propagation_trust) | resource |
 | [oci_identity_domains_user.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
-| [oci_identity_domains_user.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_group.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_group.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_policy.admin_kms_object_storage](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
-| [oci_identity_policy.oidc_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_user.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
 | [oci_identity_user.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
@@ -179,7 +176,6 @@
 | <a name="input_oci_region"></a> [oci\_region](#input\_oci\_region) | OCI region | `string` | `"us-ashburn-1"` | no |
 | <a name="input_oci_tenancy_ocid"></a> [oci\_tenancy\_ocid](#input\_oci\_tenancy\_ocid) | OCID of the tenancy (all resources created in root compartment) | `string` | n/a | yes |
 | <a name="input_oidc_github_repo"></a> [oidc\_github\_repo](#input\_oidc\_github\_repo) | GitHub repository (owner/name) whose reusable apply workflows the apply rules are bound to | `string` | `"tnoff/terraform"` | no |
-| <a name="input_oidc_spike_state_read_workspaces"></a> [oidc\_spike\_state\_read\_workspaces](#input\_oidc\_spike\_state\_read\_workspaces) | State buckets the spike service user may READ (not write). | `list(string)` | <pre>[<br/>  "dns"<br/>]</pre> | no |
 | <a name="input_openweather_api_key"></a> [openweather\_api\_key](#input\_openweather\_api\_key) | Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s kubernetes\_secret\_v1.openweather\_api\_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-castro/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord\_bot\_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. See bart\_api\_key below for the same treatment applied to castro/concord's other mirror-api-keys entry. | `string` | n/a | yes |
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | SSH public key for OKE worker nodes | `string` | n/a | yes |
 | <a name="input_state_bucket_prefix"></a> [state\_bucket\_prefix](#input\_state\_bucket\_prefix) | Prefix for state bucket names | `string` | `"terraform-state"` | no |
