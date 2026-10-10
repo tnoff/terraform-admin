@@ -151,10 +151,7 @@ writes the private half to `generated-output/`.
 
 | Key | Resource | Output |
 |---|---|---|
-| `terraform-admin` user | `tls_private_key.terraform_admin` | `generated-output/terraform_admin_private_key.pem`; `OCI_API_KEY_B64` and `OCI_FINGERPRINT` in `.envrc` only (not in CI since tnoff/terraform#135: CI jobs use OIDC or a scoped user) |
-| `terraform-cluster-ci` user | `tls_private_key.cluster_ci` | `CLUSTER_CI_OCI_API_KEY_B64` and `CLUSTER_CI_OCI_FINGERPRINT` in CI only. The user OCID (`CLUSTER_CI_OCI_USER_OCID`, and `TF_VAR_cluster_ci_user_ocid` in `.envrc`) does not change on rotation |
-| `terraform-dns-ci` user | `tls_private_key.dns_ci` | `DNS_CI_OCI_API_KEY_B64` and `DNS_CI_OCI_FINGERPRINT` in CI only. Same shape as `terraform-cluster-ci` |
-| `terraform-infra-ci` and `terraform-discord-ci` users | `tls_private_key.state_ci["infra"]` / `["discord"]` | `INFRA_CI_OCI_*` / `DISCORD_CI_OCI_*` in CI only. Same shape as `terraform-cluster-ci` |
+| `terraform-admin` user | `tls_private_key.terraform_admin` | `generated-output/terraform_admin_private_key.pem`; `OCI_API_KEY_B64` and `OCI_FINGERPRINT` in `.envrc` only (CI holds no OCI key since tnoff/terraform#135: every job signs in with its GitHub OIDC token) |
 | `mcp-readonly-bot` user | `tls_private_key.mcp_readonly` | `generated-output/mcp_readonly_api_key.pem` and a ready-made `mcp_readonly_oci_config` profile |
 
 Rotate with a targeted replace:
@@ -162,10 +159,6 @@ Rotate with a targeted replace:
 ```bash
 terraform apply -replace=tls_private_key.terraform_admin
 terraform apply -replace=tls_private_key.mcp_readonly
-terraform apply -replace=tls_private_key.cluster_ci
-terraform apply -replace=tls_private_key.dns_ci
-terraform apply -replace='tls_private_key.state_ci["infra"]'
-terraform apply -replace='tls_private_key.state_ci["discord"]'
 ```
 
 This is destroy-then-recreate, so there is a short window where the old key is
@@ -179,11 +172,14 @@ gone before the new one is live. For `terraform-admin`:
 4. Verify: `oci iam api-key list --user-id <terraform-admin-user-ocid>` shows
    one fresh key, and a local `bin/tf plan` authenticates.
 
-`terraform-cluster-ci` is the identity `terraform`'s `apps/` and `dns/` jobs use
-(tnoff/terraform#116) and rotates the same way. Replacing its key leaves the
-user OCID alone, so `bootstrap/`'s RBAC binding survives; only the next
-`apply:apps` / `apply:dns` run needs the new `CLUSTER_CI_*` secrets, which the
-same apply pushes.
+The CI identities have no key to rotate: each job exchanges its GitHub OIDC token
+for a one-hour session token (tnoff/terraform#135). The only stored credential on
+that path is the exchange app's client secret (`OIDC_EXCHANGE_CLIENT_SECRET`), which
+is useless without a GitHub token the trust accepts. No rotation procedure has been
+exercised for it. `terraform apply -replace=oci_identity_domains_app.oidc_exchange`
+would recreate the app (new client id and secret, pushed to `terraform`'s Actions
+secrets in the same apply), but the trust lists the app in `oauth_clients`, so
+treat that as untested and re-run the whole pipeline afterwards.
 
 For `mcp-readonly-bot`, afterwards paste the regenerated
 `generated-output/mcp_readonly_oci_config` profile into `~/.oci/config`

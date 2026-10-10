@@ -101,67 +101,13 @@ variable "mcp_readonly_private_key_path" {
 }
 
 # ==============================================================================
-# Cluster CI user -- the identity terraform's apply:apps / apply:dns jobs (and
-# their plan jobs) authenticate as. See tnoff/terraform#116.
+# Cluster path for the federated CI identities (apps and dns; see github-oidc.tf)
 # ==============================================================================
-
-variable "cluster_ci_user_name" {
-  description = "Name of the scoped OCI user the apps/ and dns/ CI jobs run as"
-  type        = string
-  default     = "terraform-cluster-ci"
-}
-
-variable "cluster_ci_group_name" {
-  description = "Name of the group holding the cluster CI user's policy"
-  type        = string
-  default     = "terraform-cluster-ci"
-}
-
-variable "cluster_ci_state_write_workspaces" {
-  description = "State buckets (workspaces) the apps/ CI user may read AND write. Just its own."
-  type        = list(string)
-  default     = ["apps"]
-}
-
-variable "cluster_ci_state_read_workspaces" {
-  description = "State buckets the apps/ CI user may only read, because apps/ renders values from those stacks' outputs through terraform_remote_state. Object storage cannot scope a read to a state file's outputs, so every entry exposes that whole state file; keep it to what apps/ really reads."
-  type        = list(string)
-  # Only the stacks apps/ declares a terraform_remote_state for. infra and
-  # bootstrap came off in tnoff/terraform#129: their states hold deploy tokens,
-  # Actions secret values and the Flux GitHub App key, and apps/ read one
-  # timestamp and one namespace list from them. Do not add a stack back here
-  # without a reason that survives that.
-  default = ["discord", "oci"]
-}
 
 variable "cluster_ci_compartment_name" {
   description = "Name of the compartment holding the OKE cluster and its bastion"
   type        = string
   default     = "apps"
-}
-
-# ==============================================================================
-# DNS CI user -- the identity terraform's apply:dns / plan:dns jobs run as. Split
-# from the apps/ user because dns/ reads no other stack's state, so it needs
-# write on its own bucket and nothing else. See tnoff/terraform#116.
-# ==============================================================================
-
-variable "dns_ci_user_name" {
-  description = "Name of the scoped OCI user the dns/ CI job runs as"
-  type        = string
-  default     = "terraform-dns-ci"
-}
-
-variable "dns_ci_group_name" {
-  description = "Name of the group holding the dns CI user's policy"
-  type        = string
-  default     = "terraform-dns-ci"
-}
-
-variable "dns_ci_state_write_workspaces" {
-  description = "State buckets the dns/ CI user may read AND write. dns/ reads no other stack's state."
-  type        = list(string)
-  default     = ["dns"]
 }
 
 # ==============================================================================
@@ -516,26 +462,3 @@ variable "gitlab_ci_variables_enabled" {
 # else (tnoff/terraform#116). Only the oci/ jobs still need terraform-admin.
 # ==============================================================================
 
-variable "state_ci_users" {
-  description = "Scoped OCI users for CI stacks that need nothing from OCI but their state bucket. Keyed by stack. state_write_workspaces are read and written; state_read_workspaces are read-only, and each one exposes that whole state file, so list only stacks the stack reads through terraform_remote_state."
-  type = map(object({
-    user_name              = string
-    group_name             = string
-    state_write_workspaces = list(string)
-    state_read_workspaces  = list(string)
-  }))
-  default = {
-    infra = {
-      user_name              = "terraform-infra-ci"
-      group_name             = "terraform-infra-ci"
-      state_write_workspaces = ["infra"]
-      state_read_workspaces  = ["oci", "discord"]
-    }
-    discord = {
-      user_name              = "terraform-discord-ci"
-      group_name             = "terraform-discord-ci"
-      state_write_workspaces = ["discord"]
-      state_read_workspaces  = []
-    }
-  }
-}
