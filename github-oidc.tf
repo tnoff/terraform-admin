@@ -97,6 +97,29 @@ locals {
       }
     }
 
+    # infra/ reads the oci and discord stacks through terraform_remote_state (oci's
+    # outputs feed the GitLab/OCIR variables, discord's the CI-alerts webhook), so
+    # both identities also READ those two buckets: what terraform-infra-ci holds today,
+    # split by who is asking. Those states hold secrets (bot keys, webhook URLs); the
+    # plan identity is reachable by any job, which is the exposure the issue accepted
+    # because PR plan jobs already hold terraform-infra-ci's key for the same reads.
+    infra = {
+      plan = {
+        description  = "Federated service user for infra/ PR plans (GitHub pull_request runs): read-only"
+        state_verb   = "read"
+        workspaces   = ["infra"]
+        cluster_path = false
+        read_extra   = ["oci", "discord"]
+      }
+      apply = {
+        description  = "Federated service user for infra/ applies (GitHub push-to-main runs)"
+        state_verb   = "manage"
+        workspaces   = ["infra"]
+        cluster_path = false
+        read_extra   = ["oci", "discord"]
+      }
+    }
+
     # oci/ is the stack the admin key exists for: it manages IAM, networking, OKE,
     # buckets, vaults and OCIR. The apply identity therefore holds
     # `manage all-resources`, reachable only by a push-to-main run of
@@ -185,6 +208,9 @@ resource "oci_identity_policy" "oidc" {
     [
       for grant in(each.value.cluster_path ? local.cluster_path_grants : []) :
       "Allow group ${oci_identity_domains_group.oidc[each.key].display_name} to ${grant} in compartment ${var.cluster_ci_compartment_name}"
+    ],
+    length(try(each.value.read_extra, [])) == 0 ? [] : [
+      "Allow group ${oci_identity_domains_group.oidc[each.key].display_name} to read objects in tenancy where any {${join(", ", [for w in each.value.read_extra : "target.bucket.name = '${var.state_bucket_prefix}-${w}'"])}}",
     ],
     [
       for grant in try(each.value.tenancy_grants, []) :
