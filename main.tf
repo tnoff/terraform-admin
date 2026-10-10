@@ -552,8 +552,10 @@ locals {
     TF_VAR_oidc_spike_group_ocid = oci_identity_domains_group.oidc_spike.ocid
     # The dns OIDC identities (github-oidc-dns.tf). bootstrap/ binds both groups
     # to read Services in ingress-nginx; .envrc ONLY, bootstrap never runs in CI.
-    TF_VAR_dns_plan_oidc_group_ocid  = oci_identity_domains_group.oidc["dns-plan"].ocid
-    TF_VAR_dns_apply_oidc_group_ocid = oci_identity_domains_group.oidc["dns-apply"].ocid
+    TF_VAR_dns_plan_oidc_group_ocid   = oci_identity_domains_group.oidc["dns-plan"].ocid
+    TF_VAR_dns_apply_oidc_group_ocid  = oci_identity_domains_group.oidc["dns-apply"].ocid
+    TF_VAR_apps_plan_oidc_group_ocid  = oci_identity_domains_group.oidc["apps-plan"].ocid
+    TF_VAR_apps_apply_oidc_group_ocid = oci_identity_domains_group.oidc["apps-apply"].ocid
 
     TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
     TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token

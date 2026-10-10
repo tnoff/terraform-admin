@@ -27,9 +27,6 @@
 # is asking. Adding a stack is one entry in local.oidc_stacks, one reusable apply
 # workflow, and (for stacks that reach the cluster) a bootstrap/ RBAC binding.
 #
-# apps/ is deliberately not here yet: it reads the secret-bearing oci and discord
-# state, so a PR-reachable identity for it needs the grant decision first.
-#
 # Removing an identity takes TWO applies. Identity Domains refuses to delete a
 # user that a trust rule still points at (DeleteUser returned 400 with no
 # message when the Phase 0 users were removed in the same apply as the rules that
@@ -116,6 +113,31 @@ locals {
         state_verb   = "manage"
         workspaces   = ["infra"]
         cluster_path = false
+        read_extra   = ["oci", "discord"]
+      }
+    }
+
+    # apps/ renders Secrets and ConfigMaps into the cluster and reads the oci and
+    # discord state. Its cluster permissions are NOT granted here: OKE authorises by
+    # RBAC, bound to these identities' IAM groups in terraform/bootstrap
+    # (operator-applied). The plan group gets read-only roles (get/list Secrets and
+    # ConfigMaps in the namespaces apps/ writes to), the apply group the existing
+    # write tiers. The plan identity is reachable by any job, so a pull request can
+    # read those Secrets: the exposure the issue accepted, because PR plan jobs
+    # already hold terraform-cluster-ci's key, which can read and write them.
+    apps = {
+      plan = {
+        description  = "Federated service user for apps/ PR plans (GitHub pull_request runs): read-only"
+        state_verb   = "read"
+        workspaces   = ["apps"]
+        cluster_path = true
+        read_extra   = ["oci", "discord"]
+      }
+      apply = {
+        description  = "Federated service user for apps/ applies (GitHub push-to-main runs)"
+        state_verb   = "manage"
+        workspaces   = ["apps"]
+        cluster_path = true
         read_extra   = ["oci", "discord"]
       }
     }
