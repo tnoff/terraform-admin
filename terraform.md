@@ -45,13 +45,16 @@
 | [oci_identity_api_key.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_api_key.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_domains_app.oidc_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
+| [oci_identity_domains_group.ocir_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_group.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_identity_propagation_trust.github_actions](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_identity_propagation_trust) | resource |
+| [oci_identity_domains_user.ocir_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_domains_user.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_group.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_group.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_policy.admin_kms_object_storage](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
+| [oci_identity_policy.ocir_spike](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_user.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
