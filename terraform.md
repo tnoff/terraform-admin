@@ -120,6 +120,7 @@
 | [tls_private_key.terraform_admin](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [gitlab_group.personal](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/data-sources/group) | data source |
 | [oci_identity_domains.default](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_domains) | data source |
+| [oci_identity_domains_identity_propagation_trusts.live](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_domains_identity_propagation_trusts) | data source |
 | [oci_identity_tenancy.current](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_tenancy) | data source |
 | [oci_objectstorage_namespace.this](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/objectstorage_namespace) | data source |
 
