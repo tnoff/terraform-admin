@@ -241,117 +241,22 @@ resource "oci_identity_policy" "admin_kms_object_storage" {
 }
 
 # ==============================================================================
-# IAM Resources - Cluster CI User
+# Cluster path for the federated CI identities
 #
-# The identity for terraform's apply:apps job and its plan job; dns/ has its own
-# user below (tnoff/terraform#116). Until this existed those jobs ran as terraform_admin,
-# which holds `manage all-resources` tenancy-wide and which OKE maps to
-# cluster-admin, so a compromised apps/ or dns/ job could rewrite IAM or touch
-# any workload. This user can do exactly four things:
-#
-#   1. open and delete bastion sessions (the tunnel to the private API); that
-#      includes reading the compute and network resources a session is built on,
-#   2. authenticate to the OKE API (`use clusters`; NOT `manage`, which is what
-#      OKE turns into cluster-admin),
-#   3. read and write the apps/ state bucket,
-#   4. read the state buckets in var.cluster_ci_state_read_workspaces, which
-#      apps/ reads through terraform_remote_state.
-#
-# What it may do INSIDE the cluster is not decided here. It gets no implicit
-# cluster-admin, so tnoff/terraform's bootstrap/ stack binds it to the narrow
-# Secret/ConfigMap/Service ClusterRoles by user OCID. That binding is applied
+# What reaching the private OKE API through the bastion takes, granted to the
+# apps and dns OIDC identities (github-oidc.tf, cluster_path = true) in the
+# cluster compartment. What they may do INSIDE the cluster is not decided here:
+# OKE gives them no implicit cluster-admin (`use clusters`, NOT `manage`, which OKE
+# turns into cluster-admin), so tnoff/terraform's bootstrap/ stack binds their IAM
+# groups to narrow Secret/ConfigMap/Service ClusterRoles. That binding is applied
 # by the operator, never by CI, so CI cannot widen its own access.
 #
-# Known limit: object storage cannot scope reads to a state file's outputs, so
-# `read objects` on a bucket exposes everything in that state file (bot
-# credentials included), so var.cluster_ci_state_read_workspaces should list
-# only stacks whose outputs apps/ really reads. The user still cannot write
-# them, touch IAM, or reach any other tenancy resource.
-# ==============================================================================
-
-resource "tls_private_key" "cluster_ci" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "oci_identity_user" "cluster_ci" {
-  compartment_id = var.oci_tenancy_ocid
-  description    = "Scoped user for terraform's apps/ and dns/ CI jobs: bastion tunnel, OKE API, state buckets"
-  name           = var.cluster_ci_user_name
-
-  freeform_tags = {
-    "Purpose"   = "terraform-cluster-ci"
-    "ManagedBy" = "terraform"
-    "Workspace" = "admin"
-  }
-}
-
-resource "oci_identity_api_key" "cluster_ci" {
-  user_id   = oci_identity_user.cluster_ci.id
-  key_value = tls_private_key.cluster_ci.public_key_pem
-}
-
-resource "oci_identity_group" "cluster_ci" {
-  compartment_id = var.oci_tenancy_ocid
-  description    = "Scoped group for terraform's apps/ and dns/ CI jobs"
-  name           = var.cluster_ci_group_name
-
-  freeform_tags = {
-    "Purpose"   = "terraform-cluster-ci"
-    "ManagedBy" = "terraform"
-    "Workspace" = "admin"
-  }
-}
-
-resource "oci_identity_user_group_membership" "cluster_ci" {
-  group_id = oci_identity_group.cluster_ci.id
-  user_id  = oci_identity_user.cluster_ci.id
-}
-
-resource "oci_identity_policy" "cluster_ci" {
-  compartment_id = var.oci_tenancy_ocid
-  description    = "Scoped policy for terraform's apps/ and dns/ CI jobs"
-  name           = "terraform-cluster-ci-policy"
-
-  statements = [
-    "Allow group ${oci_identity_group.cluster_ci.name} to manage bastion-session in compartment ${var.cluster_ci_compartment_name}",
-    # CreateSession and DeleteSession need BASTION_USE (`use bastion`, which also
-    # covers listing and reading the bastion), and CreateSession reads the
-    # target's compute and network resources. These are the exact permissions in
-    # Oracle's Bastion policy reference, as narrow resource types rather than the
-    # documentation examples' `manage virtual-network-family`.
-    "Allow group ${oci_identity_group.cluster_ci.name} to use bastion in compartment ${var.cluster_ci_compartment_name}",
-    "Allow group ${oci_identity_group.cluster_ci.name} to read instances in compartment ${var.cluster_ci_compartment_name}",
-    "Allow group ${oci_identity_group.cluster_ci.name} to read instance-agent-plugins in compartment ${var.cluster_ci_compartment_name}",
-    "Allow group ${oci_identity_group.cluster_ci.name} to read vnic-attachments in compartment ${var.cluster_ci_compartment_name}",
-    "Allow group ${oci_identity_group.cluster_ci.name} to read vnics in compartment ${var.cluster_ci_compartment_name}",
-    "Allow group ${oci_identity_group.cluster_ci.name} to read subnets in compartment ${var.cluster_ci_compartment_name}",
-    "Allow group ${oci_identity_group.cluster_ci.name} to read vcns in compartment ${var.cluster_ci_compartment_name}",
-    "Allow group ${oci_identity_group.cluster_ci.name} to use clusters in compartment ${var.cluster_ci_compartment_name}",
-    "Allow group ${oci_identity_group.cluster_ci.name} to manage objects in tenancy where any {${join(", ", [for w in var.cluster_ci_state_write_workspaces : "target.bucket.name = '${var.state_bucket_prefix}-${w}'"])}}",
-    "Allow group ${oci_identity_group.cluster_ci.name} to read objects in tenancy where any {${join(", ", [for w in var.cluster_ci_state_read_workspaces : "target.bucket.name = '${var.state_bucket_prefix}-${w}'"])}}",
-  ]
-
-  freeform_tags = {
-    "Purpose"   = "terraform-cluster-ci"
-    "ManagedBy" = "terraform"
-    "Workspace" = "admin"
-  }
-}
-
-# ==============================================================================
-# IAM Resources - DNS CI User
-#
-# The identity for terraform's apply:dns / plan:dns jobs (tnoff/terraform#116).
-# dns/ reads no other stack's state, so unlike the apps/ user this one gets
-# write on the dns state bucket and nothing else beyond the cluster path
-# (bastion session + OKE API; dns/ looks up the ingress-nginx Service). Its
-# in-cluster access is `services` read in ingress-nginx, bound by bootstrap/.
+# The API-key users this section used to create (terraform-cluster-ci, -dns-ci,
+# -infra-ci, -discord-ci) were retired when every CI stack moved to OIDC
+# (tnoff/terraform#135).
 # ==============================================================================
 
 locals {
-  # What reaching the private OKE API through the bastion takes. The same set the
-  # apps/ user holds; see the comment on oci_identity_policy.cluster_ci.
   cluster_path_grants = [
     "manage bastion-session",
     "use bastion",
@@ -363,146 +268,6 @@ locals {
     "read vcns",
     "use clusters",
   ]
-}
-
-resource "tls_private_key" "dns_ci" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "oci_identity_user" "dns_ci" {
-  compartment_id = var.oci_tenancy_ocid
-  description    = "Scoped user for terraform's dns/ CI job: bastion tunnel, OKE API, dns state bucket"
-  name           = var.dns_ci_user_name
-
-  freeform_tags = {
-    "Purpose"   = "terraform-dns-ci"
-    "ManagedBy" = "terraform"
-    "Workspace" = "admin"
-  }
-}
-
-resource "oci_identity_api_key" "dns_ci" {
-  user_id   = oci_identity_user.dns_ci.id
-  key_value = tls_private_key.dns_ci.public_key_pem
-}
-
-resource "oci_identity_group" "dns_ci" {
-  compartment_id = var.oci_tenancy_ocid
-  description    = "Scoped group for terraform's dns/ CI job"
-  name           = var.dns_ci_group_name
-
-  freeform_tags = {
-    "Purpose"   = "terraform-dns-ci"
-    "ManagedBy" = "terraform"
-    "Workspace" = "admin"
-  }
-}
-
-resource "oci_identity_user_group_membership" "dns_ci" {
-  group_id = oci_identity_group.dns_ci.id
-  user_id  = oci_identity_user.dns_ci.id
-}
-
-resource "oci_identity_policy" "dns_ci" {
-  compartment_id = var.oci_tenancy_ocid
-  description    = "Scoped policy for terraform's dns/ CI job"
-  name           = "terraform-dns-ci-policy"
-
-  statements = concat(
-    [
-      for grant in local.cluster_path_grants :
-      "Allow group ${oci_identity_group.dns_ci.name} to ${grant} in compartment ${var.cluster_ci_compartment_name}"
-    ],
-    [
-      "Allow group ${oci_identity_group.dns_ci.name} to manage objects in tenancy where any {${join(", ", [for w in var.dns_ci_state_write_workspaces : "target.bucket.name = '${var.state_bucket_prefix}-${w}'"])}}",
-    ],
-  )
-
-  freeform_tags = {
-    "Purpose"   = "terraform-dns-ci"
-    "ManagedBy" = "terraform"
-    "Workspace" = "admin"
-  }
-}
-
-# ==============================================================================
-# IAM Resources - state-only CI users (infra/ and discord/)
-#
-# Neither stack uses the OCI provider; they authenticated as terraform-admin only
-# to reach their state buckets (infra/ also reads the oci and discord states).
-# Each gets a user with `manage objects` on its own state bucket, `read objects`
-# on the stacks it reads, and nothing else (tnoff/terraform#116). Keyed by stack
-# in var.state_ci_users; the credentials reach CI as INFRA_CI_OCI_* and
-# DISCORD_CI_OCI_*.
-# ==============================================================================
-
-resource "tls_private_key" "state_ci" {
-  for_each  = var.state_ci_users
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "oci_identity_user" "state_ci" {
-  for_each       = var.state_ci_users
-  compartment_id = var.oci_tenancy_ocid
-  description    = "Scoped user for terraform's ${each.key}/ CI job: its state bucket only"
-  name           = each.value.user_name
-
-  freeform_tags = {
-    "Purpose"   = "terraform-${each.key}-ci"
-    "ManagedBy" = "terraform"
-    "Workspace" = "admin"
-  }
-}
-
-resource "oci_identity_api_key" "state_ci" {
-  for_each  = var.state_ci_users
-  user_id   = oci_identity_user.state_ci[each.key].id
-  key_value = tls_private_key.state_ci[each.key].public_key_pem
-}
-
-resource "oci_identity_group" "state_ci" {
-  for_each       = var.state_ci_users
-  compartment_id = var.oci_tenancy_ocid
-  description    = "Scoped group for terraform's ${each.key}/ CI job"
-  name           = each.value.group_name
-
-  freeform_tags = {
-    "Purpose"   = "terraform-${each.key}-ci"
-    "ManagedBy" = "terraform"
-    "Workspace" = "admin"
-  }
-}
-
-resource "oci_identity_user_group_membership" "state_ci" {
-  for_each = var.state_ci_users
-  group_id = oci_identity_group.state_ci[each.key].id
-  user_id  = oci_identity_user.state_ci[each.key].id
-}
-
-resource "oci_identity_policy" "state_ci" {
-  for_each       = var.state_ci_users
-  compartment_id = var.oci_tenancy_ocid
-  description    = "Scoped policy for terraform's ${each.key}/ CI job: state buckets only"
-  name           = "terraform-${each.key}-ci-policy"
-
-  statements = concat(
-    [
-      "Allow group ${oci_identity_group.state_ci[each.key].name} to manage objects in tenancy where any {${join(", ", [for w in each.value.state_write_workspaces : "target.bucket.name = '${var.state_bucket_prefix}-${w}'"])}}",
-    ],
-    # An empty `any {}` is invalid, so a stack that reads no other state gets no
-    # read statement at all.
-    length(each.value.state_read_workspaces) == 0 ? [] : [
-      "Allow group ${oci_identity_group.state_ci[each.key].name} to read objects in tenancy where any {${join(", ", [for w in each.value.state_read_workspaces : "target.bucket.name = '${var.state_bucket_prefix}-${w}'"])}}",
-    ],
-  )
-
-  freeform_tags = {
-    "Purpose"   = "terraform-${each.key}-ci"
-    "ManagedBy" = "terraform"
-    "Workspace" = "admin"
-  }
 }
 
 # ==============================================================================
@@ -539,18 +304,7 @@ locals {
     TF_VAR_oci_fingerprint  = oci_identity_api_key.terraform_admin.fingerprint
     TF_VAR_oci_api_key_b64  = base64encode(tls_private_key.terraform_admin.private_key_pem)
 
-    # bootstrap/ binds this user to its narrow ClusterRoles by OCID. .envrc ONLY:
-    # bootstrap is operator-applied and never runs in CI.
-    TF_VAR_cluster_ci_user_ocid = oci_identity_user.cluster_ci.id
-    TF_VAR_dns_ci_user_ocid     = oci_identity_user.dns_ci.id
-
-    # The GitHub OIDC spike's domain group (oidc-spike.tf). Unlike the API-key
-    # users above, bootstrap/ binds this one as a Group: OKE presents a federated
-    # service user to Kubernetes under the GitHub `sub` as its username, with the
-    # IAM group OCID in its groups, so the user OCID matches nothing in RBAC.
-    # Delete with oidc-spike.tf if the spike is a no-go.
-    TF_VAR_oidc_spike_group_ocid = oci_identity_domains_group.oidc_spike.ocid
-    # The dns OIDC identities (github-oidc-dns.tf). bootstrap/ binds both groups
+    # The dns OIDC identities (github-oidc.tf). bootstrap/ binds both groups
     # to read Services in ingress-nginx; .envrc ONLY, bootstrap never runs in CI.
     TF_VAR_dns_plan_oidc_group_ocid   = oci_identity_domains_group.oidc["dns-plan"].ocid
     TF_VAR_dns_apply_oidc_group_ocid  = oci_identity_domains_group.oidc["dns-apply"].ocid
@@ -790,35 +544,13 @@ locals {
 
     TF_VAR_oci_tenancy_ocid = var.oci_tenancy_ocid
 
-    # The scoped identity for the apps/ and dns/ jobs (tnoff/terraform#116).
-    # Deliberately NOT OCI_* / TF_VAR_oci_*: the terragrunt composite action
-    # exports only those prefixes, so these stay out of every job's
-    # environment until a workflow passes them to a step by name.
-    CLUSTER_CI_OCI_USER_OCID   = oci_identity_user.cluster_ci.id
-    CLUSTER_CI_OCI_FINGERPRINT = oci_identity_api_key.cluster_ci.fingerprint
-    CLUSTER_CI_OCI_API_KEY_B64 = base64encode(tls_private_key.cluster_ci.private_key_pem)
-
-    # The dns/ job's own identity (tnoff/terraform#116). Same reasoning.
-    DNS_CI_OCI_USER_OCID   = oci_identity_user.dns_ci.id
-    DNS_CI_OCI_FINGERPRINT = oci_identity_api_key.dns_ci.fingerprint
-    DNS_CI_OCI_API_KEY_B64 = base64encode(tls_private_key.dns_ci.private_key_pem)
-
-    # The infra/ and discord/ jobs' own identities (tnoff/terraform#116).
-    INFRA_CI_OCI_USER_OCID   = oci_identity_user.state_ci["infra"].id
-    INFRA_CI_OCI_FINGERPRINT = oci_identity_api_key.state_ci["infra"].fingerprint
-    INFRA_CI_OCI_API_KEY_B64 = base64encode(tls_private_key.state_ci["infra"].private_key_pem)
-
-    DISCORD_CI_OCI_USER_OCID   = oci_identity_user.state_ci["discord"].id
-    DISCORD_CI_OCI_FINGERPRINT = oci_identity_api_key.state_ci["discord"].fingerprint
-    DISCORD_CI_OCI_API_KEY_B64 = base64encode(tls_private_key.state_ci["discord"].private_key_pem)
-
-    # The GitHub OIDC spike's token-exchange app (tnoff/terraform#135, see
-    # oidc-spike.tf). Not OCI_*-prefixed, for the same reason as the scoped
-    # users above. The secret is only useful together with a GitHub token the
-    # trust accepts. Delete these three with oidc-spike.tf if the spike is a no-go.
-    OIDC_EXCHANGE_DOMAIN_URL    = local.oidc_spike_domain_endpoint
-    OIDC_EXCHANGE_CLIENT_ID     = oci_identity_domains_app.oidc_spike_exchange.name
-    OIDC_EXCHANGE_CLIENT_SECRET = oci_identity_domains_app.oidc_spike_exchange.client_secret
+    # The GitHub OIDC token-exchange app (tnoff/terraform#135, oidc-trust.tf). Not
+    # OCI_*-prefixed, so the terragrunt action does not export it to the job's
+    # environment: the login action takes it as an input. The secret is only useful
+    # together with a GitHub token the trust accepts.
+    OIDC_EXCHANGE_DOMAIN_URL    = local.oidc_domain_endpoint
+    OIDC_EXCHANGE_CLIENT_ID     = oci_identity_domains_app.oidc_exchange.name
+    OIDC_EXCHANGE_CLIENT_SECRET = oci_identity_domains_app.oidc_exchange.client_secret
 
     TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
     TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token

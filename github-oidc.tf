@@ -3,7 +3,7 @@
 #
 # Replaces the stored per-stack API keys with federated service users. Each stack
 # has a PLAN identity (read-only, used by pull_request runs) and an APPLY
-# identity (used by applies on main). The trust (oidc-spike.tf) hands a token the
+# identity (used by applies on main). The trust (oidc-trust.tf) hands a token the
 # user whose rule it matches. Phase 0 measured how, and set the rules below:
 #
 #   plan   aud eq oidc-plan-<stack>
@@ -34,7 +34,7 @@
 # delete of a resource that has left the configuration: it orders destroys after
 # destroys, not after updates. So drop the identity's rule (keep the user) in one
 # apply, then delete the user in the next. If it happens anyway, `terraform apply
-# -target=oci_identity_domains_identity_propagation_trust.oidc_spike` first, then
+# -target=oci_identity_domains_identity_propagation_trust.github_actions` first, then
 # a full apply.
 # ==============================================================================
 
@@ -181,7 +181,7 @@ locals {
         stack = stack
         mode  = mode
         name  = "terraform-${stack}-${mode}-oidc"
-        # The trust rule that selects this identity (see oidc-spike.tf).
+        # The trust rule that selects this identity (see oidc-trust.tf).
         rule = (mode == "plan"
           ? "aud eq oidc-plan-${stack}"
         : "job_workflow_ref eq ${var.oidc_github_repo}/.github/workflows/apply-${stack}.yml@refs/heads/main")
@@ -193,7 +193,7 @@ locals {
 resource "oci_identity_domains_user" "oidc" {
   for_each = local.oidc_identities
 
-  idcs_endpoint = local.oidc_spike_domain_endpoint
+  idcs_endpoint = local.oidc_domain_endpoint
   schemas       = ["urn:ietf:params:scim:schemas:core:2.0:User"]
   user_name     = each.value.name
   description   = each.value.description
@@ -206,7 +206,7 @@ resource "oci_identity_domains_user" "oidc" {
 resource "oci_identity_domains_group" "oidc" {
   for_each = local.oidc_identities
 
-  idcs_endpoint = local.oidc_spike_domain_endpoint
+  idcs_endpoint = local.oidc_domain_endpoint
   schemas       = ["urn:ietf:params:scim:schemas:core:2.0:Group"]
   display_name  = each.value.name
 
