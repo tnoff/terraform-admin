@@ -780,15 +780,13 @@ locals {
   # Map of GitLab CI variables → values, all sourced from admin's own
   # inputs / outputs.
   terraform_ci_vars = {
+    # No admin OCI key here any more (tnoff/terraform#135): every CI job now runs
+    # as a federated (OIDC) identity or a scoped user below. The admin key stays
+    # in .envrc for local operator runs only. The tenancy OCID is not a secret
+    # and the OIDC login needs it to build its session profile.
     OCI_TENANCY_OCID = var.oci_tenancy_ocid
-    OCI_USER_OCID    = oci_identity_user.terraform_admin.id
-    OCI_FINGERPRINT  = oci_identity_api_key.terraform_admin.fingerprint
-    OCI_API_KEY_B64  = base64encode(tls_private_key.terraform_admin.private_key_pem)
 
     TF_VAR_oci_tenancy_ocid = var.oci_tenancy_ocid
-    TF_VAR_oci_user_ocid    = oci_identity_user.terraform_admin.id
-    TF_VAR_oci_fingerprint  = oci_identity_api_key.terraform_admin.fingerprint
-    TF_VAR_oci_api_key_b64  = base64encode(tls_private_key.terraform_admin.private_key_pem)
 
     # The scoped identity for the apps/ and dns/ jobs (tnoff/terraform#116).
     # Deliberately NOT OCI_* / TF_VAR_oci_*: the terragrunt composite action

@@ -151,7 +151,7 @@ writes the private half to `generated-output/`.
 
 | Key | Resource | Output |
 |---|---|---|
-| `terraform-admin` user | `tls_private_key.terraform_admin` | `generated-output/terraform_admin_private_key.pem`; `OCI_API_KEY_B64` and `OCI_FINGERPRINT` in CI and `.envrc` |
+| `terraform-admin` user | `tls_private_key.terraform_admin` | `generated-output/terraform_admin_private_key.pem`; `OCI_API_KEY_B64` and `OCI_FINGERPRINT` in `.envrc` only (not in CI since tnoff/terraform#135: CI jobs use OIDC or a scoped user) |
 | `terraform-cluster-ci` user | `tls_private_key.cluster_ci` | `CLUSTER_CI_OCI_API_KEY_B64` and `CLUSTER_CI_OCI_FINGERPRINT` in CI only. The user OCID (`CLUSTER_CI_OCI_USER_OCID`, and `TF_VAR_cluster_ci_user_ocid` in `.envrc`) does not change on rotation |
 | `terraform-dns-ci` user | `tls_private_key.dns_ci` | `DNS_CI_OCI_API_KEY_B64` and `DNS_CI_OCI_FINGERPRINT` in CI only. Same shape as `terraform-cluster-ci` |
 | `terraform-infra-ci` and `terraform-discord-ci` users | `tls_private_key.state_ci["infra"]` / `["discord"]` | `INFRA_CI_OCI_*` / `DISCORD_CI_OCI_*` in CI only. Same shape as `terraform-cluster-ci` |
@@ -172,12 +172,12 @@ This is destroy-then-recreate, so there is a short window where the old key is
 gone before the new one is live. For `terraform-admin`:
 
 1. Make sure no `terraform` CI run is in flight.
-2. Apply. The new fingerprint, PEM and `OCI_*` values are pushed to
-   `terraform`'s Actions secrets in the same apply.
+2. Apply. The new fingerprint and PEM land in `.envrc`; they are no longer
+   pushed to `terraform`'s Actions secrets (tnoff/terraform#135).
 3. Re-source `generated-output/.envrc` in every shell and direnv session
    (`OCI_FINGERPRINT` changed).
 4. Verify: `oci iam api-key list --user-id <terraform-admin-user-ocid>` shows
-   one fresh key, and the next `terraform` CI run authenticates.
+   one fresh key, and a local `bin/tf plan` authenticates.
 
 `terraform-cluster-ci` is the identity `terraform`'s `apps/` and `dns/` jobs use
 (tnoff/terraform#116) and rotates the same way. Replacing its key leaves the
