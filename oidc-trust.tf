@@ -25,7 +25,9 @@
 # Apply any rule change with
 #   terraform apply -replace=oci_identity_domains_identity_propagation_trust.github_actions \
 #                   -target=oci_identity_domains_identity_propagation_trust.github_actions
-# and verify with an admin read of the live rules (see the header of github-oidc.tf).
+# and read the result back: the `check` at the bottom of this file compares the live
+# rules with github-oidc.tf on every plan and at the end of every apply (the data
+# source can return them even though the resource cannot).
 # ==============================================================================
 
 locals {
@@ -117,4 +119,67 @@ moved {
 moved {
   from = oci_identity_domains_identity_propagation_trust.oidc_spike
   to   = oci_identity_domains_identity_propagation_trust.github_actions
+}
+
+# ------------------------------------------------------------------------------
+# Live-rule check
+#
+# Terraform's own resource cannot read the trust's rules back, so `plan` is blind
+# to drift in them (see the header). The DATA SOURCE can, but only when asked for
+# the attribute by name, which is why `attributes` is set: without it the list comes
+# back empty. This compares what the live trust holds with what github-oidc.tf says
+# it should, both the rule strings and the user each one maps to.
+#
+# A `check` block only warns: if the rules are wrong you still need to be able to
+# apply the fix. It prints on every plan and at the end of an apply, so an apply that
+# "succeeded" without changing the rules (what happened when a rule removal was
+# silently ignored) no longer looks clean. `depends_on` defers the read to apply time
+# when the trust itself is changing, so the check sees the result of that apply.
+# ------------------------------------------------------------------------------
+
+data "oci_identity_domains_identity_propagation_trusts" "live" {
+  idcs_endpoint  = local.oidc_domain_endpoint
+  attribute_sets = ["all"]
+  attributes     = "impersonationServiceUsers"
+
+  depends_on = [oci_identity_domains_identity_propagation_trust.github_actions]
+}
+
+locals {
+  oidc_rules_expected = {
+    for k, v in local.oidc_identities : v.rule => oci_identity_domains_user.oidc[k].id
+  }
+
+  # Keyed by the rule string; the value is the user's id. Empty if the trust is not
+  # in the listing at all, which the check reports as every rule missing.
+  oidc_rules_live = merge([
+    for t in data.oci_identity_domains_identity_propagation_trusts.live.identity_propagation_trusts : {
+      for r in t.impersonation_service_users : r.rule => r.value
+    } if t.id == oci_identity_domains_identity_propagation_trust.github_actions.id
+  ]...)
+
+  oidc_rules_missing = sort([for r in keys(local.oidc_rules_expected) : r if !contains(keys(local.oidc_rules_live), r)])
+  oidc_rules_extra   = sort([for r in keys(local.oidc_rules_live) : r if !contains(keys(local.oidc_rules_expected), r)])
+  oidc_rules_wrong_user = sort([
+    for r, u in local.oidc_rules_expected : r
+    if contains(keys(local.oidc_rules_live), r) && local.oidc_rules_live[r] != u
+  ])
+}
+
+check "oidc_trust_rules_match" {
+  assert {
+    condition = (
+      length(local.oidc_rules_missing) == 0 &&
+      length(local.oidc_rules_extra) == 0 &&
+      length(local.oidc_rules_wrong_user) == 0
+    )
+    error_message = <<-EOT
+      The live identity propagation trust does not match github-oidc.tf.
+      missing from the live trust: ${jsonencode(local.oidc_rules_missing)}
+      live but not in the config:  ${jsonencode(local.oidc_rules_extra)}
+      mapped to the wrong user:    ${jsonencode(local.oidc_rules_wrong_user)}
+      Terraform cannot update the rules in place. Fix with:
+        terraform apply -replace=oci_identity_domains_identity_propagation_trust.github_actions -target=oci_identity_domains_identity_propagation_trust.github_actions
+    EOT
+  }
 }
