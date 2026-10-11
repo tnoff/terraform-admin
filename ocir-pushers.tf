@@ -45,6 +45,59 @@ locals {
       github_repo_id = 833243768
       ocir_repos     = ["magic-mirror"]
     }
+
+    # The rest of the image repos (tnoff/terraform#180). ocir_repos are exactly what each
+    # repo's release workflow pushes today, not everything the old bot's policy allowed
+    # (the oke-utilities bot could also manage the retired `oke-security-scanner` repo;
+    # nothing pushes it any more).
+    eastbay = {
+      github_repo    = "eastbay"
+      github_repo_id = 1117196124
+      ocir_repos     = ["eastbay-website"]
+    }
+    personal-website = {
+      github_repo    = "personal-website"
+      github_repo_id = 959009153
+      ocir_repos     = ["personal-website"]
+    }
+    discord-bot = {
+      github_repo    = "discord-bot"
+      github_repo_id = 244822610
+      ocir_repos = [
+        "discord_gateway", "discord_dispatch", "discord_broker",
+        "discord_downloader", "discord_search", "discord_db",
+      ]
+    }
+    database-backup = {
+      github_repo    = "database-backup"
+      github_repo_id = 828254714
+      ocir_repos     = ["database_backup"]
+    }
+    oke-utilities = {
+      github_repo    = "oke-utilities"
+      github_repo_id = 1121397060
+      ocir_repos     = ["oke-scan", "secret_age_tracker", "ocir_cleanup"]
+    }
+    oci-monitoring-exporter = {
+      github_repo    = "oci-monitoring-exporter"
+      github_repo_id = 1271768013
+      ocir_repos     = ["oci-monitoring-exporter"]
+    }
+    hathor = {
+      github_repo    = "hathor"
+      github_repo_id = 76080668
+      ocir_repos     = ["hathor"]
+    }
+    backstage = {
+      github_repo    = "backstage"
+      github_repo_id = 1343312874
+      ocir_repos     = ["backstage"]
+    }
+    playball = {
+      github_repo    = "playball"
+      github_repo_id = 1068811003
+      ocir_repos     = ["playball"]
+    }
   }
 
   ocir_pusher_identities = {
