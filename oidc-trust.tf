@@ -103,12 +103,6 @@ resource "oci_identity_domains_identity_propagation_trust" "github_actions" {
       value = oci_identity_domains_user.ocir_pusher[impersonation_service_users.key].id
     }
   }
-
-  # THROWAWAY (ocir-spike.tf, tnoff/terraform#180): remove with that file.
-  impersonation_service_users {
-    rule  = local.ocir_spike_rule
-    value = oci_identity_domains_user.ocir_spike.id
-  }
 }
 
 output "oidc_domain_endpoint" {
@@ -165,8 +159,6 @@ locals {
   oidc_rules_expected = merge(
     { for k, v in local.oidc_identities : v.rule => oci_identity_domains_user.oidc[k].id },
     { for k, v in local.ocir_pusher_identities : v.rule => oci_identity_domains_user.ocir_pusher[k].id },
-    # THROWAWAY (ocir-spike.tf, tnoff/terraform#180): remove with that file.
-    { (local.ocir_spike_rule) = oci_identity_domains_user.ocir_spike.id },
   )
 
   # Keyed by the rule string; the value is the user's id. Empty if the trust is not
