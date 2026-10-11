@@ -35,7 +35,7 @@ jobs:
   #     outside the App's installation (tox-dev/tox, open-telemetry).
   renovate:
     name: Renovate
-    uses: tnoff/github-workflows/.github/workflows/renovate.yml@adea087c43d56fd13d5b1abf2d5f2ba3e695784d  # renovate-v1.0.0
+    uses: tnoff/github-workflows/.github/workflows/renovate.yml@39f04ec459e78dd5945c134af14b52ead0743ab5  # renovate-v1.1.1
     secrets:
       app_client_id: ${{ secrets.CI_APP_CLIENT_ID }}
       app_private_key: ${{ secrets.CI_APP_PRIVATE_KEY }}
