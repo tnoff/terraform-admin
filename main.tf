@@ -552,6 +552,13 @@ locals {
     OIDC_EXCHANGE_CLIENT_ID     = oci_identity_domains_app.oidc_exchange.name
     OIDC_EXCHANGE_CLIENT_SECRET = oci_identity_domains_app.oidc_exchange.client_secret
 
+    # The same exchange values as TF_VAR_*, for terraform's infra/ stack to hand to the
+    # image repos whose releases push to OCIR without a stored token (ocir-pushers.tf).
+    # Only infra declares these variables, so only infra's job receives them.
+    TF_VAR_oidc_exchange_domain_url    = local.oidc_domain_endpoint
+    TF_VAR_oidc_exchange_client_id     = oci_identity_domains_app.oidc_exchange.name
+    TF_VAR_oidc_exchange_client_secret = oci_identity_domains_app.oidc_exchange.client_secret
+
     TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
     TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token
     TF_VAR_cloudflare_account_id  = var.cloudflare_account_id

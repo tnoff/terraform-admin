@@ -94,6 +94,16 @@ resource "oci_identity_domains_identity_propagation_trust" "github_actions" {
     }
   }
 
+  # Image-repo push identities (ocir-pushers.tf): `sub` of the repo's main branch.
+  dynamic "impersonation_service_users" {
+    for_each = local.ocir_pusher_identities
+
+    content {
+      rule  = impersonation_service_users.value.rule
+      value = oci_identity_domains_user.ocir_pusher[impersonation_service_users.key].id
+    }
+  }
+
   # THROWAWAY (ocir-spike.tf, tnoff/terraform#180): remove with that file.
   impersonation_service_users {
     rule  = local.ocir_spike_rule
@@ -154,6 +164,7 @@ data "oci_identity_domains_identity_propagation_trusts" "live" {
 locals {
   oidc_rules_expected = merge(
     { for k, v in local.oidc_identities : v.rule => oci_identity_domains_user.oidc[k].id },
+    { for k, v in local.ocir_pusher_identities : v.rule => oci_identity_domains_user.ocir_pusher[k].id },
     # THROWAWAY (ocir-spike.tf, tnoff/terraform#180): remove with that file.
     { (local.ocir_spike_rule) = oci_identity_domains_user.ocir_spike.id },
   )
