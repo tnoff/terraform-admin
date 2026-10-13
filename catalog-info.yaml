@@ -220,7 +220,7 @@ spec:
   owner: group:default/admin
   dependencyOf:
     - component:default/mirror-sanjose
-    - component:default/mirror-castro
+    - component:default/mirror-dublin
     - component:default/mirror-concord
 ---
 apiVersion: backstage.io/v1alpha1
@@ -229,14 +229,15 @@ metadata:
   name: bart-api-key
   description: >-
     511.org transit token that MMM-BartTimes authenticates with (variable
-    bart_api_key). Shared by the castro and concord sites; terraform/apps creates the
+    bart_api_key). Shared by the dublin, concord and sanjose sites; terraform/apps creates the
     mirror-bart-key Secret in each.
 spec:
   type: credential
   owner: group:default/admin
   dependencyOf:
-    - component:default/mirror-castro
+    - component:default/mirror-dublin
     - component:default/mirror-concord
+    - component:default/mirror-sanjose
 ---
 apiVersion: backstage.io/v1alpha1
 kind: Resource
