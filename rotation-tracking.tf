@@ -108,9 +108,9 @@ resource "time_static" "openweather_api_key_rotated_at" {
   }
 }
 
-# BART_API_KEY (really a 511.org transit token), shared by mirror-castro and
-# mirror-concord -- reaches the cluster via apps/'s
-# kubernetes_secret_v1.bart_api_key (one resource, for_each over the two
+# BART_API_KEY (really a 511.org transit token), shared by mirror-dublin,
+# mirror-concord and mirror-sanjose -- reaches the cluster via apps/'s
+# kubernetes_secret_v1.bart_api_key (one resource, for_each over those
 # namespaces). Previously hand-sealed alongside OPENWEATHER_API_KEY in each
 # site's mirror-api-keys SealedSecret (docker-apps); new as of 2026-09-21,
 # so its first apply stamps "today" same as any brand-new tfvar (see Caveat
