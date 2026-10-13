@@ -124,6 +124,19 @@ resource "time_static" "bart_api_key_rotated_at" {
   }
 }
 
+# FIVE11_API_KEY, the 511.org transit token for mirror-dublin and mirror-sanjose
+# -- reaches the cluster via apps/'s kubernetes_secret_v1.five11_api_key (one
+# resource, for_each over those namespaces). New, so its first apply stamps
+# "today" same as any brand-new tfvar (see Caveat #2 above).
+resource "terraform_data" "five11_api_key_version" {
+  triggers_replace = [sha256(var.five11_api_key)]
+}
+resource "time_static" "five11_api_key_rotated_at" {
+  triggers = {
+    version = terraform_data.five11_api_key_version.id
+  }
+}
+
 # discord's Spotify/YouTube search creds + VPN tunnel key, and eastbay's
 # website secrets -- new as of 2026-09-21, so their first apply each stamps
 # "today" same as any brand-new tfvar (see Caveat #2 above). See
