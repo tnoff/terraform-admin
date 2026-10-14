@@ -58,6 +58,26 @@ in its CI variables was a standing exposure for no benefit. The map still feeds
 GitHub either way. Set it true (and restore `.gitlab-ci.yml`) to roll back to
 GitLab CI.
 
+### Cluster ServiceAccount trust (`k8s-oidc-trust.tf`)
+
+A second identity propagation trust, separate from the GitHub one in
+`oidc-trust.tf`, with its own exchange app. It lets in-cluster pods swap a
+projected ServiceAccount token for an OCI resource principal token
+(tnoff/terraform#191). Things that bite:
+
+- The trust fetches `k8s_jwks_endpoint_url` on every new exchange. That is the
+  `k8s_oidc_jwks` bucket the jwks-publisher CronJob keeps in sync with the
+  cluster; if the bucket is unreachable, new exchanges fail with a 401.
+- OCI allows one trust per issuer string and the Kubernetes default issuer is
+  the same for every cluster, so per-workload policies in `terraform` `oci/`
+  must match `request.principal.ext_iss` as well as `ext_sub`. The policy
+  variable is `ext_iss`, not `var_ext_iss`.
+- `subject_type` must be `Resource` and propagated claims need the `ext_`
+  prefix (max three); the API otherwise rejects the trust with
+  `invalidAttributes`.
+- Unlike the GitHub trust there are no per-user rules, so the drift problem
+  described in `oidc-trust.tf` does not apply.
+
 ### Why this stack owns `terraform`'s repo settings and secrets
 
 A stack must not own the repository, or the credentials, that its own CI runs

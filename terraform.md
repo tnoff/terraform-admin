@@ -44,10 +44,12 @@
 | [local_sensitive_file.terraform_admin_private_key](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
 | [oci_identity_api_key.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_api_key.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
+| [oci_identity_domains_app.k8s_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
 | [oci_identity_domains_app.oidc_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
 | [oci_identity_domains_group.ocir_pusher](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_group.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_identity_propagation_trust.github_actions](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_identity_propagation_trust) | resource |
+| [oci_identity_domains_identity_propagation_trust.k8s_workloads](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_identity_propagation_trust) | resource |
 | [oci_identity_domains_user.ocir_pusher](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_domains_user.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_group.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
@@ -177,6 +179,7 @@
 | <a name="input_hathor_vpn_private_key"></a> [hathor\_vpn\_private\_key](#input\_hathor\_vpn\_private\_key) | WireGuard private key for the Mullvad tunnel hathor's sync CronJob runs through its gluetun sidecar. Mint a NEW Mullvad device for it (mullvad.net/en/account/wireguard-config) and never reuse discord\_vpn\_private\_key: two peers sharing one key knock each other offline. Self-generated, not vendor-issued -- Mullvad only ever receives the public half. Consumed by apps/'s kubernetes\_secret\_v1.hathor\_vpn\_key. | `string` | n/a | yes |
 | <a name="input_hathor_vpn_server_hostnames"></a> [hathor\_vpn\_server\_hostnames](#input\_hathor\_vpn\_server\_hostnames) | Comma-separated Mullvad WireGuard server hostnames gluetun picks ONE from for the life of the hathor sync pod (gluetun's SERVER\_HOSTNAMES). Names must exist in the gluetun image's server list: Mullvad renumbers servers and gluetun only logs a warning for names it does not know, silently shrinking the pool. Kept out of the manifest in docker-apps. Consumed by apps/'s kubernetes\_secret\_v1.hathor\_vpn\_key as SERVER\_HOSTNAMES, so it rides on hathor\_vpn\_private\_key's rotation stamp. | `string` | n/a | yes |
 | <a name="input_hathor_youtube_cookies_b64"></a> [hathor\_youtube\_cookies\_b64](#input\_hathor\_youtube\_cookies\_b64) | Base64, as ONE line (`base64 -w0 cookies.txt`), of the Netscape-format YouTube cookies.txt yt-dlp reads. A cookies file is multi-line and multi-line env vars are flaky across shells, so it travels base64-encoded and apps/'s kubernetes\_secret\_v1.hathor\_youtube\_cookies base64decode()s it back; the hathor pod mounts it as a FILE. Cookies expire, so expect to replace this one regularly. | `string` | n/a | yes |
+| <a name="input_k8s_jwks_endpoint_url"></a> [k8s\_jwks\_endpoint\_url](#input\_k8s\_jwks\_endpoint\_url) | Public URL of the cluster's hosted JWKS (tnoff/terraform output oidc\_jwks\_url, the k8s\_oidc\_jwks bucket's jwks.json). The trust validates ServiceAccount tokens against it. Sensitive only to keep it out of plan output and the repo: the bucket is public, so it is not a secret. | `string` | n/a | yes |
 | <a name="input_mcp_readonly_group_name"></a> [mcp\_readonly\_group\_name](#input\_mcp\_readonly\_group\_name) | Name of the tenancy-wide read-only group backing the local OCI MCP server | `string` | `"mcp-readonly-bot"` | no |
 | <a name="input_mcp_readonly_private_key_path"></a> [mcp\_readonly\_private\_key\_path](#input\_mcp\_readonly\_private\_key\_path) | Path where the MCP read-only user's API key PEM will be written | `string` | `"generated-output/mcp_readonly_api_key.pem"` | no |
 | <a name="input_mcp_readonly_user_name"></a> [mcp\_readonly\_user\_name](#input\_mcp\_readonly\_user\_name) | Name of the tenancy-wide read-only user backing the local OCI MCP server | `string` | `"mcp-readonly-bot"` | no |
@@ -201,6 +204,8 @@
 
 | Name | Description |
 | ---- | ----------- |
+| <a name="output_k8s_exchange_client_id"></a> [k8s\_exchange\_client\_id](#output\_k8s\_exchange\_client\_id) | Client id of the in-cluster token-exchange app |
+| <a name="output_k8s_exchange_client_secret"></a> [k8s\_exchange\_client\_secret](#output\_k8s\_exchange\_client\_secret) | Client secret of the in-cluster token-exchange app. Not pushed anywhere yet: the sidecar's Secret in tnoff/terraform apps/ is a later change. |
 | <a name="output_oidc_domain_endpoint"></a> [oidc\_domain\_endpoint](#output\_oidc\_domain\_endpoint) | Identity domain URL the token exchange is POSTed to (<this>/oauth2/v1/token) |
 | <a name="output_oidc_exchange_client_id"></a> [oidc\_exchange\_client\_id](#output\_oidc\_exchange\_client\_id) | Client id of the token-exchange app |
 | <a name="output_oidc_exchange_client_secret"></a> [oidc\_exchange\_client\_secret](#output\_oidc\_exchange\_client\_secret) | Client secret of the token-exchange app. Already pushed to tnoff/terraform as OIDC\_EXCHANGE\_CLIENT\_SECRET via terraform\_ci\_vars; this output is for reading it locally. |
