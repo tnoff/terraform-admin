@@ -122,7 +122,7 @@ variable "cluster_ci_compartment_name" {
 # ==============================================================================
 
 variable "cloudflare_api_token" {
-  description = "Cloudflare account API token used by terraform/dns's own cloudflare provider to manage DNS A records (tyler-north.com, castrovalleymirror.com, eastbaymassageandlymph.com). Terraform-only -- never reaches docker-apps or the cluster. See cloudflare_dns01_token for the separate token cert-manager's DNS01 solver uses, and terraform-admin/AGENTS.md's \"Two Discord bot tokens, not one\" for why these split the same way discord_token did: sharing one Cloudflare token between a human-run terraform apply and an in-cluster automated controller was already the pre-existing state (both used the same value, just via different sync paths), and this stops widening the same gap that broke Discord."
+  description = "Cloudflare account API token used by terraform/dns's own cloudflare provider to manage DNS A records (tyler-north.com, eastbaymassageandlymph.com). Terraform-only -- never reaches docker-apps or the cluster. See cloudflare_dns01_token for the separate token cert-manager's DNS01 solver uses, and terraform-admin/AGENTS.md's \"Two Discord bot tokens, not one\" for why these split the same way discord_token did: sharing one Cloudflare token between a human-run terraform apply and an in-cluster automated controller was already the pre-existing state (both used the same value, just via different sync paths), and this stops widening the same gap that broke Discord."
   type        = string
   sensitive   = true
 }
@@ -151,7 +151,7 @@ variable "discord_management_token" {
 }
 
 variable "openweather_api_key" {
-  description = "Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s kubernetes_secret_v1.openweather_api_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-castro/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord_bot_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. See bart_api_key below for the same treatment applied to castro/concord's other mirror-api-keys entry."
+  description = "Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s kubernetes_secret_v1.openweather_api_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-dublin/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord_bot_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. See bart_api_key below for the same treatment applied to the other mirror-api-keys entry."
   type        = string
   sensitive   = true
 }
