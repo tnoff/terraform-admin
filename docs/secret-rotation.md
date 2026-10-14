@@ -56,6 +56,7 @@ consumer column names the stack that renders it.
 | `cloudflare_api_token` | Cloudflare dashboard, DNS provider token | `dns/` provider (CI only) |
 | `cloudflare_dns01_token` | Cloudflare dashboard, separate zone-scoped token | `apps/` -> `cloudflare-api-key` Secret (cert-manager) |
 | `openweather_api_key`, `bart_api_key` | OpenWeather; 511.org | `apps/` -> `mirror-*-key` Secrets in each mirror namespace |
+| `five11_api_key` | 511.org (api.511.org token) | `apps/` -> `mirror-511-key` Secret in mirror-dublin and mirror-sanjose |
 | `discord_spotify_client_id`, `discord_spotify_client_secret`, `discord_youtube_api_key` | Spotify dashboard; Google Cloud console | `apps/` -> `discord-search-creds` |
 | `discord_vpn_private_key` | Self-generated WireGuard key (Mullvad holds only the public half) | `apps/` -> `discord-vpn-key` |
 | `eastbay_contact_email`, `eastbay_contact_number`, `eastbay_email_host_user`, `eastbay_email_host_password`, `eastbay_flask_secret_key` | Business details; SMTP account; `python -c 'import secrets; print(secrets.token_hex(32))'` | `apps/` -> `eastbay-website-creds` |

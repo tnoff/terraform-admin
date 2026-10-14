@@ -162,6 +162,12 @@ variable "bart_api_key" {
   sensitive   = true
 }
 
+variable "five11_api_key" {
+  description = "Free-tier 511.org transit token (api.511.org), read by MMM-BartTimes' node helper as FIVE11_API_KEY for the mirror-dublin and mirror-sanjose boards (VTA and ACE via 511). Pushed to terraform's CI and consumed by apps/'s kubernetes_secret_v1.five11_api_key, which creates the mirror-511-key Secret in each of those namespaces directly. Supplied to the pod through the environment, never the module config, because everything in config is served publicly at /config/. Distinct from bart_api_key, which is the legacy key shared with the BART site."
+  type        = string
+  sensitive   = true
+}
+
 # ==============================================================================
 # discord's Spotify/YouTube search providers + VPN tunnel key, and eastbay's
 # website secrets -- the project's scope widened 2026-09-21 from "match an

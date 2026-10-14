@@ -242,6 +242,21 @@ spec:
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
+  name: five11-api-key
+  description: >-
+    511.org transit token that MMM-BartTimes reads from FIVE11_API_KEY (variable
+    five11_api_key) for the VTA and ACE boards. terraform/apps creates the
+    mirror-511-key Secret in mirror-dublin and mirror-sanjose.
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/mirror-dublin
+    - component:default/mirror-sanjose
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
   name: eastbay-smtp-credentials
   description: >-
     SMTP username and password the Eastbay website uses to send contact-form email
