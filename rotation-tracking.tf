@@ -402,3 +402,16 @@ resource "time_static" "backstage_mcp_token_rotated_at" {
     version = terraform_data.backstage_mcp_token_version.id
   }
 }
+
+# The in-cluster ServiceAccount exchange app's client secret (k8s-oidc-trust.tf,
+# tnoff/terraform#191). Terraform-generated rather than operator-supplied, but it
+# changes whenever the app is replaced, which is exactly a rotation, so the same
+# hash-and-stamp trick tracks it for the Secret in terraform's apps/ stack.
+resource "terraform_data" "k8s_exchange_client_secret_version" {
+  triggers_replace = [sha256(oci_identity_domains_app.k8s_exchange.client_secret)]
+}
+resource "time_static" "k8s_exchange_client_secret_rotated_at" {
+  triggers = {
+    version = terraform_data.k8s_exchange_client_secret_version.id
+  }
+}

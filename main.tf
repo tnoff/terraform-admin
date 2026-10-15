@@ -569,8 +569,9 @@ locals {
     # for terraform's apps/ stack to put in the Secret the rpst_sidecar containers mount.
     # The secret is only useful together with a ServiceAccount token the cluster trust
     # accepts, i.e. from a pod in this cluster.
-    TF_VAR_k8s_exchange_client_id     = oci_identity_domains_app.k8s_exchange.name
-    TF_VAR_k8s_exchange_client_secret = oci_identity_domains_app.k8s_exchange.client_secret
+    TF_VAR_k8s_exchange_client_id                = oci_identity_domains_app.k8s_exchange.name
+    TF_VAR_k8s_exchange_client_secret            = oci_identity_domains_app.k8s_exchange.client_secret
+    TF_VAR_k8s_exchange_client_secret_rotated_at = time_static.k8s_exchange_client_secret_rotated_at.rfc3339
 
     TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
     TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token
