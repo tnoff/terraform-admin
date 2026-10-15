@@ -58,6 +58,33 @@ in its CI variables was a standing exposure for no benefit. The map still feeds
 GitHub either way. Set it true (and restore `.gitlab-ci.yml`) to roll back to
 GitLab CI.
 
+### Cluster ServiceAccount trust (`k8s-oidc-trust.tf`)
+
+A second identity propagation trust, separate from the GitHub one in
+`oidc-trust.tf`, with its own exchange app. It lets in-cluster pods swap a
+projected ServiceAccount token for an OCI resource principal token
+(tnoff/terraform#191). Things that bite:
+
+- The trust fetches the hosted key set on every new exchange. That is the public
+  `k8s_oidc_jwks` bucket in `k8s-jwks-bucket.tf` (us-sanjose-1, hence the
+  `sanjose` provider alias), which the jwks-publisher CronJob keeps in sync with
+  the cluster; if the bucket is unreachable, new exchanges fail with a 401. The
+  bucket lives here, not in `terraform` `oci/`, so the trust and the bucket it
+  depends on are created in one apply. `oci/` still owns the publisher's bot, key,
+  network source and Secret, and its policy names the bucket by string.
+- Anyone who can overwrite `jwks.json` can mint identities. The only writer is the
+  publisher bot (overwrite only, cluster network only); Terraform seeds the object
+  and ignores later changes to it.
+- OCI allows one trust per issuer string and the Kubernetes default issuer is
+  the same for every cluster, so per-workload policies in `terraform` `oci/`
+  must match `request.principal.ext_iss` as well as `ext_sub`. The policy
+  variable is `ext_iss`, not `var_ext_iss`.
+- `subject_type` must be `Resource` and propagated claims need the `ext_`
+  prefix (max three); the API otherwise rejects the trust with
+  `invalidAttributes`.
+- Unlike the GitHub trust there are no per-user rules, so the drift problem
+  described in `oidc-trust.tf` does not apply.
+
 ### Why this stack owns `terraform`'s repo settings and secrets
 
 A stack must not own the repository, or the credentials, that its own CI runs
