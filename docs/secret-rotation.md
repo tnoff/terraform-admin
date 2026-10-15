@@ -182,6 +182,8 @@ would recreate the app (new client id and secret, pushed to `terraform`'s Action
 secrets in the same apply), but the trust lists the app in `oauth_clients`, so
 treat that as untested and re-run the whole pipeline afterwards.
 
+The in-cluster ServiceAccount exchange (tnoff/terraform#191, `k8s-oidc-trust.tf`) works the same way: its app (`k8s-workload-exchange`) has a client secret (`TF_VAR_k8s_exchange_client_secret`), which `terraform` apps/ writes into the Secret the rpst_sidecar containers mount. It is useless without a ServiceAccount token from a pod in this cluster, and no rotation has been exercised for it either: `terraform apply -replace=oci_identity_domains_app.k8s_exchange` recreates the app (new client id and secret), but the `k8s-workloads` trust lists it in `oauth_clients`, so apply the trust in the same run, then restart the sidecars (the Secret is re-read on every exchange, so a restart is only needed if mounted via env).
+
 For `mcp-readonly-bot`, afterwards paste the regenerated
 `generated-output/mcp_readonly_oci_config` profile into `~/.oci/config`
 (and see the local OCI MCP setup in mcp-local).

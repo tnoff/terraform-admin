@@ -76,7 +76,7 @@ locals {
     oke-utilities = {
       github_repo    = "oke-utilities"
       github_repo_id = 1121397060
-      ocir_repos     = ["oke-scan", "secret_age_tracker", "ocir_cleanup", "jwks_publisher"]
+      ocir_repos     = ["oke-scan", "secret_age_tracker", "ocir_cleanup", "jwks_publisher", "rpst_sidecar"]
     }
     oci-monitoring-exporter = {
       github_repo    = "oci-monitoring-exporter"
