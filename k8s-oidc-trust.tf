@@ -35,6 +35,12 @@
 locals {
   # The Kubernetes default `iss` for this cluster's ServiceAccount tokens.
   k8s_oidc_issuer = "https://kubernetes.default.svc.cluster.local"
+
+  # Where the jwks-publisher CronJob keeps the cluster's key set: the public
+  # `k8s_oidc_jwks` bucket (tnoff/terraform oci/), which lives in us-sanjose-1 and
+  # not in this stack's region. The bucket name is not secret; the tenancy's
+  # Object Storage namespace is looked up in main.tf.
+  k8s_jwks_endpoint_url = "https://objectstorage.us-sanjose-1.oraclecloud.com/n/${data.oci_objectstorage_namespace.this.namespace}/b/k8s_oidc_jwks/o/jwks.json"
 }
 
 resource "oci_identity_domains_app" "k8s_exchange" {
@@ -64,7 +70,7 @@ resource "oci_identity_domains_identity_propagation_trust" "k8s_workloads" {
   active        = true
 
   issuer              = local.k8s_oidc_issuer
-  public_key_endpoint = var.k8s_jwks_endpoint_url
+  public_key_endpoint = local.k8s_jwks_endpoint_url
 
   # Only the cluster exchange app may present a ServiceAccount token to this trust.
   oauth_clients = [oci_identity_domains_app.k8s_exchange.name]

@@ -111,16 +111,6 @@ variable "cluster_ci_compartment_name" {
 }
 
 # ==============================================================================
-# Kubernetes ServiceAccount federation (see k8s-oidc-trust.tf)
-# ==============================================================================
-
-variable "k8s_jwks_endpoint_url" {
-  description = "Public URL of the cluster's hosted JWKS (tnoff/terraform output oidc_jwks_url, the k8s_oidc_jwks bucket's jwks.json). The trust validates ServiceAccount tokens against it. Sensitive only to keep it out of plan output and the repo: the bucket is public, so it is not a secret."
-  type        = string
-  sensitive   = true
-}
-
-# ==============================================================================
 # External Secrets — admin/ holds these and pushes them to `terraform`'s
 # GitHub Actions secrets and GitLab CI/CD variables (see terraform_ci_vars in
 # main.tf). Manually rotated by editing this stack's tfvars (or env vars) and
