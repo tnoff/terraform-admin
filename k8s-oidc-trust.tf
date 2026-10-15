@@ -37,10 +37,8 @@ locals {
   k8s_oidc_issuer = "https://kubernetes.default.svc.cluster.local"
 
   # Where the jwks-publisher CronJob keeps the cluster's key set: the public
-  # `k8s_oidc_jwks` bucket (tnoff/terraform oci/), which lives in us-sanjose-1 and
-  # not in this stack's region. The bucket name is not secret; the tenancy's
-  # Object Storage namespace is looked up in main.tf.
-  k8s_jwks_endpoint_url = "https://objectstorage.us-sanjose-1.oraclecloud.com/n/${data.oci_objectstorage_namespace.this.namespace}/b/k8s_oidc_jwks/o/jwks.json"
+  # bucket in k8s-jwks-bucket.tf, in us-sanjose-1 and not in this stack's region.
+  k8s_jwks_endpoint_url = "https://objectstorage.us-sanjose-1.oraclecloud.com/n/${data.oci_objectstorage_namespace.this.namespace}/b/${module.oidc_jwks_bucket.bucket.name}/o/${oci_objectstorage_object.oidc_jwks.object}"
 }
 
 resource "oci_identity_domains_app" "k8s_exchange" {

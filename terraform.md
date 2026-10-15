@@ -19,6 +19,7 @@
 | <a name="provider_gitlab"></a> [gitlab](#provider\_gitlab) | ~> 19.0 |
 | <a name="provider_local"></a> [local](#provider\_local) | ~> 2.0 |
 | <a name="provider_oci"></a> [oci](#provider\_oci) | ~> 9.0 |
+| <a name="provider_oci.sanjose"></a> [oci.sanjose](#provider\_oci.sanjose) | ~> 9.0 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 | <a name="provider_time"></a> [time](#provider\_time) | ~> 0.14 |
 | <a name="provider_tls"></a> [tls](#provider\_tls) | ~> 4.0 |
@@ -27,10 +28,11 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://github.com/tnoff/terraform-modules.git//gitlab/repo | d98c420745d5418765d61f9e8e63fa9736d81782 |
-| <a name="module_terraform_repo"></a> [terraform\_repo](#module\_terraform\_repo) | git::https://github.com/tnoff/terraform-modules.git//github/repo | d98c420745d5418765d61f9e8e63fa9736d81782 |
-| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | d98c420745d5418765d61f9e8e63fa9736d81782 |
-| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault | d98c420745d5418765d61f9e8e63fa9736d81782 |
+| <a name="module_oidc_jwks_bucket"></a> [oidc\_jwks\_bucket](#module\_oidc\_jwks\_bucket) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | 664f06cef4c917f7ada1a7e861059791f2e0819a |
+| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://github.com/tnoff/terraform-modules.git//gitlab/repo | 664f06cef4c917f7ada1a7e861059791f2e0819a |
+| <a name="module_terraform_repo"></a> [terraform\_repo](#module\_terraform\_repo) | git::https://github.com/tnoff/terraform-modules.git//github/repo | 664f06cef4c917f7ada1a7e861059791f2e0819a |
+| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | 664f06cef4c917f7ada1a7e861059791f2e0819a |
+| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault | 664f06cef4c917f7ada1a7e861059791f2e0819a |
 
 ## Resources
 
@@ -63,6 +65,7 @@
 | [oci_identity_user.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
 | [oci_identity_user_group_membership.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user_group_membership) | resource |
 | [oci_identity_user_group_membership.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user_group_membership) | resource |
+| [oci_objectstorage_object.oidc_jwks](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/objectstorage_object) | resource |
 | [terraform_data.backstage_app_private_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.backstage_mcp_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.bart_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
@@ -126,6 +129,7 @@
 | [tls_private_key.mcp_readonly](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [tls_private_key.terraform_admin](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [gitlab_group.personal](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/data-sources/group) | data source |
+| [oci_identity_compartments.apps](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_compartments) | data source |
 | [oci_identity_domains.default](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_domains) | data source |
 | [oci_identity_domains_identity_propagation_trusts.live](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_domains_identity_propagation_trusts) | data source |
 | [oci_identity_tenancy.current](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_tenancy) | data source |
