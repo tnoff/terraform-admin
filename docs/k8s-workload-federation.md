@@ -101,7 +101,8 @@ request.principal.ext_iss = 'https://kubernetes.default.svc.cluster.local'
    the grants to what the workload needs.
 3. **Exchange credentials.** In `terraform` `apps/main.tf`, add the namespace to
    `local.rpst_exchange_namespaces`; that creates the `rpst-exchange-creds` Secret there
-   (the namespace must already exist from `bootstrap/`).
+   (the namespace must already exist from `bootstrap/` and be covered by its tier map, or
+   the apply fails with a Kubernetes 403).
 4. **Pod.** Copy the sidecar wiring from `docker-apps`
    `monitoring/oci-monitoring-exporter/deployment.yaml`: the `rpst` native sidecar, the
    memory-backed `emptyDir`, the projected `serviceAccountToken` volume (audience = the
