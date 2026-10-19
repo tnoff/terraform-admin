@@ -80,6 +80,18 @@ resource "oci_identity_domains_identity_propagation_trust" "k8s_workloads" {
   subject_type           = "Resource"
   impersonating_resource = "k8sworkload"
   claim_propagations     = ["ext_sub", "ext_iss"]
+
+  # Only tokens minted FOR this identity domain may be exchanged. Without this the trust
+  # accepted every token the cluster signs, including the default API-audience token that
+  # each pod has mounted ("api" / https://kubernetes.default.svc) -- measured on #191 with a
+  # policy-less ServiceAccount: all four audiences exchanged. The sidecar's projected token
+  # asks for exactly this audience. Whether the validator matches an array-valued `aud` claim
+  # as expected is verified at apply time (see the PR): if the sidecar's own exchange fails
+  # after the apply, revert this block.
+  claim_validations {
+    name  = "aud"
+    value = local.oidc_domain_endpoint
+  }
 }
 
 output "k8s_exchange_client_id" {
