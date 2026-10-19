@@ -9,6 +9,7 @@ nav:
   - Terraform reference: terraform.md
   - Infrastructure bootstrap: infra-bootstrap.md
   - Secret rotation: secret-rotation.md
+  - In-cluster workload federation: k8s-workload-federation.md
 
 plugins:
   - techdocs-core

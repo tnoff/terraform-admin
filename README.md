@@ -18,6 +18,9 @@ Bootstrap Terraform for the OCI tenancy that hosts everything else: the
 - The `terraform` GitHub repo and every CI credential its workflows use, as
   GitHub Actions secrets and variables (plus a frozen GitLab mirror project with
   the same values as CI variables, kept only as a rollback path)
+- The identity domain trusts for federated identities: GitHub Actions (CI jobs and image pushes) and the OKE cluster's ServiceAccount tokens,
+  with the hosted key set bucket the cluster trust depends on
+  ([in-cluster workload federation](https://github.com/tnoff/terraform-admin/blob/main/docs/k8s-workload-federation.md))
 - Rotation timestamps for each operator-rotated input
   (`rotation-tracking.tf`)
 - Generated files in `generated-output/` (gitignored): the admin API key PEM,
