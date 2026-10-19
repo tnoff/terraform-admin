@@ -13,20 +13,32 @@ bucket the trust fetches signing keys from.
 
 ## How it fits together
 
-```
- kube-apiserver (private)                    OCI Identity Domains (Default)
-   /openid/v1/jwks                             trust "k8s-workloads"
-        |                                          ^   fetches the key set on every
-        | read by                                  |   NEW exchange (not cached)
-        v                                          |
- jwks-publisher CronJob  --overwrite-->  bucket k8s_oidc_jwks / jwks.json  (public read)
- (every 10 min, as a bot)                          ^
-                                                   | verifies the ServiceAccount token's
- pod                                               | signature against that key set
-  |- rpst sidecar --- token + client creds --------+  and returns an RPST
-  |     writes rpst + private.pem to a memory volume
-  '- app container: oci SDK get_resource_principals_signer()  ->  OCI API
-                                    policy: name + ext_sub + ext_iss  ->  allowed or not
+```mermaid
+flowchart TB
+    subgraph cluster["OKE cluster"]
+        api["kube-apiserver (private)<br/>/openid/v1/jwks"]
+        pub["jwks-publisher CronJob<br/>every 10 min, as a bot"]
+        subgraph pod["workload pod"]
+            side["rpst sidecar"]
+            vol[("memory volume<br/>rpst + private.pem")]
+            app["app container<br/>OCI SDK resource principal signer"]
+        end
+    end
+    bucket[("bucket k8s_oidc_jwks<br/>jwks.json, public read")]
+    subgraph oci["OCI"]
+        trust["Identity Domains trust<br/>k8s-workloads"]
+        oapi["OCI API"]
+        policy{{"policy per ServiceAccount<br/>name + ext_sub + ext_iss"}}
+    end
+    api -->|"1. read key set"| pub
+    pub -->|"2. overwrite if changed"| bucket
+    side -->|"3. ServiceAccount token<br/>+ client credentials"| trust
+    trust -.->|"fetches the key set on every<br/>new exchange (not cached)"| bucket
+    trust -->|"4. session token (RPST)"| side
+    side -->|"5. writes"| vol
+    vol -->|"6. re-read on refresh"| app
+    app -->|"7. signed calls"| oapi
+    oapi --- policy
 ```
 
 The API server is private (reachable only through the bastion), which is why the key
