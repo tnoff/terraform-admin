@@ -70,14 +70,20 @@ bounded by the policies (below), but treat the bucket like a CA bundle:
   service gateway, so a NAT IP source would not match). A copy of its key used from
   elsewhere is refused.
 - **Versioned.** Every change is kept, so a bad write can be reverted.
-- **Validated.** The publisher refuses any key that carries private material or is not
-  RSA/RS256, and compares before writing.
+- **Validated and self-healing.** The publisher refuses any key that carries private
+  material or is not RSA/RS256, and compares the hosted file with the live key set on every
+  run, replacing it if they differ. A key added by anyone else therefore survives at most
+  10 minutes, and the `jwks-hosted-key-set-changed` alert (Loki, on the publisher's log line)
+  tells you it happened.
 - **Seeded by Terraform, ignored afterwards.** The object is created here with
   `ignore_changes = all`; the bot only ever overwrites it.
 - **Apply identities.** The `oci/` CI apply identity has `manage all-resources` in the
   tenancy (tnoff/terraform#116), so it could also change the bucket. Narrowing it would
-  make the bucket stronger; until then this stack (applied only locally) is where the
-  trust itself is protected.
+  not create a boundary: that stack manages IAM policies, and anything that can write
+  policies can grant itself more. The identity has no identity-domain admin roles, so it
+  cannot edit the trust, which is applied only locally from this stack. What gates a CI
+  apply is a push to `main` of `tnoff/terraform`; branch protection and environments are
+  not available while that repo is private.
 
 Reading `jwks.json` is harmless: it is public key material.
 
@@ -100,6 +106,11 @@ request.principal.ext_iss = 'https://kubernetes.default.svc.cluster.local'
   workload.
 - **Use a dedicated ServiceAccount per workload, never `default`.** The policy trusts
   whatever pod runs as that ServiceAccount.
+- **Only tokens minted for the identity domain are accepted.** The trust requires the
+  `aud` claim to equal the domain URL (`claim_validations`). Verified: a token with any
+  other audience, including the default `api` token every pod has mounted, is refused
+  with 401 "aud is missing or invalid". The sidecar's projected token requests exactly this
+  audience.
 - **No policy, no access.** A ServiceAccount with no entry in `k8s_workloads` gets a
   token that can do nothing. Some list calls (for example `list_compartments`) are open to
   any principal, so do not use those as a "denied" control.
@@ -142,7 +153,8 @@ replaces the seeded `{"keys":[]}`, every exchange is rejected.
 | Situation | Effect |
 |---|---|
 | Bucket unreachable or `jwks.json` unreadable | New exchanges fail immediately with 401 "Error fetching public key"; tokens already issued keep working until they expire (the sidecar asks for 180 minutes). Recovers within about a second of the bucket coming back. |
-| Publisher CronJob not running | Nothing breaks until the cluster rotates its signing key; then new exchanges for tokens signed with the new key fail. The `kube-cronjob-stale` alert fires only after 9 days, so check the last Job. |
+| Publisher CronJob not running | Nothing breaks until the cluster rotates its signing key; then new exchanges for tokens signed with the new key fail. The `jwks-publisher-stale` alert fires after 1 hour without a successful run (the generic `kube-cronjob-stale` waits 9 days). |
+| Hosted key set differs from the cluster's | The publisher replaces it on its next run (within 10 minutes) and logs the added and removed key ids. The `jwks-hosted-key-set-changed` alert fires: expected once per real signing-key rotation, otherwise something wrote the bucket, so check the object's versions and audit events. |
 | Cluster signing key rotates | The publisher adds the new kid within 10 minutes and logs `added`, `removed`, `kept`. OKE's rotation has not been observed yet; the `jwks-watch` recorder in namespace `jwks-watch` logs the live kids every 12 hours. |
 | Sidecar cannot exchange | It retries forever (2 s up to 120 s, with jitter) and its liveness probe (`--check`) restarts it once the token is within a minute of expiry. The app keeps its last token until then. |
 | Policy missing or not yet propagated | The exchange succeeds but the app's calls are refused (404 `NotAuthorizedOrNotFound`). |
