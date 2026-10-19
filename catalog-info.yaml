@@ -430,3 +430,40 @@ spec:
   owner: group:default/admin
   dependencyOf:
     - component:default/mcp-local
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: k8s-oidc-jwks-bucket
+  description: >-
+    Public Object Storage bucket (us-sanjose-1) holding the cluster's ServiceAccount
+    public key set as jwks.json. OCI Identity Domains fetches it, unauthenticated, on every
+    new token exchange, so it is the trust anchor for in-cluster workload federation:
+    whoever can overwrite it can mint ServiceAccount identities. Written only by the
+    jwks-publisher bot, from the cluster network. Defined by module.oidc_jwks_bucket in
+    k8s-jwks-bucket.tf. See docs/k8s-workload-federation.md.
+spec:
+  type: object-storage
+  owner: group:default/admin
+  system: workload-federation
+  dependencyOf:
+    - component:default/jwks-publisher-cronjob
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: k8s-exchange-client-secret
+  description: >-
+    Client id and secret of the k8s-workload-exchange app (k8s-oidc-trust.tf), which
+    pods authenticate with at the identity domain's token endpoint when they trade a
+    ServiceAccount token for an OCI resource principal token. Reaches terraform's apps/
+    stack as TF_VAR_k8s_exchange_client_id / _client_secret, which creates the
+    rpst-exchange-creds Secret in each namespace that runs a federated workload. Useless
+    without a ServiceAccount token the hosted key set verifies. No rotation procedure has
+    been exercised.
+spec:
+  type: credential
+  owner: group:default/admin
+  system: workload-federation
+  dependencyOf:
+    - component:default/rpst-sidecar
