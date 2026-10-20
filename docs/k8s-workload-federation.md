@@ -136,9 +136,14 @@ request.principal.ext_iss = 'https://kubernetes.default.svc.cluster.local'
    OCI SDK signer with `get_resource_principals_signer()` once (it re-reads the files as the
    sidecar refreshes them). The app must tolerate the files being absent for a few minutes
    after a policy change and retry rather than crash-loop.
-6. **Wait.** New policies and network sources take up to about 10 minutes to take
+6. **Allowlist.** In `docker-apps` `policy/federation-token.rego`, add
+   `<namespace>/<serviceAccount>` to `federated_service_accounts`. Conftest denies any
+   other ServiceAccount that mounts a token whose audience is the identity domain, and
+   any container other than `rpst` that mounts that token volume, so a workload cannot
+   quietly obtain exchangeable tokens.
+7. **Wait.** New policies and network sources take up to about 10 minutes to take
    effect; the sidecar retries with backoff and logs each failure.
-7. **Retire the old key.** Once the workload runs on the new path, remove its user, key,
+8. **Retire the old key.** Once the workload runs on the new path, remove its user, key,
    policy and Secret in a later change.
 
 ## Operating it
@@ -167,6 +172,35 @@ replaces the seeded `{"keys":[]}`, every exchange is rejected.
   [secret rotation](secret-rotation.md)). The sidecar re-reads the mounted Secret on
   every exchange, so a rotated value is picked up without a restart.
 - There is nothing to rotate per workload: sessions are minted fresh every refresh.
+
+## Monitoring
+
+All rules are in `docker-apps` `monitoring/grafana/rules.yaml`; the dashboard is
+**Workload Federation**.
+
+| Alert | Fires when |
+|---|---|
+| `rpst-exchange-failing` | A sidecar logs its 8th consecutive failed exchange (`RPST exchange failed (attempt N)`). Read the line for the HTTP status: 401 is the hosted key set or the trust, 400 the exchange app or its secret. |
+| `rpst-canary-stale` | No successful canary run in 30 minutes. |
+| `oci-exporter-poll-stalled` / `oci-exporter-poll-errors` | The pilot workload stopped polling OCI, or its polls fail. |
+| `jwks-publisher-stale`, `jwks-hosted-key-set-changed` | See "What fails how". |
+| `audit-watch-flagged` | A resource principal was refused (401/403/404) or made an unexpected write. |
+| `audit-watch-stale` | No successful audit-watch run in 30 minutes. |
+
+**Canary.** The `rpst-canary` CronJob in `monitoring` runs `python -m rpst_sidecar --once`
+every 10 minutes under a ServiceAccount with no OCI grants. It proves the whole exchange
+(token, hosted key set, trust, exchange app) works without depending on a real workload.
+
+**Audit watch.** The `audit-watch` CronJob reads the tenancy's Audit log every 10 minutes
+(window 12 minutes, ending 5 minutes ago because events land late) using a resource
+principal granted `read audit-events in tenancy`. It looks only at events whose
+`auth_type` is `resource`, groups them by operation and status, and logs a
+`DENIED` line for 401/403/404 and an `UNEXPECTED_WRITE` line for any non-read other than
+the known OKE writes (`UpdateInternalVnic`, `UpdateNetworkLoadBalancer`, configurable with
+`KNOWN_WRITE_EVENTS`). It never reads `identity.credentials`. Limits: resource-principal
+events carry no principal name, so a finding names the operation, status and source IP,
+not the ServiceAccount (match the IP to a pod); and a denial is only visible if OCI logs
+it, which a test showed it does (as 404).
 
 ## Seeing what a workload did
 
