@@ -65,7 +65,7 @@ locals {
       github_repo_id = 244822610
       ocir_repos = [
         "discord_gateway", "discord_dispatch", "discord_broker",
-        "discord_downloader", "discord_search", "discord_db",
+        "discord_downloader", "discord_search", "discord_db", "discord_commands",
       ]
     }
     database-backup = {
