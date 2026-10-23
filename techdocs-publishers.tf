@@ -12,9 +12,11 @@
 # a second policy. Repos without a push user need their own user, group and trust rule first
 # (not here yet).
 #
-# Two statements per repo, because OCI cannot scope a LIST by object name: the workflow lists the
-# entity's existing objects (inspect, bucket-wide: names, sizes and hashes, not content) and then
-# uploads and deletes stale files (manage, only under default/component/<entity>/).
+# Three statements per repo. `oci os object sync` first does a GetBucket (read buckets, this one
+# bucket; OCI answers the denial with a 404 BucketNotFound, which is how it first showed up in
+# database-backup's run). OCI cannot scope a LIST by object name, so the workflow lists the entity's
+# existing objects with inspect (bucket-wide: names, sizes and hashes, not content) and then
+# uploads and deletes stale files with manage, only under default/component/<entity>/.
 # ==============================================================================
 
 locals {
@@ -36,6 +38,7 @@ resource "oci_identity_policy" "techdocs_publisher" {
   name           = "${local.ocir_pusher_identities[each.key].name}-techdocs-policy"
 
   statements = [
+    "Allow group ${oci_identity_domains_group.ocir_pusher[each.key].display_name} to read buckets in compartment ${var.cluster_ci_compartment_name} where target.bucket.name = '${local.techdocs_bucket_name}'",
     "Allow group ${oci_identity_domains_group.ocir_pusher[each.key].display_name} to inspect objects in compartment ${var.cluster_ci_compartment_name} where target.bucket.name = '${local.techdocs_bucket_name}'",
     "Allow group ${oci_identity_domains_group.ocir_pusher[each.key].display_name} to manage objects in compartment ${var.cluster_ci_compartment_name} where all {target.bucket.name = '${local.techdocs_bucket_name}', target.object.name = 'default/component/${each.value.entity}/*'}",
   ]
