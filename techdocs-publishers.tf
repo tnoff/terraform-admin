@@ -26,7 +26,12 @@ locals {
   # default/component/<entity>/ (lower case), which is what `techdocs-cli publish --entity`
   # wrote and what the backend reads.
   techdocs_publishers = {
-    database-backup = { entity = "database-backup" }
+    database-backup     = { entity = "database-backup" }
+    eastbay             = { entity = "eastbay" }
+    hathor              = { entity = "hathor" }
+    magic-mirror-docker = { entity = "magic-mirror-docker" }
+    personal-website    = { entity = "personal-website" }
+    oke-utilities       = { entity = "oke-scan" } # catalog entity name, not the repo name
   }
 }
 
