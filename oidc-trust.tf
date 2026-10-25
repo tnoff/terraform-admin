@@ -103,6 +103,17 @@ resource "oci_identity_domains_identity_propagation_trust" "github_actions" {
       value = oci_identity_domains_user.ocir_pusher[impersonation_service_users.key].id
     }
   }
+
+  # TechDocs-only publish identities (techdocs-publishers.tf): `sub` of the repo's main branch,
+  # or of its `techdocs` environment for tnoff/terraform.
+  dynamic "impersonation_service_users" {
+    for_each = local.techdocs_only_identities
+
+    content {
+      rule  = impersonation_service_users.value.rule
+      value = oci_identity_domains_user.techdocs_only[impersonation_service_users.key].id
+    }
+  }
 }
 
 output "oidc_domain_endpoint" {
@@ -159,6 +170,7 @@ locals {
   oidc_rules_expected = merge(
     { for k, v in local.oidc_identities : v.rule => oci_identity_domains_user.oidc[k].id },
     { for k, v in local.ocir_pusher_identities : v.rule => oci_identity_domains_user.ocir_pusher[k].id },
+    { for k, v in local.techdocs_only_identities : v.rule => oci_identity_domains_user.techdocs_only[k].id },
   )
 
   # Keyed by the rule string; the value is the user's id. Empty if the trust is not
