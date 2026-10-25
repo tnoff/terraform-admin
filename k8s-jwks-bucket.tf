@@ -35,7 +35,7 @@ data "oci_identity_compartments" "apps" {
 module "oidc_jwks_bucket" {
   # checkov:skip=CKV_OCI_10: Public on purpose. OCI Identity Domains must fetch the key set unauthenticated; the content is public key material, listing is off (ObjectReadWithoutList) and writes are limited to one overwrite-only bot (see the comment above).
   # checkov:skip=CKV_OCI_9: No customer-managed key. The content is public and tiny, and a disabled or deleted KMS key would make the key set unreadable and break every token exchange.
-  source                         = "git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket?ref=600f00ee56f9b088080b0b4ff7f55f72b7cb5976"
+  source                         = "git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket?ref=1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972"
   compartment_ocid               = data.oci_identity_compartments.apps.compartments[0].id
   display_name                   = "k8s_oidc_jwks"
   namespace                      = data.oci_objectstorage_namespace.this.namespace
