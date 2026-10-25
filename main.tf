@@ -15,7 +15,7 @@ data "oci_objectstorage_namespace" "this" {
 # ==============================================================================
 
 module "terraform_state_vault" {
-  source = "git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault?ref=600f00ee56f9b088080b0b4ff7f55f72b7cb5976"
+  source = "git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault?ref=1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972"
 
   compartment_ocid    = var.oci_tenancy_ocid
   display_name        = var.vault_name
@@ -32,7 +32,7 @@ module "terraform_state_vault" {
 # ==============================================================================
 
 module "terraform_state_buckets" {
-  source                          = "git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket?ref=600f00ee56f9b088080b0b4ff7f55f72b7cb5976"
+  source                          = "git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket?ref=1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972"
   for_each                        = toset(var.workspaces)
   compartment_ocid                = var.oci_tenancy_ocid
   kms_key_ocid                    = module.terraform_state_vault.kms_key.id
@@ -824,7 +824,7 @@ locals {
 }
 
 module "terraform_gitlab" {
-  source           = "git::https://github.com/tnoff/terraform-modules.git//gitlab/repo?ref=600f00ee56f9b088080b0b4ff7f55f72b7cb5976"
+  source           = "git::https://github.com/tnoff/terraform-modules.git//gitlab/repo?ref=1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972"
   name             = "terraform"
   namespace_id     = data.gitlab_group.personal.id
   visibility_level = "private"
@@ -1040,7 +1040,7 @@ locals {
 # var.enable_ruleset`, and this repo is private, so no ruleset exists for an
 # actor to bypass. Rulesets on private repos need GitHub Pro.
 module "terraform_repo" {
-  source    = "git::https://github.com/tnoff/terraform-modules.git//github/repo?ref=600f00ee56f9b088080b0b4ff7f55f72b7cb5976"
+  source    = "git::https://github.com/tnoff/terraform-modules.git//github/repo?ref=1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972"
   repo_name = "terraform"
 
   repo_description = "Layer-1 infrastructure: OKE, networking, apps, DNS, Discord and the GitHub/GitLab repo fleet"

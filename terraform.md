@@ -28,11 +28,11 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_oidc_jwks_bucket"></a> [oidc\_jwks\_bucket](#module\_oidc\_jwks\_bucket) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | 600f00ee56f9b088080b0b4ff7f55f72b7cb5976 |
-| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://github.com/tnoff/terraform-modules.git//gitlab/repo | 600f00ee56f9b088080b0b4ff7f55f72b7cb5976 |
-| <a name="module_terraform_repo"></a> [terraform\_repo](#module\_terraform\_repo) | git::https://github.com/tnoff/terraform-modules.git//github/repo | 600f00ee56f9b088080b0b4ff7f55f72b7cb5976 |
-| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | 600f00ee56f9b088080b0b4ff7f55f72b7cb5976 |
-| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault | 600f00ee56f9b088080b0b4ff7f55f72b7cb5976 |
+| <a name="module_oidc_jwks_bucket"></a> [oidc\_jwks\_bucket](#module\_oidc\_jwks\_bucket) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | 1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972 |
+| <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://github.com/tnoff/terraform-modules.git//gitlab/repo | 1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972 |
+| <a name="module_terraform_repo"></a> [terraform\_repo](#module\_terraform\_repo) | git::https://github.com/tnoff/terraform-modules.git//github/repo | 1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972 |
+| <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | 1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972 |
+| <a name="module_terraform_state_vault"></a> [terraform\_state\_vault](#module\_terraform\_state\_vault) | git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault | 1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972 |
 
 ## Resources
 
