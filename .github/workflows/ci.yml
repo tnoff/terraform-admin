@@ -48,11 +48,11 @@ jobs:
   # hosted runners have Docker. Both hooks pass against this repo's HEAD.
   pre-commit:
     name: pre-commit
-    uses: tnoff/github-workflows/.github/workflows/pre-commit.yml@adea087c43d56fd13d5b1abf2d5f2ba3e695784d  # pre-commit-v1.0.0
+    uses: tnoff/github-workflows/.github/workflows/pre-commit.yml@932945598281d1716c7cdca47df80747711eafb0  # pre-commit-v1.0.1
 
   secrets:
     name: Scan for secrets
-    uses: tnoff/github-workflows/.github/workflows/trufflehog.yml@adea087c43d56fd13d5b1abf2d5f2ba3e695784d  # trufflehog-v1.0.0
+    uses: tnoff/github-workflows/.github/workflows/trufflehog.yml@b7790887a768e86127e2b6a29ed06631c947972f  # trufflehog-v1.0.1
 
   # The check this repo was missing. scheduled.yml pins three reusable
   # workflows; a `uses:` whose inputs or secrets stop matching the pinned
