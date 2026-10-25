@@ -985,6 +985,22 @@ resource "github_actions_variable" "terraform" {
   value         = each.value
 }
 
+# The same exchange domain URL and client id, as variables, ADDITIONALLY to the secrets above.
+# terraform's own workflows read them as secrets (the oci-oidc-login action), so they stay secrets;
+# a reusable-workflow call cannot read the `secrets` context in `with:`, and the TechDocs publish
+# (techdocs-publish-oidc.yml) takes both as inputs, so it reads `vars.*`. Neither value is a
+# credential on its own (the client secret is only useful with a token the trust accepts).
+resource "github_actions_variable" "terraform_oidc_exchange" {
+  for_each = {
+    OIDC_EXCHANGE_DOMAIN_URL = local.terraform_ci_vars["OIDC_EXCHANGE_DOMAIN_URL"]
+    OIDC_EXCHANGE_CLIENT_ID  = local.terraform_ci_vars["OIDC_EXCHANGE_CLIENT_ID"]
+  }
+
+  repository    = "terraform"
+  variable_name = each.key
+  value         = each.value
+}
+
 # Issue-triage labels, same set infra/repos.tf applies to every other GitHub
 # repo (local.triage_labels there). Duplicated rather than shared because this
 # stack and infra are separate states. Triage is manual -- the untriaged queue
