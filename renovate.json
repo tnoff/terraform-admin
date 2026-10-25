@@ -31,5 +31,13 @@
       "depNameTemplate": "terraform-docs/terraform-docs",
       "extractVersionTemplate": "^v(?<version>.*)$"
     }
+  ],
+  "packageRules": [
+    {
+      "description": "Hold terraform-modules digest bumps until this stack installs the patched github provider. terraform-modules' github/repo now uses github_actions_repository_fork_pr_contributor_approval, which exists only in the tnoff/terraform-provider-github fork (upstream integrations/terraform-provider-github#3445, PR #3446), not in the registry's integrations/github. The preset's digest manager moves every terraform-modules module block in this repo (github/repo and gitlab/repo) to one SHA, so a bump here fails `terraform validate` with 'Invalid resource type'. tnoff/terraform gets the fork through ci/install-provider-mirror.sh (tnoff/terraform#249); do the same here, then delete this rule. Also delete it if an upstream release ships the resource and the fork is retired.",
+      "matchDatasources": ["git-refs"],
+      "matchPackageNames": ["https://github.com/tnoff/terraform-modules"],
+      "enabled": false
+    }
   ]
 }
