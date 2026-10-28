@@ -231,6 +231,14 @@ during the gap logged 6 or 7 `401 invalid_client` failures and then issued a tok
 5 minutes 40 seconds after the deactivation: the `Apply` run took about a minute and the
 kubelet needed another minute or two to refresh the mounted Secret.
 
+**The alert margin is thin.** `rpst-exchange-failing` fires on a sidecar's 8th consecutive failed
+exchange, which with the sidecar's backoff arrives roughly 3 to 4 minutes after its first failure
+(observed: attempts 4 to 8 at 01:47:45, 01:47:54, 01:48:16, 01:49:06 and 01:50:48, the last one a
+success). A sidecar is only affected if its 90-minute refresh falls inside the gap, so a gap of
+about 6 minutes is often silent but can page. Keep the gap short (have the `apps/` change reviewed
+and ready before step 3), and silence `rpst-exchange-failing` for the window if you want a quiet
+run.
+
 Never run `terraform state show` on these apps: it prints the client secret.
 
 ### Rotating `k8s-workload-exchange`
