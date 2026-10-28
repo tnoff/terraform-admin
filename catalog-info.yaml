@@ -459,11 +459,49 @@ metadata:
     ServiceAccount token for an OCI resource principal token. Reaches terraform's apps/
     stack as TF_VAR_k8s_exchange_client_id / _client_secret, which creates the
     rpst-exchange-creds Secret in each namespace that runs a federated workload. Useless
-    without a ServiceAccount token the hosted key set verifies. No rotation procedure has
-    been exercised.
+    without a ServiceAccount token the hosted key set verifies. Rotated by replacing the app
+    (deactivate first, then terraform apply -replace, then re-render apps/); see
+    docs/secret-rotation.md, Token-exchange apps.
 spec:
   type: credential
   owner: group:default/admin
   system: workload-federation
   dependencyOf:
     - component:default/rpst-sidecar
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: oidc-exchange-client-secret
+  description: >-
+    Client id and secret of the terraform-oidc-spike-exchange app (oidc-trust.tf), which CI jobs
+    present at the identity domain's token endpoint together with a GitHub OIDC token to get an
+    OCI session token. Pushed to tnoff/terraform as the OIDC_EXCHANGE_* Actions secrets. Useless
+    without a GitHub token the github-actions-oidc-spike trust accepts. Rotated by deactivating
+    and replacing the app; see docs/secret-rotation.md, Token-exchange apps (not yet exercised
+    for this app; the in-cluster one was on 2026-10-28).
+spec:
+  type: credential
+  owner: group:default/admin
+  system: ci-federation
+  dependencyOf:
+    - component:default/terraform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: github-actions-oidc-trust
+  description: >-
+    The identity-domain trust (oidc-trust.tf, live name github-actions-oidc-spike) that
+    validates a GitHub Actions OIDC token and propagates it to a federated OCI service user.
+    One rule per caller: terraform's per-stack plan jobs (matched on audience) and apply jobs
+    (matched on workflow ref), each repo that pushes images or publishes TechDocs, and the
+    terraform repo's techdocs environment. Repo rules match an immutable subject that includes
+    the repo id, so a renamed or recreated repo does not inherit access. The rules and users are managed together in oidc-trust.tf; the
+    exchange app that fronts it is oidc-exchange-client-secret.
+spec:
+  type: identity-trust
+  owner: group:default/admin
+  system: ci-federation
+  dependencyOf:
+    - component:default/terraform
