@@ -468,3 +468,20 @@ spec:
   system: workload-federation
   dependencyOf:
     - component:default/rpst-sidecar
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: oidc-exchange-client-secret
+  description: >-
+    Client id and secret of the terraform-oidc-spike-exchange app (oidc-trust.tf), which CI jobs
+    present at the identity domain's token endpoint together with a GitHub OIDC token to get an
+    OCI session token. Pushed to tnoff/terraform as the OIDC_EXCHANGE_* Actions secrets. Useless
+    without a GitHub token the github-actions-oidc-spike trust accepts. Rotated by deactivating
+    and replacing the app; see docs/secret-rotation.md, Token-exchange apps (not yet exercised
+    for this app; the in-cluster one was on 2026-10-28).
+spec:
+  type: credential
+  owner: group:default/admin
+  dependencyOf:
+    - component:default/terraform
