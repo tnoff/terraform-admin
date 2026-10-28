@@ -168,9 +168,12 @@ replaces the seeded `{"keys":[]}`, every exchange is rejected.
 **Rotation.**
 - The publisher bot's API key rotates with the generation-slot mechanism
   ([runbook in `terraform`](https://github.com/tnoff/terraform/blob/main/docs/generation-slot-rotation.md)).
-- The exchange app's client secret has no exercised rotation procedure (see
-  [secret rotation](secret-rotation.md)). The sidecar re-reads the mounted Secret on
-  every exchange, so a rotated value is picked up without a restart.
+- The exchange app's client secret is rotated by deactivating and replacing the app, then
+  re-rendering `rpst-exchange-creds` in CI: [Token-exchange apps](secret-rotation.md#token-exchange-apps).
+  It is not slot-managed, so new exchanges fail between the deactivation and the re-render
+  (a 401 `invalid_client` in the sidecar log); existing tokens last up to 3 hours. The
+  sidecar re-reads the mounted Secret on every exchange, so a rotated value is picked up
+  without a restart, once the kubelet has refreshed the volume.
 - There is nothing to rotate per workload: sessions are minted fresh every refresh.
 
 ## Monitoring

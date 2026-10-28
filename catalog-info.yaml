@@ -459,8 +459,9 @@ metadata:
     ServiceAccount token for an OCI resource principal token. Reaches terraform's apps/
     stack as TF_VAR_k8s_exchange_client_id / _client_secret, which creates the
     rpst-exchange-creds Secret in each namespace that runs a federated workload. Useless
-    without a ServiceAccount token the hosted key set verifies. No rotation procedure has
-    been exercised.
+    without a ServiceAccount token the hosted key set verifies. Rotated by replacing the app
+    (deactivate first, then terraform apply -replace, then re-render apps/); see
+    docs/secret-rotation.md, Token-exchange apps.
 spec:
   type: credential
   owner: group:default/admin
