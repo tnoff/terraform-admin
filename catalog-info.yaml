@@ -483,5 +483,25 @@ metadata:
 spec:
   type: credential
   owner: group:default/admin
+  system: ci-federation
+  dependencyOf:
+    - component:default/terraform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: github-actions-oidc-trust
+  description: >-
+    The identity-domain trust (oidc-trust.tf, live name github-actions-oidc-spike) that
+    validates a GitHub Actions OIDC token and propagates it to a federated OCI service user.
+    One rule per caller: terraform's per-stack plan jobs (matched on audience) and apply jobs
+    (matched on workflow ref), each repo that pushes images or publishes TechDocs, and the
+    terraform repo's techdocs environment. Repo rules match an immutable subject that includes
+    the repo id, so a renamed or recreated repo does not inherit access. The rules and users are managed together in oidc-trust.tf; the
+    exchange app that fronts it is oidc-exchange-client-secret.
+spec:
+  type: identity-trust
+  owner: group:default/admin
+  system: ci-federation
   dependencyOf:
     - component:default/terraform
