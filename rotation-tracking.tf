@@ -415,3 +415,27 @@ resource "time_static" "k8s_exchange_client_secret_rotated_at" {
     version = terraform_data.k8s_exchange_client_secret_version.id
   }
 }
+
+# tnoff-terraform GitHub App private key. Operator-rotated like the other App
+# keys above; it is the credential infra/ manages GitHub with, and the one
+# input in this family that had no stamp, so it never reached the age report.
+resource "terraform_data" "terraform_app_private_key_version" {
+  triggers_replace = [sha256(var.terraform_app_private_key_b64)]
+}
+resource "time_static" "terraform_app_private_key_rotated_at" {
+  triggers = {
+    version = terraform_data.terraform_app_private_key_version.id
+  }
+}
+
+# The GitHub OIDC token-exchange app's client secret (oidc-trust.tf). Same
+# hash-and-stamp trick as k8s_exchange_client_secret above: terraform generates
+# it, and it changes exactly when the app is replaced, which is a rotation.
+resource "terraform_data" "oidc_exchange_client_secret_version" {
+  triggers_replace = [sha256(oci_identity_domains_app.oidc_exchange.client_secret)]
+}
+resource "time_static" "oidc_exchange_client_secret_rotated_at" {
+  triggers = {
+    version = terraform_data.oidc_exchange_client_secret_version.id
+  }
+}
