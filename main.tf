@@ -483,6 +483,8 @@ locals {
     TF_VAR_gitlab_ci_api_key_rotated_at             = time_static.gitlab_ci_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at            = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_terraform_app_private_key_rotated_at     = time_static.terraform_app_private_key_rotated_at.rfc3339
+    TF_VAR_oidc_exchange_client_secret_rotated_at   = time_static.oidc_exchange_client_secret_rotated_at.rfc3339
 
   }
 }
@@ -729,6 +731,8 @@ locals {
     TF_VAR_gitlab_ci_api_key_rotated_at             = time_static.gitlab_ci_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at            = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_terraform_app_private_key_rotated_at     = time_static.terraform_app_private_key_rotated_at.rfc3339
+    TF_VAR_oidc_exchange_client_secret_rotated_at   = time_static.oidc_exchange_client_secret_rotated_at.rfc3339
 
   }
 
@@ -768,6 +772,8 @@ locals {
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
     "TF_VAR_ci_app_private_key_rotated_at",
+    "TF_VAR_terraform_app_private_key_rotated_at",
+    "TF_VAR_oidc_exchange_client_secret_rotated_at",
     # 7 characters. GitLab masking requires at least 8, so masking this is
     # rejected outright -- and an App ID is public to anyone who can see the
     # app, so there is nothing to protect.
@@ -943,6 +949,8 @@ locals {
     "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
     "TF_VAR_ci_app_private_key_rotated_at",
+    "TF_VAR_terraform_app_private_key_rotated_at",
+    "TF_VAR_oidc_exchange_client_secret_rotated_at",
     "TF_VAR_gitlab_ci_service_account_id",
   ]
 
