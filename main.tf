@@ -405,7 +405,6 @@ locals {
     TF_VAR_terraform_app_installation_id = var.terraform_app_installation_id
     TF_VAR_terraform_app_private_key_b64 = var.terraform_app_private_key_b64
     TF_VAR_gitlab_api_key                = var.gitlab_api_key
-    TF_VAR_gitlab_ci_api_key             = var.gitlab_ci_api_key
     TF_VAR_gitlab_ci_service_account_id  = var.gitlab_ci_service_account_id
     TF_VAR_ssh_public_key                = var.ssh_public_key
 
@@ -480,7 +479,6 @@ locals {
     TF_VAR_grafana_admin_user_rotated_at            = time_static.grafana_admin_user_rotated_at.rfc3339
     TF_VAR_grafana_admin_password_rotated_at        = time_static.grafana_admin_password_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                = time_static.gitlab_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_ci_api_key_rotated_at             = time_static.gitlab_ci_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at            = time_static.ci_app_private_key_rotated_at.rfc3339
     TF_VAR_terraform_app_private_key_rotated_at     = time_static.terraform_app_private_key_rotated_at.rfc3339
@@ -669,7 +667,6 @@ locals {
     TF_VAR_terraform_app_installation_id = var.terraform_app_installation_id
     TF_VAR_terraform_app_private_key_b64 = var.terraform_app_private_key_b64
     TF_VAR_gitlab_api_key                = var.gitlab_api_key
-    TF_VAR_gitlab_ci_api_key             = var.gitlab_ci_api_key
     TF_VAR_gitlab_ci_service_account_id  = var.gitlab_ci_service_account_id
     TF_VAR_ssh_public_key                = var.ssh_public_key
 
@@ -728,7 +725,6 @@ locals {
     TF_VAR_grafana_admin_user_rotated_at            = time_static.grafana_admin_user_rotated_at.rfc3339
     TF_VAR_grafana_admin_password_rotated_at        = time_static.grafana_admin_password_rotated_at.rfc3339
     TF_VAR_gitlab_api_key_rotated_at                = time_static.gitlab_api_key_rotated_at.rfc3339
-    TF_VAR_gitlab_ci_api_key_rotated_at             = time_static.gitlab_ci_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at            = time_static.ci_app_private_key_rotated_at.rfc3339
     TF_VAR_terraform_app_private_key_rotated_at     = time_static.terraform_app_private_key_rotated_at.rfc3339
@@ -769,7 +765,6 @@ locals {
     "TF_VAR_grafana_admin_user_rotated_at",
     "TF_VAR_grafana_admin_password_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
-    "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
     "TF_VAR_ci_app_private_key_rotated_at",
     "TF_VAR_terraform_app_private_key_rotated_at",
@@ -946,7 +941,6 @@ locals {
     "TF_VAR_grafana_admin_user_rotated_at",
     "TF_VAR_grafana_admin_password_rotated_at",
     "TF_VAR_gitlab_api_key_rotated_at",
-    "TF_VAR_gitlab_ci_api_key_rotated_at",
     "TF_VAR_ssh_public_key_rotated_at",
     "TF_VAR_ci_app_private_key_rotated_at",
     "TF_VAR_terraform_app_private_key_rotated_at",

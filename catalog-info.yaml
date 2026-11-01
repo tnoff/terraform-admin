@@ -394,15 +394,14 @@ kind: Resource
 metadata:
   name: gitlab-ci-api-key
   description: >-
-    GitLab access token for the tnoff-ci service account (variable gitlab_ci_api_key).
-    Pushed to terraform's CI variables, and written by terraform/infra to the
-    github-workflows Actions secret GITLAB_MIRROR_TOKEN, which fleet-mirror uses to push
-    to GitLab. Operator-rotated; rotation-tracked.
+    GitLab access token for the tnoff-ci service account, used by fleet-mirror to push to
+    GitLab. Minted by terraform/infra (gitlab_group_service_account_access_token.fleet_mirror)
+    and written to the github-workflows Actions secret GITLAB_MIRROR_TOKEN. Not an operator
+    input: it rotates itself when an apply runs in its last 14 days.
 spec:
   type: credential
   owner: group:default/admin
   dependencyOf:
-    - component:default/terraform
     - component:default/fleet-mirror
 ---
 apiVersion: backstage.io/v1alpha1
