@@ -91,7 +91,6 @@
 | [terraform_data.five11_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.flux_app_private_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.gitlab_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
-| [terraform_data.gitlab_ci_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.grafana_admin_password_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.grafana_admin_user_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.hathor_google_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
@@ -124,7 +123,6 @@
 | [time_static.five11_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.flux_app_private_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.gitlab_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
-| [time_static.gitlab_ci_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.grafana_admin_password_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.grafana_admin_user_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.hathor_google_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
@@ -181,7 +179,6 @@
 | <a name="input_flux_app_installation_id"></a> [flux\_app\_installation\_id](#input\_flux\_app\_installation\_id) | Installation ID of the tnoff-flux App on tnoff/docker-apps -- the trailing number in https://github.com/settings/installations/<id>. Not a secret. Flux accepts githubAppInstallationOwner instead, but the ID has been supported since 2.5 and the owner form is newer, so the ID is the safer pin. | `number` | n/a | yes |
 | <a name="input_flux_app_private_key_b64"></a> [flux\_app\_private\_key\_b64](#input\_flux\_app\_private\_key\_b64) | Base64 of the tnoff-flux App private key PEM, single line. Base64 for the same reason ci\_app\_private\_key\_b64 is: a multi-line PEM does not survive a shell round-trip cleanly. Produce with `base64 -w0 tnoff-flux.*.private-key.pem`. Set in admin/terraform.tfvars (gitignored); bootstrap base64decodes it into the Secret. | `string` | n/a | yes |
 | <a name="input_gitlab_api_key"></a> [gitlab\_api\_key](#input\_gitlab\_api\_key) | GitLab personal access token for admin user | `string` | n/a | yes |
-| <a name="input_gitlab_ci_api_key"></a> [gitlab\_ci\_api\_key](#input\_gitlab\_ci\_api\_key) | GitLab access token for the tnoff-ci service account (formerly the tnoff-robot user's PAT, and formerly named gitlab\_bot\_api\_key) | `string` | n/a | yes |
 | <a name="input_gitlab_ci_service_account_id"></a> [gitlab\_ci\_service\_account\_id](#input\_gitlab\_ci\_service\_account\_id) | Numeric service\_account\_id (as a string) of the tnoff-ci GitLab group service account, created manually via the GitLab UI. Not a secret. | `string` | n/a | yes |
 | <a name="input_gitlab_ci_variables_enabled"></a> [gitlab\_ci\_variables\_enabled](#input\_gitlab\_ci\_variables\_enabled) | Write local.terraform\_ci\_vars into the GitLab terraform mirror project's CI variables. Off: the mirror is frozen and runs no pipelines. See the comment above for how to restore. | `bool` | `false` | no |
 | <a name="input_grafana_admin_password"></a> [grafana\_admin\_password](#input\_grafana\_admin\_password) | Grafana's bootstrap admin password, base64-encoded (defensive -- GitLab's masked-variable check has already rejected two other values in this project for containing characters outside its charset; encoding sidesteps the question for whatever the operator picks). Consumed by apps/'s kubernetes\_secret\_v1.grafana\_admin, which base64decode()s it -- previously hand-sealed as grafana-admin's admin-password (docker-apps). Also read by monitoring/grafana-sa-bootstrap's Job. Changing this value does NOT change Grafana's actual live admin password -- see the variable block comment above. | `string` | n/a | yes |

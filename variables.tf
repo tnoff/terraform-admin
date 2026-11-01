@@ -422,12 +422,6 @@ variable "gitlab_api_key" {
   sensitive   = true
 }
 
-variable "gitlab_ci_api_key" {
-  description = "GitLab access token for the tnoff-ci service account (formerly the tnoff-robot user's PAT, and formerly named gitlab_bot_api_key)"
-  type        = string
-  sensitive   = true
-}
-
 variable "gitlab_ci_service_account_id" {
   description = "Numeric service_account_id (as a string) of the tnoff-ci GitLab group service account, created manually via the GitLab UI. Not a secret."
   type        = string
