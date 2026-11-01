@@ -67,7 +67,7 @@ consumer column names the stack that renders it.
 | `hathor_url_token` | `openssl rand -hex 32`. The only auth on the hathor endpoint; rotate on any leak | `apps/` -> `hathor-url-token` |
 | `hathor_google_api_key`, `hathor_twitch_client_id`, `hathor_twitch_client_secret` | Google Cloud console (YouTube Data API v3); dev.twitch.tv console | `apps/` -> `hathor-api-keys` |
 | `hathor_youtube_cookies_b64` | A Netscape-format cookies file stripped to YouTube only (`scripts/filter_cookies.py cookies.txt --b64` in tnoff/docker-apps, which also prints the one-line base64; a raw browser export holds a login for every site). Expires; replace regularly | `apps/` -> `hathor-youtube-cookies` |
-| `gitlab_api_key`, `gitlab_ci_api_key` | GitLab personal access token (admin user); token for the `tnoff-ci` service account | `infra/` GitLab provider and mirror token (CI only) |
+| `gitlab_api_key`, `gitlab_ci_api_key` | GitLab personal access token, scope `api` (admin user); token for the `tnoff-ci` service account, scopes `read_api` and `write_repository` (or `api`) and group Maintainer | `infra/` GitLab provider (CI only); `gitlab_ci_api_key` is also written to the `github-workflows` repo as `GITLAB_MIRROR_TOKEN`, used by [fleet-mirror](https://github.com/tnoff/github-workflows/blob/main/docs/fleet-mirror.md). Verify it with `gh workflow run fleet-mirror.yml --repo tnoff/github-workflows -f dry_run=true` |
 | `ssh_public_key` | `ssh-keygen` | `oci/` OKE node cloud-init |
 
 Procedure:
@@ -81,7 +81,7 @@ Procedure:
    update in place. Then `terraform apply`.
 4. Confirm it landed: `gh secret list --repo tnoff/terraform` shows a fresh
    *updated* time for `TF_VAR_<name>`, and
-   `gh variable get TF_VAR_<name>_rotated_at --repo tnoff/terraform` shows
+   `gh variable list --repo tnoff/terraform --json name,value` (the `TF_VAR_<NAME>_ROTATED_AT` entry; `gh variable get` does not exist) shows
    today (the timestamps are public variables, not secrets).
 5. Land a trivial change under the consuming stack's directory (see
    [How a rotation reaches consumers](#how-a-rotation-reaches-consumers)) and
