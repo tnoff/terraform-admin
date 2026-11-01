@@ -105,9 +105,10 @@ applications. `discord_bot_token` is the live bot's identity and is consumed by
 `discord_management_token` only lets `terraform/discord`'s provider manage
 server structure and never reaches the cluster. Do not point the provider at
 the live bot's token, and do not stop pushing `discord_bot_token` to CI without
-also removing that Secret: they are coupled. The Cloudflare tokens follow the
-same split (`cloudflare_api_token` terraform-only, `cloudflare_dns01_token`
-for the in-cluster cert-manager Secret).
+also removing that Secret: they are coupled. The Cloudflare token is the
+deliberate exception: `cloudflare_api_token` serves both `terraform/dns` and
+the in-cluster cert-manager Secret (merged in #137), so rotate it with the
+`tokens/verify` and TXT-record checks in `docs/secret-rotation.md`.
 
 ## Module sources
 
