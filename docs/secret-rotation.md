@@ -54,8 +54,7 @@ consumer column names the stack that renders it.
 |---|---|---|
 | `discord_bot_token` | Discord developer portal, live application bot | `apps/` -> `discord-bot-token` Secret |
 | `discord_management_token` | Discord developer portal, separate bot application | `discord/` provider (CI only) |
-| `cloudflare_api_token` | Cloudflare dashboard, DNS provider token | `dns/` provider (CI only) |
-| `cloudflare_dns01_token` | Cloudflare dashboard, separate zone-scoped token | `apps/` -> `cloudflare-api-key` Secret (cert-manager) |
+| `cloudflare_api_token` | Cloudflare dashboard, one token with Zone:DNS:Edit + Zone:Zone:Read on both zones | `dns/` provider (CI) and `apps/` -> `cloudflare-api-key` Secret (cert-manager). Verify with `tokens/verify` and a TXT write/delete before applying (see the Caveats below) |
 | `openweather_api_key`, `bart_api_key` | OpenWeather; 511.org | `apps/` -> `mirror-*-key` Secrets in each mirror namespace |
 | `five11_api_key` | 511.org (api.511.org token) | `apps/` -> `mirror-511-key` Secret in mirror-dublin and mirror-sanjose |
 | `discord_spotify_client_id`, `discord_spotify_client_secret`, `discord_youtube_api_key` | Spotify dashboard; Google Cloud console | `apps/` -> `discord-search-creds` |
@@ -101,6 +100,25 @@ Caveats:
 - **`ssh_public_key`** only affects newly created nodes. Existing nodes keep
   the old authorised key until the node pool is cycled (see the node pool cycle
   runbook in the docker-apps TechDocs).
+- **`cloudflare_api_token`** feeds both `terraform/dns` and cert-manager, and
+  Let's Encrypt reuses a validated authorization for about 30 days, so a renewal
+  will not exercise a new token on demand. Before step 3, and again after
+  `apply:apps` and `apply:dns` are green, prove it against both zones. This
+  writes one TXT record and deletes it; `TOKEN` is the new value:
+
+  ```bash
+  curl -s -H "Authorization: Bearer $TOKEN" https://api.cloudflare.com/client/v4/user/tokens/verify | jq '.result.status'   # "active"
+  for Z in tyler-north.com eastbaymassageandlymph.com; do
+    ZONE=$(curl -s -H "Authorization: Bearer $TOKEN" "https://api.cloudflare.com/client/v4/zones?name=$Z" | jq -r '.result[0].id')
+    REC=$(curl -s -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+      "https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records" \
+      --data "{\"type\":\"TXT\",\"name\":\"_token-check.$Z\",\"content\":\"token-check\",\"ttl\":120}" | jq -r '.result.id')
+    curl -s -X DELETE -H "Authorization: Bearer $TOKEN" "https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records/$REC" | jq '.success'   # true
+  done
+  ```
+
+  A failure at the zone step means Zone:Zone:Read is missing; at the record
+  step, Zone:DNS:Edit.
 - **`discord_bot_token` and `discord_management_token`** are two different bot
   applications; never point `terraform/discord` at the live bot's token, and
   never stop pushing `discord_bot_token` to CI (see

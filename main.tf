@@ -311,9 +311,8 @@ locals {
     TF_VAR_apps_plan_oidc_group_ocid  = oci_identity_domains_group.oidc["apps-plan"].ocid
     TF_VAR_apps_apply_oidc_group_ocid = oci_identity_domains_group.oidc["apps-apply"].ocid
 
-    TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
-    TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token
-    TF_VAR_cloudflare_account_id  = var.cloudflare_account_id
+    TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
+    TF_VAR_cloudflare_account_id = var.cloudflare_account_id
 
     # discord_bot_token: back to being pushed, as of the incident on
     # 2026-09-21 -- see its description in variables.tf for why. It is now
@@ -457,7 +456,6 @@ locals {
     TF_VAR_discord_bot_token_rotated_at             = time_static.discord_bot_token_rotated_at.rfc3339
     TF_VAR_discord_management_token_rotated_at      = time_static.discord_management_token_rotated_at.rfc3339
     TF_VAR_cloudflare_api_token_rotated_at          = time_static.cloudflare_api_token_rotated_at.rfc3339
-    TF_VAR_cloudflare_dns01_token_rotated_at        = time_static.cloudflare_dns01_token_rotated_at.rfc3339
     TF_VAR_openweather_api_key_rotated_at           = time_static.openweather_api_key_rotated_at.rfc3339
     TF_VAR_bart_api_key_rotated_at                  = time_static.bart_api_key_rotated_at.rfc3339
     TF_VAR_five11_api_key_rotated_at                = time_static.five11_api_key_rotated_at.rfc3339
@@ -573,9 +571,8 @@ locals {
     TF_VAR_k8s_exchange_client_secret            = oci_identity_domains_app.k8s_exchange.client_secret
     TF_VAR_k8s_exchange_client_secret_rotated_at = time_static.k8s_exchange_client_secret_rotated_at.rfc3339
 
-    TF_VAR_cloudflare_api_token   = var.cloudflare_api_token
-    TF_VAR_cloudflare_dns01_token = var.cloudflare_dns01_token
-    TF_VAR_cloudflare_account_id  = var.cloudflare_account_id
+    TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
+    TF_VAR_cloudflare_account_id = var.cloudflare_account_id
 
     # discord_bot_token: back to being pushed, as of the incident on
     # 2026-09-21 -- see its description in variables.tf for why. It is now
@@ -703,7 +700,6 @@ locals {
     TF_VAR_discord_bot_token_rotated_at             = time_static.discord_bot_token_rotated_at.rfc3339
     TF_VAR_discord_management_token_rotated_at      = time_static.discord_management_token_rotated_at.rfc3339
     TF_VAR_cloudflare_api_token_rotated_at          = time_static.cloudflare_api_token_rotated_at.rfc3339
-    TF_VAR_cloudflare_dns01_token_rotated_at        = time_static.cloudflare_dns01_token_rotated_at.rfc3339
     TF_VAR_openweather_api_key_rotated_at           = time_static.openweather_api_key_rotated_at.rfc3339
     TF_VAR_bart_api_key_rotated_at                  = time_static.bart_api_key_rotated_at.rfc3339
     TF_VAR_five11_api_key_rotated_at                = time_static.five11_api_key_rotated_at.rfc3339
@@ -743,7 +739,6 @@ locals {
     "TF_VAR_discord_bot_token_rotated_at",
     "TF_VAR_discord_management_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
-    "TF_VAR_cloudflare_dns01_token_rotated_at",
     "TF_VAR_openweather_api_key_rotated_at",
     "TF_VAR_bart_api_key_rotated_at",
     "TF_VAR_five11_api_key_rotated_at",
@@ -919,7 +914,6 @@ locals {
     "TF_VAR_discord_bot_token_rotated_at",
     "TF_VAR_discord_management_token_rotated_at",
     "TF_VAR_cloudflare_api_token_rotated_at",
-    "TF_VAR_cloudflare_dns01_token_rotated_at",
     "TF_VAR_openweather_api_key_rotated_at",
     "TF_VAR_bart_api_key_rotated_at",
     "TF_VAR_five11_api_key_rotated_at",

@@ -181,29 +181,16 @@ kind: Resource
 metadata:
   name: cloudflare-api-token
   description: >-
-    Cloudflare API token terraform/dns uses to manage DNS records (variable
-    cloudflare_api_token). Terraform-only: deliberately separate from
-    cloudflare-dns01-token so a human-run apply and the in-cluster ACME solver never
-    share one credential.
+    Cloudflare API token (variable cloudflare_api_token; Zone:DNS:Edit + Zone:Zone:Read
+    on both zones). Used by terraform/dns to manage DNS records, and rendered by
+    terraform/apps as the cloudflare-api-key Secret in the cert-manager namespace for
+    cert-manager's DNS-01 solver. One token since terraform-admin#137, so a bad rotation
+    breaks DNS applies and certificate renewal together.
 spec:
   type: credential
   owner: group:default/admin
   dependencyOf:
     - component:default/terraform
----
-apiVersion: backstage.io/v1alpha1
-kind: Resource
-metadata:
-  name: cloudflare-dns01-token
-  description: >-
-    Cloudflare API token for cert-manager's DNS-01 solver (variable
-    cloudflare_dns01_token). Scoped to the same zones as cloudflare-api-token but a
-    separate token. terraform/apps materialises it as the cloudflare-api-key Secret in
-    the cert-manager namespace.
-spec:
-  type: credential
-  owner: group:default/admin
-  dependencyOf:
     - resource:default/cloudflare-api-key
     - component:default/cert-manager
 ---
