@@ -195,6 +195,12 @@ variable "discord_youtube_api_key" {
   sensitive   = true
 }
 
+variable "discord_vpn_addresses" {
+  description = "WireGuard Address (CIDR, e.g. 10.x.x.x/32) Mullvad assigned to the discord downloader device, from the same registration as discord_vpn_private_key. It is tied to that device, so rotating the key means replacing this too. An identifier rather than a secret, kept sensitive with the rest of the VPN inputs. Consumed by apps/'s kubernetes_secret_v1.discord_vpn_key as WIREGUARD_ADDRESSES, which the gluetun sidecar reads through envFrom."
+  type        = string
+  sensitive   = true
+}
+
 variable "discord_vpn_private_key" {
   description = "WireGuard private key for the Mullvad VPN tunnel the downloader's gluetun sidecar runs its per-download SOCKS5 exits through (docs corpus project_discord_vpn_exit_attribution). Self-generated, not vendor-issued -- Mullvad only ever receives the public half when the device is registered. Consumed by apps/'s kubernetes_secret_v1.discord_vpn_key."
   type        = string
