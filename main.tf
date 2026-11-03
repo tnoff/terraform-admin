@@ -364,6 +364,7 @@ locals {
     TF_VAR_discord_spotify_client_secret = var.discord_spotify_client_secret
     TF_VAR_discord_youtube_api_key       = var.discord_youtube_api_key
     TF_VAR_discord_vpn_private_key       = var.discord_vpn_private_key
+    TF_VAR_discord_vpn_addresses         = var.discord_vpn_addresses
     # base64-wrapped, not left plain like every other TF_VAR_ here: neither
     # value fits GitLab's masked-variable charset (an email always has '@';
     # a formatted phone number routinely carries punctuation the charset
@@ -624,6 +625,7 @@ locals {
     TF_VAR_discord_spotify_client_secret = var.discord_spotify_client_secret
     TF_VAR_discord_youtube_api_key       = var.discord_youtube_api_key
     TF_VAR_discord_vpn_private_key       = var.discord_vpn_private_key
+    TF_VAR_discord_vpn_addresses         = var.discord_vpn_addresses
     # base64-wrapped, not left plain like every other TF_VAR_ here: neither
     # value fits GitLab's masked-variable charset (an email always has '@';
     # a formatted phone number routinely carries punctuation the charset

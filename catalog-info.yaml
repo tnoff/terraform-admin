@@ -106,7 +106,8 @@ metadata:
     WireGuard private key for the Mullvad tunnel the downloader's gluetun sidecar
     routes per-download exits through (variable discord_vpn_private_key).
     Self-generated; Mullvad only holds the public half. Created in-cluster as the
-    discord-vpn-key Secret by terraform/apps.
+    discord-vpn-key Secret by terraform/apps, together with the device's tunnel
+    address (variable discord_vpn_addresses, WIREGUARD_ADDRESSES).
 spec:
   type: credential
   owner: group:default/admin
