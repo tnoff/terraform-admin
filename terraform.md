@@ -49,11 +49,13 @@
 | [oci_identity_api_key.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_domains_app.k8s_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
 | [oci_identity_domains_app.oidc_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
+| [oci_identity_domains_group.human_lockout](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_group.ocir_pusher](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_group.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_group.techdocs_only](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_identity_propagation_trust.github_actions](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_identity_propagation_trust) | resource |
 | [oci_identity_domains_identity_propagation_trust.k8s_workloads](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_identity_propagation_trust) | resource |
+| [oci_identity_domains_password_policy.human_lockout](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_password_policy) | resource |
 | [oci_identity_domains_user.ocir_pusher](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_domains_user.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_domains_user.techdocs_only](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
@@ -139,6 +141,7 @@
 | [oci_identity_compartments.apps](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_compartments) | data source |
 | [oci_identity_domains.default](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_domains) | data source |
 | [oci_identity_domains_identity_propagation_trusts.live](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_domains_identity_propagation_trusts) | data source |
+| [oci_identity_domains_users.human](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_domains_users) | data source |
 | [oci_identity_tenancy.current](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_tenancy) | data source |
 | [oci_objectstorage_namespace.this](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/objectstorage_namespace) | data source |
 
@@ -167,6 +170,7 @@
 | <a name="input_discord_youtube_api_key"></a> [discord\_youtube\_api\_key](#input\_discord\_youtube\_api\_key) | YouTube Data API key, used by discord's search tier (and the bot/broker/downloader) to resolve YouTube URLs and run searches. From console.cloud.google.com (YouTube Data API v3, API key credential). Consumed by apps/'s kubernetes\_secret\_v1.discord\_search\_creds. | `string` | n/a | yes |
 | <a name="input_dns_oidc_apply_write_workspaces"></a> [dns\_oidc\_apply\_write\_workspaces](#input\_dns\_oidc\_apply\_write\_workspaces) | State buckets the dns apply user (push-to-main runs) may READ AND WRITE. | `list(string)` | <pre>[<br/>  "dns"<br/>]</pre> | no |
 | <a name="input_dns_oidc_plan_read_workspaces"></a> [dns\_oidc\_plan\_read\_workspaces](#input\_dns\_oidc\_plan\_read\_workspaces) | State buckets the dns plan user (pull\_request runs) may READ. Read-only on purpose. | `list(string)` | <pre>[<br/>  "dns"<br/>]</pre> | no |
+| <a name="input_domain_human_user_name"></a> [domain\_human\_user\_name](#input\_domain\_human\_user\_name) | User name of the domain's human account, which the lockout policy applies to. Not set in the repo so the address is not committed. | `string` | n/a | yes |
 | <a name="input_eastbay_contact_email"></a> [eastbay\_contact\_email](#input\_eastbay\_contact\_email) | Contact email address shown on the EastbayMassageAndLymph website. Not secret in the confidentiality sense (it's public-facing business info), sealed alongside the site's real secrets historically -- kept sensitive here for consistency with the rest of website-secrets, not because it needs protecting. Enter it plain -- main.tf base64-encodes it before pushing to CI (GitLab's masked-variable check rejects any value containing '@', which every email address has) and apps/'s kubernetes\_secret\_v1.eastbay\_website\_creds base64decode()s it back for the Secret. | `string` | n/a | yes |
 | <a name="input_eastbay_contact_number"></a> [eastbay\_contact\_number](#input\_eastbay\_contact\_number) | Contact phone number shown on the EastbayMassageAndLymph website. Same non-secret-but-bundled reasoning as eastbay\_contact\_email. Enter it plain -- main.tf base64-encodes it before pushing to CI (a formatted phone number routinely fails GitLab's masked-variable charset check) and apps/'s kubernetes\_secret\_v1.eastbay\_website\_creds base64decode()s it back. | `string` | n/a | yes |
 | <a name="input_eastbay_email_host_password"></a> [eastbay\_email\_host\_password](#input\_eastbay\_email\_host\_password) | SMTP password/app-password paired with eastbay\_email\_host\_user. Consumed by apps/'s kubernetes\_secret\_v1.eastbay\_website\_creds. | `string` | n/a | yes |
