@@ -119,6 +119,12 @@ resource "oci_identity_domains_user" "ocir_pusher" {
   urnietfparamsscimschemasoracleidcsextensionuser_user {
     service_user = true
   }
+
+  # The domain adds extension schemas on read, so `schemas` never matches the
+  # config and every plan would strip them (tnoff/terraform-admin#144).
+  lifecycle {
+    ignore_changes = [schemas]
+  }
 }
 
 resource "oci_identity_domains_group" "ocir_pusher" {
@@ -131,6 +137,15 @@ resource "oci_identity_domains_group" "ocir_pusher" {
   members {
     type  = "User"
     value = oci_identity_domains_user.ocir_pusher[each.key].id
+  }
+
+  # The provider does not read `members` back and the domain adds extension
+  # schemas, so both would show as a diff on every plan (tnoff/terraform-admin#144).
+  # Membership is set at create; replacing the user replaces the group so the new
+  # user id is added. Policies name the group by display name, which is stable.
+  lifecycle {
+    ignore_changes       = [schemas, members]
+    replace_triggered_by = [oci_identity_domains_user.ocir_pusher[each.key].id]
   }
 }
 

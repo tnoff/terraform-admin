@@ -20,8 +20,10 @@
 # Terraform addresses changed, with the `moved` blocks below (no OCI change).
 #
 # Terraform CANNOT read the trust's rules back (Oracle returns
-# `impersonation_service_users` only on request), so `plan` shows no drift when the
-# live rules differ, and removing or reordering a rule silently does not apply.
+# `impersonation_service_users` only on request). The resource therefore ignores
+# changes to them: without that, every plan showed all rules as additions
+# (tnoff/terraform-admin#144), and an in-place update did not apply removals or
+# reorders anyway. So `plan` shows nothing when you add, remove or change a rule.
 # Apply any rule change with
 #   terraform apply -replace=oci_identity_domains_identity_propagation_trust.github_actions \
 #                   -target=oci_identity_domains_identity_propagation_trust.github_actions
@@ -113,6 +115,13 @@ resource "oci_identity_domains_identity_propagation_trust" "github_actions" {
       rule  = impersonation_service_users.value.rule
       value = oci_identity_domains_user.techdocs_only[impersonation_service_users.key].id
     }
+  }
+
+  # The rules are not read back (see the header), so they would show as additions on
+  # every plan. They are still sent in full on create, which is how `-replace`
+  # applies a rule change; the `check` below catches a live trust that differs.
+  lifecycle {
+    ignore_changes = [impersonation_service_users]
   }
 }
 

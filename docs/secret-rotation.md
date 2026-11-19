@@ -317,10 +317,11 @@ oci identity-domains apps list --endpoint "$DOMAIN_URL" \
    `terraform_data.k8s_exchange_client_secret_version` and
    `time_static.k8s_exchange_client_secret_rotated_at` replaced; the `k8s-workloads` trust
    updated **in place** (only `oauth_clients`); and the three Actions secrets updated. The
-   `-target` list is deliberate: an untargeted plan of this stack also showed about 60
-   unrelated changes (SCIM `schemas` and `members` on the users and groups, and every
-   `impersonation_service_users` rule on the `github_actions` trust as an addition, because
-   the provider does not return them on read). Do not mix those into a rotation.
+   `-target` list keeps the apply to the rotation. Before tnoff/terraform-admin#144 an
+   untargeted plan also showed about 60 unrelated changes (SCIM `schemas` and `members` on
+   the users and groups, and every `impersonation_service_users` rule on the
+   `github_actions` trust, which the provider does not return on read); those attributes
+   are now in `ignore_changes`, but keep the targets so nothing else rides along.
 
    Do not run a plain `plan` or `apply` between steps 3 and 4: it would recreate the
    `time_static` with today's date while the secret is still the old one.
