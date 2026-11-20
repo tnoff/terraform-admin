@@ -3,9 +3,9 @@
 #
 # Lets a repo's techdocs-publish workflow write its own docs to the TechDocs bucket with no
 # stored key. The job exchanges its GitHub OIDC token exactly as the image push does
-# (ocir-pushers.tf): `sub` of a push to main selects a federated service user. The CI key in
-# terraform's oci/ stack (backstage_techdocs_ci_creds) is one key that can write the whole
-# bucket for every repo; this gives each repo only its own entity prefix.
+# (ocir-pushers.tf): `sub` of a push to main selects a federated service user. It replaced a
+# single CI key in terraform's oci/ stack that could write the whole bucket for every repo
+# (since removed); this gives each repo only its own entity prefix.
 #
 # A repo that already has an OCIR push user (local.ocir_pushers) REUSES that user: a `sub` maps
 # to exactly one service user, so a second rule for the same `sub` is not an option. It only gains

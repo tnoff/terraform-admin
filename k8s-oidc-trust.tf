@@ -100,7 +100,7 @@ output "k8s_exchange_client_id" {
 }
 
 output "k8s_exchange_client_secret" {
-  description = "Client secret of the in-cluster token-exchange app. Not pushed anywhere yet: the sidecar's Secret in tnoff/terraform apps/ is a later change."
+  description = "Client secret of the in-cluster token-exchange app. Already pushed to tnoff/terraform as TF_VAR_k8s_exchange_client_secret via terraform_ci_vars, for apps/'s rpst-exchange-creds Secret; this output is for reading it locally."
   value       = oci_identity_domains_app.k8s_exchange.client_secret
   sensitive   = true
 }
