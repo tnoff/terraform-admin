@@ -161,6 +161,9 @@ locals {
           "read users", "read groups", "read policies", "read compartments", "read tag-namespaces",
           "read virtual-network-family", "read cluster-family", "read bastion-family",
           "read vaults", "read keys", "read repos", "read buckets", "read objectstorage-namespaces",
+          # oci/ manages oci_identity_network_source.oke_pods. Without this, the read
+          # 404s and every PR plan shows it as "will be created".
+          "read network-sources",
         ]
       }
       apply = {
