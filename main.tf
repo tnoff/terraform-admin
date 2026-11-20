@@ -323,36 +323,36 @@ locals {
 
     # discord_bot_token: back to being pushed, as of the incident on
     # 2026-09-21 -- see its description in variables.tf for why. It is now
-    # consumed for real, by apps/'s kubernetes_secret_v1.discord_bot_token,
+    # consumed for real, by apps/'s module.discord_bot_token,
     # not just carried for no reason.
     TF_VAR_discord_bot_token        = var.discord_bot_token
     TF_VAR_discord_management_token = var.discord_management_token
 
     # OpenWeather API key -- pushed as of 2026-09-20, consumed for real by
-    # apps/'s kubernetes_secret_v1.openweather_api_key. See its description
+    # apps/'s module.openweather_api_key. See its description
     # in variables.tf.
     TF_VAR_openweather_api_key = var.openweather_api_key
 
     # 511.org transit token (BART_API_KEY in docker-apps) -- pushed as of
-    # 2026-09-21, consumed for real by apps/'s kubernetes_secret_v1.bart_api_key.
+    # 2026-09-21, consumed for real by apps/'s module.bart_api_key.
     # See its description in variables.tf.
     TF_VAR_bart_api_key = var.bart_api_key
 
     # 511.org transit token (FIVE11_API_KEY in the mirror pods) -- consumed by
-    # apps/'s kubernetes_secret_v1.five11_api_key. See its description in
+    # apps/'s module.five11_api_key. See its description in
     # variables.tf.
     TF_VAR_five11_api_key = var.five11_api_key
 
     # Backstage externalAccess static token for the local MCP client -- pushed
     # as of 2026-09-28, consumed for real by apps/'s
-    # kubernetes_secret_v1.backstage_mcp_token. See its description in
+    # module.backstage_mcp_token. See its description in
     # variables.tf.
     TF_VAR_backstage_mcp_token = var.backstage_mcp_token
 
     # hathor (docker-apps apps/hathor/): Mullvad device key + address for its
     # gluetun sidecar (and the server pool it picks from), the URL-path token that is the whole auth on its public
     # endpoint, its Google/Twitch API creds, and the yt-dlp cookies file (already
-    # base64, one line). Consumed by apps/'s kubernetes_secret_v1.hathor_*. See
+    # base64, one line). Consumed by apps/'s module.hathor_*. See
     # their descriptions in variables.tf.
     TF_VAR_hathor_vpn_private_key      = var.hathor_vpn_private_key
     TF_VAR_hathor_vpn_addresses        = var.hathor_vpn_addresses
@@ -365,7 +365,7 @@ locals {
 
     # discord's Spotify/YouTube search creds + VPN key, and eastbay's website
     # secrets -- pushed as of 2026-09-21, consumed for real by apps/'s
-    # kubernetes_secret_v1.discord_search_creds/discord_vpn_key/eastbay_website_creds.
+    # module.discord_search_creds/discord_vpn_key/eastbay_website_creds.
     # See their descriptions in variables.tf.
     TF_VAR_discord_spotify_client_id     = var.discord_spotify_client_id
     TF_VAR_discord_spotify_client_secret = var.discord_spotify_client_secret
@@ -380,7 +380,7 @@ locals {
     # log history indefinitely, rotation or not. base64 keeps it masked
     # (output is pure Base64-alphabet, safely >= 8 chars for any realistic
     # email/phone number) instead of giving that up. terraform/apps'
-    # kubernetes_secret_v1.eastbay_website_creds base64decode()s it back.
+    # module.eastbay_website_creds base64decode()s it back.
     TF_VAR_eastbay_contact_email       = base64encode(var.eastbay_contact_email)
     TF_VAR_eastbay_contact_number      = base64encode(var.eastbay_contact_number)
     TF_VAR_eastbay_email_host_user     = var.eastbay_email_host_user
@@ -590,36 +590,36 @@ locals {
 
     # discord_bot_token: back to being pushed, as of the incident on
     # 2026-09-21 -- see its description in variables.tf for why. It is now
-    # consumed for real, by apps/'s kubernetes_secret_v1.discord_bot_token,
+    # consumed for real, by apps/'s module.discord_bot_token,
     # not just carried for no reason.
     TF_VAR_discord_bot_token        = var.discord_bot_token
     TF_VAR_discord_management_token = var.discord_management_token
 
     # OpenWeather API key -- pushed as of 2026-09-20, consumed for real by
-    # apps/'s kubernetes_secret_v1.openweather_api_key. See its description
+    # apps/'s module.openweather_api_key. See its description
     # in variables.tf.
     TF_VAR_openweather_api_key = var.openweather_api_key
 
     # 511.org transit token (BART_API_KEY in docker-apps) -- pushed as of
-    # 2026-09-21, consumed for real by apps/'s kubernetes_secret_v1.bart_api_key.
+    # 2026-09-21, consumed for real by apps/'s module.bart_api_key.
     # See its description in variables.tf.
     TF_VAR_bart_api_key = var.bart_api_key
 
     # 511.org transit token (FIVE11_API_KEY in the mirror pods) -- consumed by
-    # apps/'s kubernetes_secret_v1.five11_api_key. See its description in
+    # apps/'s module.five11_api_key. See its description in
     # variables.tf.
     TF_VAR_five11_api_key = var.five11_api_key
 
     # Backstage externalAccess static token for the local MCP client -- pushed
     # as of 2026-09-28, consumed for real by apps/'s
-    # kubernetes_secret_v1.backstage_mcp_token. See its description in
+    # module.backstage_mcp_token. See its description in
     # variables.tf.
     TF_VAR_backstage_mcp_token = var.backstage_mcp_token
 
     # hathor (docker-apps apps/hathor/): Mullvad device key + address for its
     # gluetun sidecar (and the server pool it picks from), the URL-path token that is the whole auth on its public
     # endpoint, its Google/Twitch API creds, and the yt-dlp cookies file (already
-    # base64, one line). Consumed by apps/'s kubernetes_secret_v1.hathor_*. See
+    # base64, one line). Consumed by apps/'s module.hathor_*. See
     # their descriptions in variables.tf.
     TF_VAR_hathor_vpn_private_key      = var.hathor_vpn_private_key
     TF_VAR_hathor_vpn_addresses        = var.hathor_vpn_addresses
@@ -632,7 +632,7 @@ locals {
 
     # discord's Spotify/YouTube search creds + VPN key, and eastbay's website
     # secrets -- pushed as of 2026-09-21, consumed for real by apps/'s
-    # kubernetes_secret_v1.discord_search_creds/discord_vpn_key/eastbay_website_creds.
+    # module.discord_search_creds/discord_vpn_key/eastbay_website_creds.
     # See their descriptions in variables.tf.
     TF_VAR_discord_spotify_client_id     = var.discord_spotify_client_id
     TF_VAR_discord_spotify_client_secret = var.discord_spotify_client_secret
@@ -647,7 +647,7 @@ locals {
     # log history indefinitely, rotation or not. base64 keeps it masked
     # (output is pure Base64-alphabet, safely >= 8 chars for any realistic
     # email/phone number) instead of giving that up. terraform/apps'
-    # kubernetes_secret_v1.eastbay_website_creds base64decode()s it back.
+    # module.eastbay_website_creds base64decode()s it back.
     TF_VAR_eastbay_contact_email       = base64encode(var.eastbay_contact_email)
     TF_VAR_eastbay_contact_number      = base64encode(var.eastbay_contact_number)
     TF_VAR_eastbay_email_host_user     = var.eastbay_email_host_user
@@ -913,10 +913,8 @@ locals {
   }
 }
 
-# The repository itself is created by terraform/infra (module.terraform_repo);
-# only its Actions credentials are owned here. That split is deliberate but it
-# does mean an ordering constraint: infra/ must have applied once before this
-# resource can find the repo.
+# The repository itself is module.terraform_repo below (moved here from
+# terraform/infra on 2026-09-04); these are its Actions credentials.
 resource "github_actions_secret" "terraform" {
   for_each = local.terraform_github_secrets
 
