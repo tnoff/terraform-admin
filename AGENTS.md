@@ -95,13 +95,15 @@ at all (a stack owning its own housing is the bootstrap paradox). Consequences:
 
 - This repo's `CI_APP_*` Actions secrets are managed by nothing; rotate them by
   hand (see [secret rotation](https://github.com/tnoff/terraform-admin/blob/main/docs/secret-rotation.md#github-app-private-keys)).
-- `terraform`'s `TECHDOCS_S3_*` secrets are also not set here.
+- `terraform`'s TechDocs publish needs no stored secret: it signs in through the
+  GitHub OIDC trust (`techdocs-publishers.tf`). Any `TECHDOCS_S3_*` secrets still
+  on that repo are leftovers from the old key and can be deleted by hand.
 
 ### Two Discord bot tokens, not one
 
 `discord_bot_token` and `discord_management_token` are two separate Discord
 applications. `discord_bot_token` is the live bot's identity and is consumed by
-`terraform/apps` (`kubernetes_secret_v1.discord_bot_token`);
+`terraform/apps` (`module.discord_bot_token`);
 `discord_management_token` only lets `terraform/discord`'s provider manage
 server structure and never reaches the cluster. Do not point the provider at
 the live bot's token, and do not stop pushing `discord_bot_token` to CI without

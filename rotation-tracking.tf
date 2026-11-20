@@ -82,8 +82,8 @@ resource "time_static" "cloudflare_api_token_rotated_at" {
 }
 
 # OpenWeather API key, shared by all three MagicMirror sites -- reaches the
-# cluster via apps/'s kubernetes_secret_v1.openweather_api_key (one resource,
-# for_each over the three mirror namespaces). Previously hand-sealed into
+# cluster via apps/'s module.openweather_api_key (one module call,
+# one Secret in each of the three mirror namespaces). Previously hand-sealed into
 # each site's mirror-api-keys SealedSecret (docker-apps); new as of
 # 2026-09-20, so its first apply stamps "today" same as any brand-new tfvar
 # (see Caveat #2 above). See docs/projects/sealed-secrets-terraform-admin-migration.md.
@@ -98,8 +98,8 @@ resource "time_static" "openweather_api_key_rotated_at" {
 
 # BART_API_KEY (really a 511.org transit token), shared by mirror-dublin,
 # mirror-concord and mirror-sanjose -- reaches the cluster via apps/'s
-# kubernetes_secret_v1.bart_api_key (one resource, for_each over those
-# namespaces). Previously hand-sealed alongside OPENWEATHER_API_KEY in each
+# module.bart_api_key (one module call, one Secret per
+# namespace). Previously hand-sealed alongside OPENWEATHER_API_KEY in each
 # site's mirror-api-keys SealedSecret (docker-apps); new as of 2026-09-21,
 # so its first apply stamps "today" same as any brand-new tfvar (see Caveat
 # #2 above). See docs/projects/sealed-secrets-terraform-admin-migration.md.
@@ -113,8 +113,8 @@ resource "time_static" "bart_api_key_rotated_at" {
 }
 
 # FIVE11_API_KEY, the 511.org transit token for mirror-dublin and mirror-sanjose
-# -- reaches the cluster via apps/'s kubernetes_secret_v1.five11_api_key (one
-# resource, for_each over those namespaces). New, so its first apply stamps
+# -- reaches the cluster via apps/'s module.five11_api_key (one module call,
+# one Secret per namespace). New, so its first apply stamps
 # "today" same as any brand-new tfvar (see Caveat #2 above).
 resource "terraform_data" "five11_api_key_version" {
   triggers_replace = [sha256(var.five11_api_key)]
@@ -356,7 +356,7 @@ resource "time_static" "backstage_app_private_key_rotated_at" {
 }
 
 # Backstage externalAccess static token for the local MCP client -- reaches
-# the cluster via apps/'s kubernetes_secret_v1.backstage_mcp_token. New as of
+# the cluster via apps/'s module.backstage_mcp_token. New as of
 # 2026-09-28, so its first apply stamps "today" same as any brand-new tfvar
 # (see Caveat #2 above).
 resource "terraform_data" "backstage_mcp_token_version" {
