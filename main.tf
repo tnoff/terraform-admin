@@ -10,6 +10,11 @@ data "oci_objectstorage_namespace" "this" {
   compartment_id = var.oci_tenancy_ocid
 }
 
+output "oci_namespace" {
+  description = "Object Storage namespace of the tenancy (and of the terraform-state-* buckets). Pushed to terraform as OCI_NAMESPACE: the .envrc and the repo's Actions variables."
+  value       = data.oci_objectstorage_namespace.this.namespace
+}
+
 # ==============================================================================
 # KMS Vault and Encryption Key
 # ==============================================================================
@@ -289,6 +294,11 @@ locals {
     OCI_USER_OCID    = oci_identity_user.terraform_admin.id
     OCI_FINGERPRINT  = oci_identity_api_key.terraform_admin.fingerprint
 
+    # Object Storage namespace of the state buckets, read by terraform's root.hcl
+    # (backend) and passed on to its stacks' terraform_remote_state reads. Looked
+    # up, never hardcoded, so terraform does not hardcode it either.
+    OCI_NAMESPACE = data.oci_objectstorage_namespace.this.namespace
+
     # PEM as base64. The terragrunt composite action decodes it to a file
     # at a known path in CI and exports OCI_PRIVATE_KEY_PATH +
     # TF_VAR_oci_private_key_path.
@@ -547,6 +557,11 @@ locals {
     # and the OIDC login needs it to build its session profile.
     OCI_TENANCY_OCID = var.oci_tenancy_ocid
 
+    # The state buckets' Object Storage namespace, for terraform's root.hcl backend
+    # and remote_state reads. A GitHub variable, not a secret: see
+    # terraform_github_public.
+    OCI_NAMESPACE = data.oci_objectstorage_namespace.this.namespace
+
     TF_VAR_oci_tenancy_ocid = var.oci_tenancy_ocid
 
     # The GitHub OIDC token-exchange app (tnoff/terraform#135, oidc-trust.tf). Not
@@ -733,6 +748,8 @@ locals {
   # GitLab masking requires single-line, ≥8 chars, no '@'. These can't be
   # masked; explicit allowlist so the rest stay masked by default.
   terraform_ci_vars_unmasked = [
+    # Not a secret, and shorter than GitLab's 8-character masking minimum.
+    "OCI_NAMESPACE",
     "TF_VAR_ssh_public_key",
     "TF_VAR_cloudflare_account_id",
     # rotated_at timestamps are RFC3339 strings containing `:` which
@@ -897,6 +914,9 @@ module "terraform_gitlab" {
 #
 #   ssh_public_key      the public half of a keypair
 #   cloudflare_account_id  an identifier, not a credential
+#   OCI_NAMESPACE       the Object Storage namespace; it is also the tenancy
+#                       name, so as a secret it would mask that word, repo
+#                       names included, everywhere in the logs
 #   ci_app_id / client_id  visible to anyone who can see the App
 #   *_rotated_at        apply timestamps, and the ones apps/ reads to compute
 #                       secret ages -- see project_secret_age_tracking
@@ -907,6 +927,7 @@ module "terraform_gitlab" {
 # timestamps would turn every plan diff that touches them into `***`.
 locals {
   terraform_github_public = [
+    "OCI_NAMESPACE",
     "TF_VAR_ssh_public_key",
     "TF_VAR_cloudflare_account_id",
     "TF_VAR_ci_app_id",

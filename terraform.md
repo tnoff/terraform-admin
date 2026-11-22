@@ -219,6 +219,7 @@
 | ---- | ----------- |
 | <a name="output_k8s_exchange_client_id"></a> [k8s\_exchange\_client\_id](#output\_k8s\_exchange\_client\_id) | Client id of the in-cluster token-exchange app |
 | <a name="output_k8s_exchange_client_secret"></a> [k8s\_exchange\_client\_secret](#output\_k8s\_exchange\_client\_secret) | Client secret of the in-cluster token-exchange app. Not pushed anywhere yet: the sidecar's Secret in tnoff/terraform apps/ is a later change. |
+| <a name="output_oci_namespace"></a> [oci\_namespace](#output\_oci\_namespace) | Object Storage namespace of the tenancy (and of the terraform-state-* buckets). Pushed to terraform as OCI\_NAMESPACE: the .envrc and the repo's Actions variables. |
 | <a name="output_oidc_domain_endpoint"></a> [oidc\_domain\_endpoint](#output\_oidc\_domain\_endpoint) | Identity domain URL the token exchange is POSTed to (<this>/oauth2/v1/token) |
 | <a name="output_oidc_exchange_client_id"></a> [oidc\_exchange\_client\_id](#output\_oidc\_exchange\_client\_id) | Client id of the token-exchange app |
 | <a name="output_oidc_exchange_client_secret"></a> [oidc\_exchange\_client\_secret](#output\_oidc\_exchange\_client\_secret) | Client secret of the token-exchange app. Already pushed to tnoff/terraform as OIDC\_EXCHANGE\_CLIENT\_SECRET via terraform\_ci\_vars; this output is for reading it locally. |
