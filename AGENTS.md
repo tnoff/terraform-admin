@@ -36,27 +36,19 @@ at it. Do not use multi-line PEMs as env vars.
 the OCI provider reads `OCI_*`, while the workload stacks read the same values
 as input variables so their `terraform_remote_state` blocks can authenticate.
 
-### One map, two consumers, and the secret/variable split
+### The secret/variable split
 
-`local.terraform_ci_vars` feeds both the GitHub Actions secrets/variables on
-`terraform` and the GitLab mirror project's pipeline variables (rollback path).
-The two platforms need different classification, so do not share a list:
+`local.terraform_ci_vars` feeds the GitHub Actions secrets/variables on
+`terraform`. `terraform_github_public` lists the values that become Actions
+*variables* rather than secrets (public IDs, the SSH public key, `OCI_NAMESPACE`,
+`*_rotated_at` timestamps), so GitHub does not redact them from logs. The
+default is secret.
 
-- `terraform_ci_vars_unmasked` is the GitLab allowlist of values that fail its
-  masking rules (single line, at least 8 characters, no `@`). Anything not
-  listed is masked.
-- `terraform_github_public` lists the values that become Actions *variables*
-  rather than secrets (public IDs, the SSH public key, `*_rotated_at`
-  timestamps), so GitHub does not redact them from logs. The default is secret.
+A new value goes in `terraform_ci_vars`; add it to `terraform_github_public`
+only if it is not sensitive.
 
-A new value goes in `terraform_ci_vars`; add it to the matching list only if it
-is not sensitive.
-
-The GitLab consumer is **off by default** (`var.gitlab_ci_variables_enabled`,
-false): the mirror is frozen and runs no pipelines, and leaving the admin OCI key
-in its CI variables was a standing exposure for no benefit. The map still feeds
-GitHub either way. Set it true (and restore `.gitlab-ci.yml`) to roll back to
-GitLab CI.
+The GitLab `terraform` mirror (`module.terraform_gitlab`) gets **no** CI
+variables: it is kept for Flux rollback, not to run CI.
 
 ### Cluster ServiceAccount trust (`k8s-oidc-trust.tf`)
 
