@@ -30,7 +30,12 @@ resource "oci_identity_domains_group" "human_lockout" {
     value = data.oci_identity_domains_users.human.users[0].id
   }
 
+  # members and the dynamic-group schema are not returned on read, so every plan
+  # showed them as changes (see the note above the users in github-oidc.tf). The
+  # member is the human account, which this stack does not manage.
   lifecycle {
+    ignore_changes = [schemas, members]
+
     precondition {
       condition     = length(data.oci_identity_domains_users.human.users) == 1
       error_message = "domain_human_user_name must match exactly one domain user."
