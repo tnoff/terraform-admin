@@ -317,10 +317,8 @@ oci identity-domains apps list --endpoint "$DOMAIN_URL" \
    `terraform_data.k8s_exchange_client_secret_version` and
    `time_static.k8s_exchange_client_secret_rotated_at` replaced; the `k8s-workloads` trust
    updated **in place** (only `oauth_clients`); and the three Actions secrets updated. The
-   `-target` list is deliberate: an untargeted plan of this stack also showed about 60
-   unrelated changes (SCIM `schemas` and `members` on the users and groups, and every
-   `impersonation_service_users` rule on the `github_actions` trust as an addition, because
-   the provider does not return them on read). Do not mix those into a rotation.
+   `-target` list is deliberate: it keeps a rotation to the resources it names, so an
+   unrelated pending change in this stack cannot ride along with it.
 
    Do not run a plain `plan` or `apply` between steps 3 and 4: it would recreate the
    `time_static` with today's date while the secret is still the old one.
@@ -351,9 +349,9 @@ Same shape, not exercised yet. Look the app up with `displayName eq "terraform-o
 deactivate it, then `bin/tf apply -replace=oci_identity_domains_app.oidc_exchange` with
 `-target` on the app's dependents. Two differences from the in-cluster app:
 
-- The trust it feeds is `github_actions`, whose plan shows every `impersonation_service_users`
-  rule as an addition (see step 4 above). Read the plan before accepting it; do not apply a
-  trust update you did not expect.
+- The trust it feeds is `github_actions`, which ignores its `impersonation_service_users`
+  rules (the provider cannot read them back), so its plan shows only what changed. Read the
+  plan before accepting it; do not apply a trust update you did not expect.
 - The consumers are the `OIDC_EXCHANGE_*` Actions secrets, read by every `terraform` job,
   so run it when no CI is in flight and re-run the whole pipeline afterwards.
 
