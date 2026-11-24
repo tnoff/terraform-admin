@@ -133,7 +133,7 @@ variable "cloudflare_account_id" {
 }
 
 variable "discord_bot_token" {
-  description = "The application bot's own Discord token -- the credential that runs as the live bot in docker-apps (role vidya-game-machine). Pushed to terraform's CI and consumed for real by apps/'s kubernetes_secret_v1.discord_bot_token, which creates the discord-bot-token Secret docker-apps' bot and dispatcher deployments read directly -- rotation no longer needs a manual re-seal of a docker-apps SealedSecret. (It briefly did NOT flow to CI, between the discord_management_token split and this incident: docker-apps/apps/discord/secrets-conf.yaml still hand-sealed DISCORD_TOKEN during that window, went stale on the next rotation, and crash-looped the bot. See AGENTS.md.)"
+  description = "The application bot's own Discord token -- the credential that runs as the live bot in docker-apps (role vidya-game-machine). Pushed to terraform's CI and consumed for real by apps/'s module.discord_bot_token, which creates the discord-bot-token Secret docker-apps' bot and dispatcher deployments read directly -- rotation no longer needs a manual re-seal of a docker-apps SealedSecret. (It briefly did NOT flow to CI, between the discord_management_token split and this incident: docker-apps/apps/discord/secrets-conf.yaml still hand-sealed DISCORD_TOKEN during that window, went stale on the next rotation, and crash-looped the bot. See AGENTS.md.)"
   type        = string
   sensitive   = true
 }
@@ -145,19 +145,19 @@ variable "discord_management_token" {
 }
 
 variable "openweather_api_key" {
-  description = "Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s kubernetes_secret_v1.openweather_api_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-dublin/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord_bot_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. See bart_api_key below for the same treatment applied to the other mirror-api-keys entry."
+  description = "Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s module.openweather_api_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-dublin/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord_bot_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. See bart_api_key below for the same treatment applied to the other mirror-api-keys entry."
   type        = string
   sensitive   = true
 }
 
 variable "bart_api_key" {
-  description = "Free-tier 511.org transit token (BART's own GTFS-RT feed needs no key; this is what MMM-BartTimes' apiKey config field actually authenticates against 511 with), shared by the mirror-dublin/mirror-concord/mirror-sanjose sites. Pushed to terraform's CI and consumed by apps/'s kubernetes_secret_v1.bart_api_key, which creates the mirror-bart-key Secret in each of those namespaces directly -- previously hand-sealed as BART_API_KEY in each site's mirror-api-keys SealedSecret (docker-apps) alongside OPENWEATHER_API_KEY, a dual-seal-on-rotation risk in the same shape openweather_api_key above was corrected for; this variable closes the same gap for the key that shared its SealedSecret. See docs/projects/sealed-secrets-terraform-admin-migration.md."
+  description = "Free-tier 511.org transit token (BART's own GTFS-RT feed needs no key; this is what MMM-BartTimes' apiKey config field actually authenticates against 511 with), shared by the mirror-dublin/mirror-concord/mirror-sanjose sites. Pushed to terraform's CI and consumed by apps/'s module.bart_api_key, which creates the mirror-bart-key Secret in each of those namespaces directly -- previously hand-sealed as BART_API_KEY in each site's mirror-api-keys SealedSecret (docker-apps) alongside OPENWEATHER_API_KEY, a dual-seal-on-rotation risk in the same shape openweather_api_key above was corrected for; this variable closes the same gap for the key that shared its SealedSecret. See docs/projects/sealed-secrets-terraform-admin-migration.md."
   type        = string
   sensitive   = true
 }
 
 variable "five11_api_key" {
-  description = "Free-tier 511.org transit token (api.511.org), read by MMM-BartTimes' node helper as FIVE11_API_KEY for the mirror-dublin and mirror-sanjose boards (VTA and ACE via 511). Pushed to terraform's CI and consumed by apps/'s kubernetes_secret_v1.five11_api_key, which creates the mirror-511-key Secret in each of those namespaces directly. Supplied to the pod through the environment, never the module config, because everything in config is served publicly at /config/. Distinct from bart_api_key, which is the legacy key shared with the BART site."
+  description = "Free-tier 511.org transit token (api.511.org), read by MMM-BartTimes' node helper as FIVE11_API_KEY for the mirror-dublin and mirror-sanjose boards (VTA and ACE via 511). Pushed to terraform's CI and consumed by apps/'s module.five11_api_key, which creates the mirror-511-key Secret in each of those namespaces directly. Supplied to the pod through the environment, never the module config, because everything in config is served publicly at /config/. Distinct from bart_api_key, which is the legacy key shared with the BART site."
   type        = string
   sensitive   = true
 }
@@ -169,8 +169,8 @@ variable "five11_api_key" {
 # out of discord/eastbay," full stop. These nine were previously left sealed
 # because none had a terraform-admin variable *yet* and none fanned out
 # across multiple namespaces -- both true, but no longer the bar. Pushed to
-# terraform's CI and consumed by apps/'s kubernetes_secret_v1.discord_search_creds,
-# kubernetes_secret_v1.discord_vpn_key, and kubernetes_secret_v1.eastbay_website_creds,
+# terraform's CI and consumed by apps/'s module.discord_search_creds,
+# module.discord_vpn_key, and module.eastbay_website_creds,
 # which create discord-search-creds/discord-vpn-key/eastbay-website-creds
 # directly -- discord-conf-secrets, vpn-secrets, and eastbaymassage's
 # website-secrets (docker-apps) are removed entirely, not left half-sealed.
@@ -178,61 +178,61 @@ variable "five11_api_key" {
 # ==============================================================================
 
 variable "discord_spotify_client_id" {
-  description = "Spotify application client ID, used by discord's search tier (and the bot/broker/downloader, which mirror its secret set) to resolve Spotify track/playlist URLs. Register an app at developer.spotify.com/dashboard. Consumed by apps/'s kubernetes_secret_v1.discord_search_creds."
+  description = "Spotify application client ID, used by discord's search tier (and the bot/broker/downloader, which mirror its secret set) to resolve Spotify track/playlist URLs. Register an app at developer.spotify.com/dashboard. Consumed by apps/'s module.discord_search_creds."
   type        = string
   sensitive   = true
 }
 
 variable "discord_spotify_client_secret" {
-  description = "Spotify application client secret, paired with discord_spotify_client_id. Consumed by apps/'s kubernetes_secret_v1.discord_search_creds."
+  description = "Spotify application client secret, paired with discord_spotify_client_id. Consumed by apps/'s module.discord_search_creds."
   type        = string
   sensitive   = true
 }
 
 variable "discord_youtube_api_key" {
-  description = "YouTube Data API key, used by discord's search tier (and the bot/broker/downloader) to resolve YouTube URLs and run searches. From console.cloud.google.com (YouTube Data API v3, API key credential). Consumed by apps/'s kubernetes_secret_v1.discord_search_creds."
+  description = "YouTube Data API key, used by discord's search tier (and the bot/broker/downloader) to resolve YouTube URLs and run searches. From console.cloud.google.com (YouTube Data API v3, API key credential). Consumed by apps/'s module.discord_search_creds."
   type        = string
   sensitive   = true
 }
 
 variable "discord_vpn_addresses" {
-  description = "WireGuard Address (CIDR, e.g. 10.x.x.x/32) Mullvad assigned to the discord downloader device, from the same registration as discord_vpn_private_key. It is tied to that device, so rotating the key means replacing this too. An identifier rather than a secret, kept sensitive with the rest of the VPN inputs. Consumed by apps/'s kubernetes_secret_v1.discord_vpn_key as WIREGUARD_ADDRESSES, which the gluetun sidecar reads through envFrom."
+  description = "WireGuard Address (CIDR, e.g. 10.x.x.x/32) Mullvad assigned to the discord downloader device, from the same registration as discord_vpn_private_key. It is tied to that device, so rotating the key means replacing this too. An identifier rather than a secret, kept sensitive with the rest of the VPN inputs. Consumed by apps/'s module.discord_vpn_key as WIREGUARD_ADDRESSES, which the gluetun sidecar reads through envFrom."
   type        = string
   sensitive   = true
 }
 
 variable "discord_vpn_private_key" {
-  description = "WireGuard private key for the Mullvad VPN tunnel the downloader's gluetun sidecar runs its per-download SOCKS5 exits through (docs corpus project_discord_vpn_exit_attribution). Self-generated, not vendor-issued -- Mullvad only ever receives the public half when the device is registered. Consumed by apps/'s kubernetes_secret_v1.discord_vpn_key."
+  description = "WireGuard private key for the Mullvad VPN tunnel the downloader's gluetun sidecar runs its per-download SOCKS5 exits through (docs corpus project_discord_vpn_exit_attribution). Self-generated, not vendor-issued -- Mullvad only ever receives the public half when the device is registered. Consumed by apps/'s module.discord_vpn_key."
   type        = string
   sensitive   = true
 }
 
 variable "eastbay_contact_email" {
-  description = "Contact email address shown on the EastbayMassageAndLymph website. Not secret in the confidentiality sense (it's public-facing business info), sealed alongside the site's real secrets historically -- kept sensitive here for consistency with the rest of website-secrets, not because it needs protecting. Enter it plain -- main.tf base64-encodes it before pushing to CI (GitLab's masked-variable check rejects any value containing '@', which every email address has) and apps/'s kubernetes_secret_v1.eastbay_website_creds base64decode()s it back for the Secret."
+  description = "Contact email address shown on the EastbayMassageAndLymph website. Not secret in the confidentiality sense (it's public-facing business info), sealed alongside the site's real secrets historically -- kept sensitive here for consistency with the rest of website-secrets, not because it needs protecting. Enter it plain -- main.tf base64-encodes it before pushing to CI (GitLab's masked-variable check rejects any value containing '@', which every email address has) and apps/'s module.eastbay_website_creds base64decode()s it back for the Secret."
   type        = string
   sensitive   = true
 }
 
 variable "eastbay_contact_number" {
-  description = "Contact phone number shown on the EastbayMassageAndLymph website. Same non-secret-but-bundled reasoning as eastbay_contact_email. Enter it plain -- main.tf base64-encodes it before pushing to CI (a formatted phone number routinely fails GitLab's masked-variable charset check) and apps/'s kubernetes_secret_v1.eastbay_website_creds base64decode()s it back."
+  description = "Contact phone number shown on the EastbayMassageAndLymph website. Same non-secret-but-bundled reasoning as eastbay_contact_email. Enter it plain -- main.tf base64-encodes it before pushing to CI (a formatted phone number routinely fails GitLab's masked-variable charset check) and apps/'s module.eastbay_website_creds base64decode()s it back."
   type        = string
   sensitive   = true
 }
 
 variable "eastbay_email_host_user" {
-  description = "SMTP username the EastbayMassageAndLymph website authenticates with to send contact-form email. Consumed by apps/'s kubernetes_secret_v1.eastbay_website_creds."
+  description = "SMTP username the EastbayMassageAndLymph website authenticates with to send contact-form email. Consumed by apps/'s module.eastbay_website_creds."
   type        = string
   sensitive   = true
 }
 
 variable "eastbay_email_host_password" {
-  description = "SMTP password/app-password paired with eastbay_email_host_user. Consumed by apps/'s kubernetes_secret_v1.eastbay_website_creds."
+  description = "SMTP password/app-password paired with eastbay_email_host_user. Consumed by apps/'s module.eastbay_website_creds."
   type        = string
   sensitive   = true
 }
 
 variable "eastbay_flask_secret_key" {
-  description = "Flask session-signing secret for the EastbayMassageAndLymph website. Self-generated (e.g. python -c 'import secrets; print(secrets.token_hex(32))'), not vendor-issued -- there's no external dashboard value, just a random value the operator picks. Consumed by apps/'s kubernetes_secret_v1.eastbay_website_creds."
+  description = "Flask session-signing secret for the EastbayMassageAndLymph website. Self-generated (e.g. python -c 'import secrets; print(secrets.token_hex(32))'), not vendor-issued -- there's no external dashboard value, just a random value the operator picks. Consumed by apps/'s module.eastbay_website_creds."
   type        = string
   sensitive   = true
 }
@@ -263,49 +263,49 @@ variable "grafana_admin_password" {
 }
 
 variable "hathor_vpn_private_key" {
-  description = "WireGuard private key for the Mullvad tunnel hathor's sync CronJob runs through its gluetun sidecar. Mint a NEW Mullvad device for it (mullvad.net/en/account/wireguard-config) and never reuse discord_vpn_private_key: two peers sharing one key knock each other offline. Self-generated, not vendor-issued -- Mullvad only ever receives the public half. Consumed by apps/'s kubernetes_secret_v1.hathor_vpn_key."
+  description = "WireGuard private key for the Mullvad tunnel hathor's sync CronJob runs through its gluetun sidecar. Mint a NEW Mullvad device for it (mullvad.net/en/account/wireguard-config) and never reuse discord_vpn_private_key: two peers sharing one key knock each other offline. Self-generated, not vendor-issued -- Mullvad only ever receives the public half. Consumed by apps/'s module.hathor_vpn_key."
   type        = string
   sensitive   = true
 }
 
 variable "hathor_vpn_addresses" {
-  description = "WireGuard Address (CIDR, e.g. 10.x.x.x/32) Mullvad assigned to the hathor device, from the same downloaded config as hathor_vpn_private_key. It is tied to that device, so rotating the key means replacing this too. An identifier rather than a secret, kept sensitive with the rest of the VPN inputs. Consumed by apps/'s kubernetes_secret_v1.hathor_vpn_key as WIREGUARD_ADDRESSES."
+  description = "WireGuard Address (CIDR, e.g. 10.x.x.x/32) Mullvad assigned to the hathor device, from the same downloaded config as hathor_vpn_private_key. It is tied to that device, so rotating the key means replacing this too. An identifier rather than a secret, kept sensitive with the rest of the VPN inputs. Consumed by apps/'s module.hathor_vpn_key as WIREGUARD_ADDRESSES."
   type        = string
   sensitive   = true
 }
 
 variable "hathor_vpn_server_hostnames" {
-  description = "Comma-separated Mullvad WireGuard server hostnames gluetun picks ONE from for the life of the hathor sync pod (gluetun's SERVER_HOSTNAMES). Names must exist in the gluetun image's server list: Mullvad renumbers servers and gluetun only logs a warning for names it does not know, silently shrinking the pool. Kept out of the manifest in docker-apps. Consumed by apps/'s kubernetes_secret_v1.hathor_vpn_key as SERVER_HOSTNAMES, so it rides on hathor_vpn_private_key's rotation stamp."
+  description = "Comma-separated Mullvad WireGuard server hostnames gluetun picks ONE from for the life of the hathor sync pod (gluetun's SERVER_HOSTNAMES). Names must exist in the gluetun image's server list: Mullvad renumbers servers and gluetun only logs a warning for names it does not know, silently shrinking the pool. Kept out of the manifest in docker-apps. Consumed by apps/'s module.hathor_vpn_key as SERVER_HOSTNAMES, so it rides on hathor_vpn_private_key's rotation stamp."
   type        = string
   sensitive   = true
 }
 
 variable "hathor_url_token" {
-  description = "Long random URL-path token the hathor nginx server requires in /hathor/<token>/..., which is the only authentication on that public endpoint. Generate one with `openssl rand -hex 32`. It appears in ingress and nginx access logs, so treat a leak as rotating this one value. Consumed by apps/'s kubernetes_secret_v1.hathor_url_token."
+  description = "Long random URL-path token the hathor nginx server requires in /hathor/<token>/..., which is the only authentication on that public endpoint. Generate one with `openssl rand -hex 32`. It appears in ingress and nginx access logs, so treat a leak as rotating this one value. Consumed by apps/'s module.hathor_url_token."
   type        = string
   sensitive   = true
 }
 
 variable "hathor_google_api_key" {
-  description = "Google API key hathor uses for the YouTube Data API v3 (console.cloud.google.com, API key credential). Consumed by apps/'s kubernetes_secret_v1.hathor_api_keys as GOOGLE_API_KEY."
+  description = "Google API key hathor uses for the YouTube Data API v3 (console.cloud.google.com, API key credential). Consumed by apps/'s module.hathor_api_keys as GOOGLE_API_KEY."
   type        = string
   sensitive   = true
 }
 
 variable "hathor_twitch_client_id" {
-  description = "Twitch application client ID hathor uses for the Helix API (dev.twitch.tv/console). A public identifier, paired with hathor_twitch_client_secret. Consumed by apps/'s kubernetes_secret_v1.hathor_api_keys as TWITCH_CLIENT_ID."
+  description = "Twitch application client ID hathor uses for the Helix API (dev.twitch.tv/console). A public identifier, paired with hathor_twitch_client_secret. Consumed by apps/'s module.hathor_api_keys as TWITCH_CLIENT_ID."
   type        = string
   sensitive   = true
 }
 
 variable "hathor_twitch_client_secret" {
-  description = "Twitch application client secret, paired with hathor_twitch_client_id. Consumed by apps/'s kubernetes_secret_v1.hathor_api_keys as TWITCH_CLIENT_SECRET."
+  description = "Twitch application client secret, paired with hathor_twitch_client_id. Consumed by apps/'s module.hathor_api_keys as TWITCH_CLIENT_SECRET."
   type        = string
   sensitive   = true
 }
 
 variable "hathor_youtube_cookies_b64" {
-  description = "Base64, as ONE line (`base64 -w0 cookies.txt`), of the Netscape-format YouTube cookies.txt yt-dlp reads. A cookies file is multi-line and multi-line env vars are flaky across shells, so it travels base64-encoded and apps/'s kubernetes_secret_v1.hathor_youtube_cookies base64decode()s it back; the hathor pod mounts it as a FILE. Cookies expire, so expect to replace this one regularly."
+  description = "Base64, as ONE line (`base64 -w0 cookies.txt`), of the Netscape-format YouTube cookies.txt yt-dlp reads. A cookies file is multi-line and multi-line env vars are flaky across shells, so it travels base64-encoded and apps/'s module.hathor_youtube_cookies base64decode()s it back; the hathor pod mounts it as a FILE. Cookies expire, so expect to replace this one regularly."
   type        = string
   sensitive   = true
 }
@@ -397,7 +397,7 @@ variable "backstage_app_private_key_b64" {
 variable "backstage_mcp_token" {
   type        = string
   sensitive   = true
-  description = "Static externalAccess token for Backstage's backend.auth, consumed by the backstage-mcp-server MCP client run locally against the bastion port-forward (backstage/svc/backstage:7007). The backend has dangerouslyDisableDefaultAuthPolicy set, which only waives the requirement that a request carry credentials -- a request that DOES present a bearer token still gets it verified, and with no externalAccess entry configured every such token was rejected with 401. Any sufficiently random string works; generate with `openssl rand -hex 24`. Consumed by apps/'s kubernetes_secret_v1.backstage_mcp_token, which creates the backstage-mcp-token Secret mounted as BACKSTAGE_MCP_TOKEN."
+  description = "Static externalAccess token for Backstage's backend.auth, consumed by the backstage-mcp-server MCP client run locally against the bastion port-forward (backstage/svc/backstage:7007). The backend has dangerouslyDisableDefaultAuthPolicy set, which only waives the requirement that a request carry credentials -- a request that DOES present a bearer token still gets it verified, and with no externalAccess entry configured every such token was rejected with 401. Any sufficiently random string works; generate with `openssl rand -hex 24`. Consumed by apps/'s module.backstage_mcp_token, which creates the backstage-mcp-token Secret mounted as BACKSTAGE_MCP_TOKEN."
 }
 
 variable "ci_app_id" {
@@ -431,13 +431,3 @@ variable "ssh_public_key" {
   description = "SSH public key for OKE worker nodes"
   type        = string
 }
-
-# ==============================================================================
-# State-only CI users: infra/ and discord/
-#
-# Neither stack uses the OCI provider. discord/ reads no other stack's state;
-# infra/ reads the oci and discord states. They used the admin identity only to
-# reach state buckets, so each gets a user that can do exactly that and nothing
-# else (tnoff/terraform#116). Only the oci/ jobs still need terraform-admin.
-# ==============================================================================
-
