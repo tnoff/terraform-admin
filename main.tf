@@ -918,9 +918,9 @@ locals {
 resource "github_actions_secret" "terraform" {
   for_each = local.terraform_github_secrets
 
-  repository      = "terraform"
-  secret_name     = each.key
-  plaintext_value = each.value
+  repository  = "terraform"
+  secret_name = each.key
+  value       = each.value
 }
 
 resource "github_actions_variable" "terraform" {
