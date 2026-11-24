@@ -193,6 +193,15 @@ locals {
   ]...)
 }
 
+# Trust rule -> service user id for every identity above. The trust itself is owned by
+# tnoff/terraform's oci/ stack, which takes this map as TF_VAR_oidc_stack_rules (published to
+# CI in terraform_ci_vars, and to the operator's .envrc in admin_secrets_bundle).
+locals {
+  oidc_stack_rules = {
+    for k, v in local.oidc_identities : v.rule => oci_identity_domains_user.oidc[k].id
+  }
+}
+
 # IDCS returns some attributes only when a read asks for them by name (the same
 # reason the trust's rules cannot be read back, see oidc-trust.tf). For these
 # users and groups that made every plan show the same no-op changes after an

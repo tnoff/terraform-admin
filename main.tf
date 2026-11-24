@@ -318,6 +318,12 @@ locals {
     TF_VAR_apps_plan_oidc_group_ocid  = oci_identity_domains_group.oidc["apps-plan"].ocid
     TF_VAR_apps_apply_oidc_group_ocid = oci_identity_domains_group.oidc["apps-apply"].ocid
 
+    # What tnoff/terraform's oci/ stack needs to plan and apply the GitHub trust from a
+    # workstation (the trust is applied by -replace, which CI cannot do for itself). The same
+    # values terraform_ci_vars pushes to CI; the .envrc is built from this map, not that one.
+    TF_VAR_oidc_exchange_client_id = oci_identity_domains_app.oidc_exchange.name
+    TF_VAR_oidc_stack_rules        = jsonencode(local.oidc_stack_rules)
+
     TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
     TF_VAR_cloudflare_account_id = var.cloudflare_account_id
 
@@ -582,9 +588,7 @@ locals {
     # with its own image-pusher and TechDocs rules; the identities stay here because they are what
     # every stack signs in WITH. Not a secret (rules and user ids), so it is in
     # terraform_github_public. Only oci/ declares the variable, so only its job receives it.
-    TF_VAR_oidc_stack_rules = jsonencode({
-      for k, v in local.oidc_identities : v.rule => oci_identity_domains_user.oidc[k].id
-    })
+    TF_VAR_oidc_stack_rules = jsonencode(local.oidc_stack_rules)
 
     # The in-cluster ServiceAccount exchange app (k8s-oidc-trust.tf, tnoff/terraform#191),
     # for terraform's apps/ stack to put in the Secret the rpst_sidecar containers mount.
