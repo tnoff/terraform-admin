@@ -164,6 +164,12 @@ locals {
           # oci/ manages oci_identity_network_source.oke_pods. Without this the plan
           # cannot see it (OCI answers the denied read as not found) and plans a create.
           "read network-sources",
+          # oci/ owns the GitHub trust and the federated push/TechDocs identities, and looks the
+          # identity domain up by name (data.oci_identity_domains). Without this the list comes
+          # back empty rather than denied, and the plan fails indexing it. Names and URLs only:
+          # deliberately not `read domains`, which any pull request could use to read the
+          # domain's objects. Widen only if a plan still fails on the domain's own objects.
+          "inspect domains",
         ]
       }
       apply = {
