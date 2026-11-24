@@ -156,6 +156,12 @@ resource "oci_identity_domains_user" "techdocs_only" {
   urnietfparamsscimschemasoracleidcsextensionuser_user {
     service_user = true
   }
+
+  # IDCS adds the extension schemas the resource's blocks imply, so state
+  # never matches this list; see the note above the first user in github-oidc.tf.
+  lifecycle {
+    ignore_changes = [schemas]
+  }
 }
 
 resource "oci_identity_domains_group" "techdocs_only" {
@@ -168,6 +174,14 @@ resource "oci_identity_domains_group" "techdocs_only" {
   members {
     type  = "User"
     value = oci_identity_domains_user.techdocs_only[each.key].id
+  }
+
+  # members and the dynamic-group schema are not returned on read (see the note
+  # in github-oidc.tf). The user's id only changes when it is replaced, which
+  # recreates the group so the membership follows it.
+  lifecycle {
+    ignore_changes       = [schemas, members]
+    replace_triggered_by = [oci_identity_domains_user.techdocs_only[each.key].id]
   }
 }
 
