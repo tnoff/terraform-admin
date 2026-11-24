@@ -10,6 +10,11 @@ data "oci_objectstorage_namespace" "this" {
   compartment_id = var.oci_tenancy_ocid
 }
 
+output "oci_namespace" {
+  description = "Object Storage namespace of the tenancy (and of the terraform-state-* buckets). Pushed to terraform as OCI_NAMESPACE: the .envrc and the repo's Actions variables."
+  value       = data.oci_objectstorage_namespace.this.namespace
+}
+
 # ==============================================================================
 # KMS Vault and Encryption Key
 # ==============================================================================
@@ -271,11 +276,8 @@ locals {
 }
 
 # ==============================================================================
-# Values pushed to `terraform`'s GitHub Actions secrets/variables (the live
-# path — see terraform_github_secrets below) and its GitLab CI variables
-# (kept as a rollback path only, since .gitlab-ci.yml no longer exists in the
-# mirrored content — see module.terraform_gitlab's comment), AND exported
-# from .envrc for local dev. PEM goes via OCI_API_KEY_B64 (base64-encoded,
+# Values pushed to `terraform`'s GitHub Actions secrets/variables (see
+# terraform_github_secrets below), AND exported from .envrc for local dev. PEM goes via OCI_API_KEY_B64 (base64-encoded,
 # single-line) — multi-line PEMs through env vars are unreliable across
 # shells, so the terragrunt composite action's "Materialise the OCI API key"
 # step (tnoff/terraform's .github/actions/terragrunt) decodes it to disk in
@@ -288,6 +290,11 @@ locals {
     OCI_TENANCY_OCID = var.oci_tenancy_ocid
     OCI_USER_OCID    = oci_identity_user.terraform_admin.id
     OCI_FINGERPRINT  = oci_identity_api_key.terraform_admin.fingerprint
+
+    # Object Storage namespace of the state buckets, read by terraform's root.hcl
+    # (backend) and passed on to its stacks' terraform_remote_state reads. Looked
+    # up, never hardcoded, so terraform does not hardcode it either.
+    OCI_NAMESPACE = data.oci_objectstorage_namespace.this.namespace
 
     # PEM as base64. The terragrunt composite action decodes it to a file
     # at a known path in CI and exports OCI_PRIVATE_KEY_PATH +
@@ -519,11 +526,11 @@ resource "local_sensitive_file" "envrc" {
 }
 
 # ==============================================================================
-# GitLab project hosting this terraform code + its CI/CD variables.
+# GitLab project mirroring this terraform code (kept for Flux rollback; no CI).
 #
 # Lives in admin/ (not infra/) because:
-#   1. admin already owns the secrets that populate every CI variable —
-#      having infra/ relay them just adds a bootstrap-window hop.
+#   1. (historical) admin owned the secrets that populated its CI
+#      variables; those are gone now, the project runs no CI.
 #   2. admin already creates the OCI side of the bootstrap (state buckets,
 #      IAM, KMS); creating the GitLab project that uses them belongs in
 #      the same layer.
@@ -538,14 +545,20 @@ data "gitlab_group" "personal" {
 }
 
 locals {
-  # Map of GitLab CI variables → values, all sourced from admin's own
-  # inputs / outputs.
+  # The values tnoff/terraform's CI is allowed to know, all sourced from
+  # admin's own inputs / outputs. Pushed to GitHub only (below); the GitLab
+  # mirror gets none of them.
   terraform_ci_vars = {
     # No admin OCI key here any more (tnoff/terraform#135): every CI job now runs
     # as a federated (OIDC) identity or a scoped user below. The admin key stays
     # in .envrc for local operator runs only. The tenancy OCID is not a secret
     # and the OIDC login needs it to build its session profile.
     OCI_TENANCY_OCID = var.oci_tenancy_ocid
+
+    # The state buckets' Object Storage namespace, for terraform's root.hcl backend
+    # and remote_state reads. A GitHub variable, not a secret: see
+    # terraform_github_public.
+    OCI_NAMESPACE = data.oci_objectstorage_namespace.this.namespace
 
     TF_VAR_oci_tenancy_ocid = var.oci_tenancy_ocid
 
@@ -730,58 +743,6 @@ locals {
 
   }
 
-  # GitLab masking requires single-line, ≥8 chars, no '@'. These can't be
-  # masked; explicit allowlist so the rest stay masked by default.
-  terraform_ci_vars_unmasked = [
-    "TF_VAR_ssh_public_key",
-    "TF_VAR_cloudflare_account_id",
-    # rotated_at timestamps are RFC3339 strings containing `:` which
-    # GitLab masking rejects. Contents are non-secret apply timestamps,
-    # safe to expose.
-    "TF_VAR_discord_bot_token_rotated_at",
-    "TF_VAR_discord_management_token_rotated_at",
-    "TF_VAR_cloudflare_api_token_rotated_at",
-    "TF_VAR_openweather_api_key_rotated_at",
-    "TF_VAR_bart_api_key_rotated_at",
-    "TF_VAR_five11_api_key_rotated_at",
-    "TF_VAR_backstage_mcp_token_rotated_at",
-    "TF_VAR_hathor_vpn_private_key_rotated_at",
-    "TF_VAR_hathor_url_token_rotated_at",
-    "TF_VAR_hathor_google_api_key_rotated_at",
-    "TF_VAR_hathor_twitch_client_secret_rotated_at",
-    "TF_VAR_hathor_youtube_cookies_rotated_at",
-    "TF_VAR_discord_spotify_client_id_rotated_at",
-    "TF_VAR_discord_spotify_client_secret_rotated_at",
-    "TF_VAR_discord_youtube_api_key_rotated_at",
-    "TF_VAR_discord_vpn_private_key_rotated_at",
-    "TF_VAR_eastbay_contact_email_rotated_at",
-    "TF_VAR_eastbay_contact_number_rotated_at",
-    "TF_VAR_eastbay_email_host_user_rotated_at",
-    "TF_VAR_eastbay_email_host_password_rotated_at",
-    "TF_VAR_eastbay_flask_secret_key_rotated_at",
-    "TF_VAR_grafana_admin_user_rotated_at",
-    "TF_VAR_grafana_admin_password_rotated_at",
-    "TF_VAR_gitlab_api_key_rotated_at",
-    "TF_VAR_ssh_public_key_rotated_at",
-    "TF_VAR_ci_app_private_key_rotated_at",
-    "TF_VAR_terraform_app_private_key_rotated_at",
-    "TF_VAR_oidc_exchange_client_secret_rotated_at",
-    # 7 characters. GitLab masking requires at least 8, so masking this is
-    # rejected outright -- and an App ID is public to anyone who can see the
-    # app, so there is nothing to protect.
-    "TF_VAR_ci_app_id",
-    "TF_VAR_terraform_app_id",
-    "TF_VAR_terraform_app_installation_id",
-    # Not a secret either, and masking a non-secret only makes CI logs
-    # harder to read.
-    "TF_VAR_ci_app_client_id",
-    "TF_VAR_backstage_app_id",
-    "TF_VAR_backstage_app_client_id",
-    "TF_VAR_backstage_app_private_key_rotated_at",
-    # A GitLab service_account_id, not a credential -- same reasoning as
-    # ci_app_id above, and likely under 8 characters too.
-    "TF_VAR_gitlab_ci_service_account_id",
-  ]
 
   terraform_weekly_schedule = {
     weekly = {
@@ -814,8 +775,8 @@ locals {
       # only nobody pushing does, until the project goes read-only.
       #
       # Kept rather than deleted so the slot and its staggering rationale
-      # survive; flipping this back to true is all it takes to run GitLab CI
-      # again if the migration ever needs backing out.
+      # survive. Running GitLab CI again would also need its CI variables,
+      # which this stack no longer writes there.
       active = false
     }
   }
@@ -864,39 +825,27 @@ module "terraform_gitlab" {
 
   schedules = local.terraform_weekly_schedule
 
-  # Off by default: see var.gitlab_ci_variables_enabled. This was the largest
-  # copy of the CI secrets outside GitHub -- the admin OCI API key and every
-  # TF_VAR_* value -- sitting in a project that runs nothing.
-  pipeline_variables = var.gitlab_ci_variables_enabled ? {
-    for key, value in local.terraform_ci_vars :
-    key => {
-      value  = value
-      masked = !contains(local.terraform_ci_vars_unmasked, key)
-    }
-  } : {}
+  # No pipeline_variables: the GitLab copy is a mirror kept for Flux rollback,
+  # not a CI host, so it holds none of local.terraform_ci_vars.
 }
 
 # ==============================================================================
-# The same credentials, on GitHub.
+# The CI credentials, on GitHub.
 #
-# tnoff/terraform runs its plan/apply on GitHub Actions now, so every value in
-# local.terraform_ci_vars needs a second home. This is the GitHub half of
-# module.terraform_gitlab's pipeline_variables -- one map, two consumers -- and
-# it lives here for the reason stated above that module: admin already owns
-# these values, and having infra/ relay them would only add a bootstrap-window
-# hop. infra/ owns the *repository*; admin owns what CI is allowed to know.
+# tnoff/terraform runs its plan/apply on GitHub Actions, so every value in
+# local.terraform_ci_vars is pushed here. It lives in admin because admin
+# already owns these values, and having infra/ relay them would only add a
+# bootstrap-window hop. infra/ owns the *repository*; admin owns what CI is
+# allowed to know.
 #
-# Secret vs variable is NOT the GitLab masked/unmasked split, and reusing
-# local.terraform_ci_vars_unmasked here would be wrong. That list exists
-# because GitLab can only mask a single-line value of >=8 characters with no
-# '@' -- a platform constraint, not a judgement about sensitivity.
-# TF_VAR_ssh_public_key is on it partly for that reason too -- the trailing
-# user@host comment on a public key contains an '@'. GitHub has no such
-# limit, so the default here is secret, and the exceptions are the values that
-# are genuinely public:
+# The default is secret, and the exceptions are the values that are genuinely
+# public:
 #
 #   ssh_public_key      the public half of a keypair
 #   cloudflare_account_id  an identifier, not a credential
+#   OCI_NAMESPACE       the Object Storage namespace; it is also the tenancy
+#                       name, so as a secret it would mask that word, repo
+#                       names included, everywhere in the logs
 #   ci_app_id / client_id  visible to anyone who can see the App
 #   *_rotated_at        apply timestamps, and the ones apps/ reads to compute
 #                       secret ages -- see project_secret_age_tracking
@@ -907,6 +856,7 @@ module "terraform_gitlab" {
 # timestamps would turn every plan diff that touches them into `***`.
 locals {
   terraform_github_public = [
+    "OCI_NAMESPACE",
     "TF_VAR_ssh_public_key",
     "TF_VAR_cloudflare_account_id",
     "TF_VAR_ci_app_id",
@@ -1047,8 +997,7 @@ locals {
 #
 # Only the App credentials are set below. The ~18 values that are genuinely
 # "what CI is allowed to know" continue to come from
-# github_actions_secret.terraform above, off the same map that feeds the GitLab
-# pipeline variables.
+# github_actions_secret.terraform above, off local.terraform_ci_vars.
 #
 # No bypass_actors: the module gates its ruleset on `var.is_public &&
 # var.enable_ruleset`, and this repo is private, so no ruleset exists for an
