@@ -180,6 +180,34 @@ locals {
         tenancy_grants = ["manage all-resources"]
       }
     }
+
+    # trust/ owns the one GitHub identity-propagation trust. Identity Domains does not let
+    # a narrow IAM grant read a trust: users and groups are covered by `read users`/`read
+    # groups`, but apps and trusts are not (GetIdentityPropagationTrust returns 401 for the
+    # oci plan identity). A plan identity is reachable by ANY job, so it cannot be given the
+    # grants that would work (`read all-resources` exposes every state bucket and vault
+    # secret to a pull request). trust/ therefore plans with -refresh=false: the plan
+    # identity only reads the trust and oci state buckets (the trust takes oci's rules
+    # through remote state) and never touches the domain. The apply identity needs
+    # `manage all-resources` for the same reason the oci one does, and is reachable by the
+    # same gate (a push-to-main run of apply-trust.yml).
+    trust = {
+      plan = {
+        description  = "Federated service user for trust/ PR plans (GitHub pull_request runs): read-only, no domain access"
+        state_verb   = "read"
+        workspaces   = ["trust"]
+        cluster_path = false
+        read_extra   = ["oci"]
+      }
+      apply = {
+        description    = "Federated service user for trust/ applies (GitHub push-to-main runs): manage all-resources"
+        state_verb     = "manage"
+        workspaces     = ["trust"]
+        cluster_path   = false
+        read_extra     = ["oci"]
+        tenancy_grants = ["manage all-resources"]
+      }
+    }
   }
 
   # One entry per identity, keyed "<stack>-<mode>". The names are unchanged from

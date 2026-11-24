@@ -321,8 +321,9 @@ locals {
     # What tnoff/terraform's oci/ stack needs to plan and apply the GitHub trust from a
     # workstation (the trust is applied by -replace, which CI cannot do for itself). The same
     # values terraform_ci_vars pushes to CI; the .envrc is built from this map, not that one.
-    TF_VAR_oidc_exchange_client_id = oci_identity_domains_app.oidc_exchange.name
-    TF_VAR_oidc_stack_rules        = jsonencode(local.oidc_stack_rules)
+    TF_VAR_oidc_exchange_client_id  = oci_identity_domains_app.oidc_exchange.name
+    TF_VAR_oidc_exchange_domain_url = local.oidc_domain_endpoint
+    TF_VAR_oidc_stack_rules         = jsonencode(local.oidc_stack_rules)
 
     TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
     TF_VAR_cloudflare_account_id = var.cloudflare_account_id
