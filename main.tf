@@ -577,6 +577,15 @@ locals {
     TF_VAR_oidc_exchange_client_id     = oci_identity_domains_app.oidc_exchange.name
     TF_VAR_oidc_exchange_client_secret = oci_identity_domains_app.oidc_exchange.client_secret
 
+    # Trust rule -> service user id for every per-stack plan/apply identity (github-oidc.tf), as a
+    # JSON object. The GitHub trust itself is owned by terraform's oci/ stack, which merges these
+    # with its own image-pusher and TechDocs rules; the identities stay here because they are what
+    # every stack signs in WITH. Not a secret (rules and user ids), so it is in
+    # terraform_github_public. Only oci/ declares the variable, so only its job receives it.
+    TF_VAR_oidc_stack_rules = jsonencode({
+      for k, v in local.oidc_identities : v.rule => oci_identity_domains_user.oidc[k].id
+    })
+
     # The in-cluster ServiceAccount exchange app (k8s-oidc-trust.tf, tnoff/terraform#191),
     # for terraform's apps/ stack to put in the Secret the rpst_sidecar containers mount.
     # The secret is only useful together with a ServiceAccount token the cluster trust
@@ -891,6 +900,7 @@ locals {
     "TF_VAR_ci_app_private_key_rotated_at",
     "TF_VAR_terraform_app_private_key_rotated_at",
     "TF_VAR_oidc_exchange_client_secret_rotated_at",
+    "TF_VAR_oidc_stack_rules",
     "TF_VAR_gitlab_ci_service_account_id",
   ]
 
