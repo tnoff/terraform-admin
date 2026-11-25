@@ -2,7 +2,7 @@
 
 Bootstrap Terraform for the OCI tenancy that hosts everything else: the
 [`terraform`](https://github.com/tnoff/terraform) workload repo's stacks
-(`oci/`, `apps/`, `discord/`, `dns/`, `infra/`, plus the operator-run
+(`oci/`, `apps/`, `discord/`, `dns/`, `infra/`, plus
 `bootstrap/`). It runs locally, on local state, and rarely.
 
 ## What this creates

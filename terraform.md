@@ -38,9 +38,15 @@
 
 | Name | Type |
 | ---- | ---- |
+| [github_actions_environment_secret.flux_app_private_key_b64](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_secret) | resource |
+| [github_actions_environment_variable.flux_app_id](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) | resource |
+| [github_actions_environment_variable.flux_app_installation_id](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) | resource |
+| [github_actions_environment_variable.flux_app_private_key_rotated_at](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) | resource |
 | [github_actions_secret.terraform](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_secret) | resource |
 | [github_actions_variable.terraform](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_variable) | resource |
 | [github_actions_variable.terraform_oidc_exchange](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_variable) | resource |
+| [github_repository_deployment_branch_policy.bootstrap_main](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_deployment_branch_policy) | resource |
+| [github_repository_environment.bootstrap](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_environment) | resource |
 | [local_sensitive_file.envrc](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
 | [local_sensitive_file.mcp_readonly_oci_config](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
 | [local_sensitive_file.mcp_readonly_private_key](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |

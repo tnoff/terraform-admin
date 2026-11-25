@@ -322,8 +322,9 @@ metadata:
   name: flux-github-app-key
   description: >-
     Private key of the tnoff-flux GitHub App, Flux's read-only credential for
-    docker-apps (variable flux_app_private_key_b64). Consumed only by the operator-run
-    terraform/bootstrap stack, never by CI. Flux mints its own short-lived
+    docker-apps (variable flux_app_private_key_b64). Consumed only by the bootstrap
+    stack: from the local .envrc, and in CI only as Environment secrets on bootstrap-plan and
+    bootstrap-apply (bootstrap-environments.tf), never a repo-level secret. Flux mints its own short-lived
     installation tokens from it, so nothing expires silently.
 spec:
   type: credential

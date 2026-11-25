@@ -328,9 +328,11 @@ variable "hathor_youtube_cookies_b64" {
 # the App private key, so unlike a fine-grained PAT there is nothing that
 # expires and stops reconciliation silently.
 #
-# All three are consumed by the operator-run bootstrap stack via the local
-# .envrc ONLY -- deliberately absent from terraform_ci_vars, the same treatment
-# the sealed-secrets controller key gets. Nothing in CI needs them.
+# All three are consumed by the bootstrap stack. Locally they reach it through the
+# .envrc; in CI they are ENVIRONMENT secrets/variables on the bootstrap-plan and
+# bootstrap-apply Environments only (bootstrap-environments.tf), deliberately NOT in
+# terraform_ci_vars: a repo-level secret is readable by every workflow job, an
+# Environment's only by jobs that pass its branch policy (and, for apply, a reviewer).
 # ==============================================================================
 # tnoff-terraform GitHub App -- the identity terraform/infra manages GitHub with.
 #
