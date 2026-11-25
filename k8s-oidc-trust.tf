@@ -7,7 +7,7 @@
 # is exchanged against this trust, and the cluster's signing keys are mirrored into a
 # public Object Storage bucket by the jwks-publisher CronJob (oke-utilities).
 #
-#   exchange app   its own confidential app, NOT the GitHub one in oidc-trust.tf, so
+#   exchange app   its own confidential app, NOT the GitHub one in oidc-exchange.tf, so
 #                  a leaked GitHub-side secret cannot reach this trust and the other
 #                  way round. No admin roles.
 #   trust          ONE for the cluster issuer. Validates the signature against the

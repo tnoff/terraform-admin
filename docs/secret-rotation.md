@@ -234,7 +234,7 @@ trust accepts (a GitHub OIDC token, or a ServiceAccount token the hosted key set
 | App (display name) | Terraform | Trust that lists it | Where the secret goes |
 |---|---|---|---|
 | `k8s-workload-exchange` | `oci_identity_domains_app.k8s_exchange` (`k8s-oidc-trust.tf`) | `k8s-workloads` | `TF_VAR_k8s_exchange_client_*` Actions secrets, then `terraform` `apps/` writes `rpst-exchange-creds` in `monitoring`, `security-scanner`, `hathor`, `discord` and `backstage` |
-| `terraform-oidc-spike-exchange` | `oci_identity_domains_app.oidc_exchange` (`oidc-trust.tf`) | `github-actions-oidc-spike` | `OIDC_EXCHANGE_*` Actions secrets on `terraform` |
+| `terraform-oidc-spike-exchange` | `oci_identity_domains_app.oidc_exchange` (`oidc-exchange.tf`) | `github-actions-oidc-spike` | `OIDC_EXCHANGE_*` Actions secrets on `terraform` |
 
 These are **not slot-managed**. A rotation replaces the app, so it has a gap: from the moment
 the old app stops working until the consumer is re-rendered, *new* exchanges fail with a 400

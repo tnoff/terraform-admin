@@ -47,7 +47,7 @@ unauthenticated.
 
 | Piece | Lives in | Notes |
 |---|---|---|
-| Trust `k8s-workloads` and exchange app `k8s-workload-exchange` | this repo, `k8s-oidc-trust.tf` | Separate from the GitHub trust in `oidc-trust.tf`. |
+| Trust `k8s-workloads` and exchange app `k8s-workload-exchange` | this repo, `k8s-oidc-trust.tf` | Separate from the GitHub trust, which is in tnoff/terraform `trust/`. |
 | Bucket `k8s_oidc_jwks` and its seeded `jwks.json` | this repo, `k8s-jwks-bucket.tf` | In us-sanjose-1 (the `sanjose` provider alias). Public read, no listing, versioned. |
 | Exchange app credentials to CI | this repo, `main.tf` (`TF_VAR_k8s_exchange_*`) | Reach `terraform` `apps/`. |
 | Publisher bot, its API key, the `oke-pods` network source | `terraform` `oci/` | Bot may only overwrite `jwks.json`, only from the cluster network. |
