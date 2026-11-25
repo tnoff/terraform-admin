@@ -52,8 +52,8 @@ variables: it is kept for Flux rollback, not to run CI.
 
 ### Cluster ServiceAccount trust (`k8s-oidc-trust.tf`)
 
-A second identity propagation trust, separate from the GitHub one in
-`oidc-trust.tf`, with its own exchange app. It lets in-cluster pods swap a
+A second identity propagation trust, separate from the GitHub one (in
+tnoff/terraform `trust/`), with its own exchange app. It lets in-cluster pods swap a
 projected ServiceAccount token for an OCI resource principal token
 (tnoff/terraform#191). Things that bite:
 
@@ -75,7 +75,7 @@ projected ServiceAccount token for an OCI resource principal token
   prefix (max three); the API otherwise rejects the trust with
   `invalidAttributes`.
 - Unlike the GitHub trust there are no per-user rules, so the drift problem
-  described in `oidc-trust.tf` does not apply.
+  described in tnoff/terraform `trust/README.md` does not apply.
 
 ### Why this stack owns `terraform`'s repo settings and secrets
 
@@ -88,7 +88,7 @@ at all (a stack owning its own housing is the bootstrap paradox). Consequences:
 - This repo's `CI_APP_*` Actions secrets are managed by nothing; rotate them by
   hand (see [secret rotation](https://github.com/tnoff/terraform-admin/blob/main/docs/secret-rotation.md#github-app-private-keys)).
 - `terraform`'s TechDocs publish needs no stored secret: it signs in through the
-  GitHub OIDC trust (`techdocs-publishers.tf`). Any `TECHDOCS_S3_*` secrets still
+  GitHub OIDC trust (the identity is in tnoff/terraform `oci/techdocs-publishers.tf`). Any `TECHDOCS_S3_*` secrets still
   on that repo are leftovers from the old key and can be deleted by hand.
 
 ### Two Discord bot tokens, not one

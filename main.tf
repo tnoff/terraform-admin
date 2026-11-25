@@ -569,7 +569,7 @@ locals {
 
     TF_VAR_oci_tenancy_ocid = var.oci_tenancy_ocid
 
-    # The GitHub OIDC token-exchange app (tnoff/terraform#135, oidc-trust.tf). Not
+    # The GitHub OIDC token-exchange app (tnoff/terraform#135, oidc-exchange.tf). Not
     # OCI_*-prefixed, so the terragrunt action does not export it to the job's
     # environment: the login action takes it as an input. The secret is only useful
     # together with a GitHub token the trust accepts.
@@ -578,17 +578,17 @@ locals {
     OIDC_EXCHANGE_CLIENT_SECRET = oci_identity_domains_app.oidc_exchange.client_secret
 
     # The same exchange values as TF_VAR_*, for terraform's infra/ stack to hand to the
-    # image repos whose releases push to OCIR without a stored token (ocir-pushers.tf).
+    # image repos whose releases push to OCIR without a stored token (oci/ocir-pushers.tf in tnoff/terraform).
     # Only infra declares these variables, so only infra's job receives them.
     TF_VAR_oidc_exchange_domain_url    = local.oidc_domain_endpoint
     TF_VAR_oidc_exchange_client_id     = oci_identity_domains_app.oidc_exchange.name
     TF_VAR_oidc_exchange_client_secret = oci_identity_domains_app.oidc_exchange.client_secret
 
     # Trust rule -> service user id for every per-stack plan/apply identity (github-oidc.tf), as a
-    # JSON object. The GitHub trust itself is owned by terraform's oci/ stack, which merges these
-    # with its own image-pusher and TechDocs rules; the identities stay here because they are what
+    # JSON object. The GitHub trust itself is owned by terraform's trust/ stack, which merges these
+    # with oci/'s image-pusher and TechDocs rules; the identities stay here because they are what
     # every stack signs in WITH. Not a secret (rules and user ids), so it is in
-    # terraform_github_public. Only oci/ declares the variable, so only its job receives it.
+    # terraform_github_public. Only trust/ declares the variable, so only its job receives it.
     TF_VAR_oidc_stack_rules = jsonencode(local.oidc_stack_rules)
 
     # The in-cluster ServiceAccount exchange app (k8s-oidc-trust.tf, tnoff/terraform#191),

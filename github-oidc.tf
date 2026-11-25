@@ -3,7 +3,7 @@
 #
 # Replaces the stored per-stack API keys with federated service users. Each stack
 # has a PLAN identity (read-only, used by pull_request runs) and an APPLY
-# identity (used by applies on main). The trust (oidc-trust.tf) hands a token the
+# identity (used by applies on main). The trust (tnoff/terraform trust/) hands a token the
 # user whose rule it matches. Phase 0 measured how, and set the rules below:
 #
 #   plan   aud eq oidc-plan-<stack>
@@ -218,7 +218,7 @@ locals {
         stack = stack
         mode  = mode
         name  = "terraform-${stack}-${mode}-oidc"
-        # The trust rule that selects this identity (see oidc-trust.tf).
+        # The trust rule that selects this identity (see tnoff/terraform trust/).
         rule = (mode == "plan"
           ? "aud eq oidc-plan-${stack}"
         : "job_workflow_ref eq ${var.oidc_github_repo}/.github/workflows/apply-${stack}.yml@refs/heads/main")
@@ -237,13 +237,13 @@ locals {
 }
 
 # IDCS returns some attributes only when a read asks for them by name (the same
-# reason the trust's rules cannot be read back, see oidc-trust.tf). For these
+# reason the trust's rules cannot be read back, see tnoff/terraform trust/README.md). For these
 # users and groups that made every plan show the same no-op changes after an
 # apply: `schemas` listing the extension URNs the API adds, and each group's
 # `members` as new. state show confirms the group has no members and the
 # dynamic:Group schema, and meta.last_modified never moves, so nothing is being
-# changed. The identity users and groups here (this file, ocir-pushers.tf,
-# techdocs-publishers.tf) therefore ignore those attributes. A group is replaced
+# changed. The identity users and groups here, and the image-push and TechDocs ones in
+# tnoff/terraform oci/, therefore ignore those attributes. A group is replaced
 # when its user's id changes, so its membership still follows a replaced user.
 resource "oci_identity_domains_user" "oidc" {
   for_each = local.oidc_identities

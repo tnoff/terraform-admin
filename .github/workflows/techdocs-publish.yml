@@ -10,7 +10,7 @@ name: Publish TechDocs
 #
 # Publishes with a short-lived OCI token from this job's GitHub OIDC identity, not a stored S3 key
 # (tnoff/terraform#217). OCI maps this repo's push to main to the user that may write only
-# default/component/terraform-admin/ in the TechDocs bucket (terraform-admin techdocs-publishers.tf).
+# default/component/terraform-admin/ in the TechDocs bucket (tnoff/terraform oci/techdocs-publishers.tf).
 
 on:
   push:

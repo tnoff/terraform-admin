@@ -50,23 +50,15 @@
 | [oci_identity_domains_app.k8s_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
 | [oci_identity_domains_app.oidc_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
 | [oci_identity_domains_group.human_lockout](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
-| [oci_identity_domains_group.ocir_pusher](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_group.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
-| [oci_identity_domains_group.techdocs_only](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
-| [oci_identity_domains_identity_propagation_trust.github_actions](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_identity_propagation_trust) | resource |
 | [oci_identity_domains_identity_propagation_trust.k8s_workloads](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_identity_propagation_trust) | resource |
 | [oci_identity_domains_password_policy.human_lockout](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_password_policy) | resource |
-| [oci_identity_domains_user.ocir_pusher](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_domains_user.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
-| [oci_identity_domains_user.techdocs_only](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_user) | resource |
 | [oci_identity_group.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_group.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_group) | resource |
 | [oci_identity_policy.admin_kms_object_storage](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
-| [oci_identity_policy.ocir_pusher](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.oidc](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
-| [oci_identity_policy.techdocs_only](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
-| [oci_identity_policy.techdocs_publisher](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_policy.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_policy) | resource |
 | [oci_identity_user.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
 | [oci_identity_user.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_user) | resource |
@@ -140,7 +132,6 @@
 | [gitlab_group.personal](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/data-sources/group) | data source |
 | [oci_identity_compartments.apps](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_compartments) | data source |
 | [oci_identity_domains.default](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_domains) | data source |
-| [oci_identity_domains_identity_propagation_trusts.live](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_domains_identity_propagation_trusts) | data source |
 | [oci_identity_domains_users.human](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_domains_users) | data source |
 | [oci_identity_tenancy.current](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/identity_tenancy) | data source |
 | [oci_objectstorage_namespace.this](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/objectstorage_namespace) | data source |
@@ -197,8 +188,6 @@
 | <a name="input_mcp_readonly_user_name"></a> [mcp\_readonly\_user\_name](#input\_mcp\_readonly\_user\_name) | Name of the tenancy-wide read-only user backing the local OCI MCP server | `string` | `"mcp-readonly-bot"` | no |
 | <a name="input_oci_region"></a> [oci\_region](#input\_oci\_region) | OCI region | `string` | `"us-ashburn-1"` | no |
 | <a name="input_oci_tenancy_ocid"></a> [oci\_tenancy\_ocid](#input\_oci\_tenancy\_ocid) | OCID of the tenancy (all resources created in root compartment) | `string` | n/a | yes |
-| <a name="input_oidc_github_owner"></a> [oidc\_github\_owner](#input\_oidc\_github\_owner) | GitHub owner (user or org) of the image repos | `string` | `"tnoff"` | no |
-| <a name="input_oidc_github_owner_id"></a> [oidc\_github\_owner\_id](#input\_oidc\_github\_owner\_id) | Numeric id of the GitHub owner, for the immutable subject (gh api users/<owner> --jq .id) | `number` | `1326564` | no |
 | <a name="input_oidc_github_repo"></a> [oidc\_github\_repo](#input\_oidc\_github\_repo) | GitHub repository (owner/name) whose reusable apply workflows the apply rules are bound to | `string` | `"tnoff/terraform"` | no |
 | <a name="input_openweather_api_key"></a> [openweather\_api\_key](#input\_openweather\_api\_key) | Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s module.openweather\_api\_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-dublin/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord\_bot\_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. See bart\_api\_key below for the same treatment applied to the other mirror-api-keys entry. | `string` | n/a | yes |
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | SSH public key for OKE worker nodes | `string` | n/a | yes |
