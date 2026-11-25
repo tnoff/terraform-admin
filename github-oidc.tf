@@ -18,6 +18,14 @@
 #          ends in refs/pull/N/merge, so it cannot produce this one. Each stack
 #          needs its own apply-<stack>.yml, called from apply.yml.
 #
+#   env    sub eq repo:<owner>@<id>/<repo>@<id>:environment:<name>
+#          For stacks applied behind a protected GitHub Environment (bootstrap). Only a job
+#          that names the environment gets this `sub`, and GitHub does not start such a job
+#          until the environment's branch policy and required reviewers allow it, so a pull
+#          request cannot reach it (neither can a push to another branch). The same shape
+#          as the TechDocs environment rule in tnoff/terraform oci/. A stack with an
+#          explicit `rule` in local.oidc_stacks uses it instead of the two defaults above.
+#
 # Rules must not overlap: the winner when several match is not decided by list
 # position, so an intended token should match exactly one rule, and an accidental
 # overlap must resolve to a lower-privilege identity (a main-push apply token that
@@ -44,6 +52,18 @@ variable "oidc_github_repo" {
   default     = "tnoff/terraform"
 }
 
+variable "oidc_github_owner_id" {
+  description = "Numeric id of the GitHub owner (gh api users/<owner> --jq .id), for the immutable subject of environment rules"
+  type        = number
+  default     = 1326564
+}
+
+variable "oidc_github_repo_id" {
+  description = "Numeric id of oidc_github_repo (gh api repos/<owner>/<repo> --jq .id), for the immutable subject of environment rules"
+  type        = number
+  default     = 1356736164
+}
+
 variable "dns_oidc_plan_read_workspaces" {
   description = "State buckets the dns plan user (pull_request runs) may READ. Read-only on purpose."
   type        = list(string)
@@ -60,6 +80,10 @@ locals {
   # stack -> mode -> what that identity may do. cluster_path adds the bastion/OKE
   # grants (stacks that talk to the cluster); the in-cluster permissions are
   # bound to the identity's IAM group in terraform/bootstrap.
+  # Subject prefix of a job in this repo, with the owner and repo ids so a renamed or
+  # recreated repo does not inherit access: repo:tnoff@<id>/terraform@<id>
+  oidc_repo_subject = "repo:${split("/", var.oidc_github_repo)[0]}@${var.oidc_github_owner_id}/${split("/", var.oidc_github_repo)[1]}@${var.oidc_github_repo_id}"
+
   oidc_stacks = {
     dns = {
       plan = {
@@ -208,6 +232,38 @@ locals {
         tenancy_grants = ["manage all-resources"]
       }
     }
+
+    # bootstrap/ (namespaces, the RBAC bindings for the apps/dns CI groups, the Flux install),
+    # applied from CI behind protected GitHub Environments instead of from a workstation.
+    # Neither identity is reachable from a pull request: each is selected by the `sub` of a
+    # job that names its Environment (which is restricted to main, and for apply needs a
+    # reviewer). There is no PR plan identity on purpose: a plan reads the flux-system GitHub
+    # App key Secret, and a plan identity any pull request could use could print it.
+    # Both reach the cluster through the bastion. Plan gets `use clusters` (the cluster_path
+    # set) and only reads; the in-cluster read access is bound by bootstrap itself, for the
+    # plan group, once this exists. Apply gets `manage clusters`, which OKE maps to
+    # cluster-admin (`use clusters` does not): it creates namespaces, RBAC and Flux. That is
+    # no more than the oci apply identity already holds through `manage all-resources`.
+    # bootstrap reads infra's state for the Flux deploy token.
+    bootstrap = {
+      plan = {
+        description  = "Federated service user for bootstrap/ plans (main only, bootstrap-plan Environment): read-only"
+        state_verb   = "read"
+        workspaces   = ["bootstrap"]
+        cluster_path = true
+        read_extra   = ["infra"]
+        rule         = "sub eq ${local.oidc_repo_subject}:environment:bootstrap-plan"
+      }
+      apply = {
+        description        = "Federated service user for bootstrap/ applies (main only, bootstrap-apply Environment with a required reviewer): manage clusters"
+        state_verb         = "manage"
+        workspaces         = ["bootstrap"]
+        cluster_path       = true
+        read_extra         = ["infra"]
+        compartment_grants = ["manage clusters"]
+        rule               = "sub eq ${local.oidc_repo_subject}:environment:bootstrap-apply"
+      }
+    }
   }
 
   # One entry per identity, keyed "<stack>-<mode>". The names are unchanged from
@@ -219,9 +275,9 @@ locals {
         mode  = mode
         name  = "terraform-${stack}-${mode}-oidc"
         # The trust rule that selects this identity (see tnoff/terraform trust/).
-        rule = (mode == "plan"
+        rule = try(cfg.rule, (mode == "plan"
           ? "aud eq oidc-plan-${stack}"
-        : "job_workflow_ref eq ${var.oidc_github_repo}/.github/workflows/apply-${stack}.yml@refs/heads/main")
+        : "job_workflow_ref eq ${var.oidc_github_repo}/.github/workflows/apply-${stack}.yml@refs/heads/main"))
       })
     }
   ]...)
@@ -298,6 +354,10 @@ resource "oci_identity_policy" "oidc" {
     ],
     [
       for grant in(each.value.cluster_path ? local.cluster_path_grants : []) :
+      "Allow group ${oci_identity_domains_group.oidc[each.key].display_name} to ${grant} in compartment ${var.cluster_ci_compartment_name}"
+    ],
+    [
+      for grant in try(each.value.compartment_grants, []) :
       "Allow group ${oci_identity_domains_group.oidc[each.key].display_name} to ${grant} in compartment ${var.cluster_ci_compartment_name}"
     ],
     length(try(each.value.read_extra, [])) == 0 ? [] : [
