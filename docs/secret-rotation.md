@@ -132,7 +132,7 @@ Four Apps, deliberately separate so each has its own blast radius.
 |---|---|---|
 | `terraform_app_private_key_b64` | `tnoff-terraform` (repo admin) | This stack's own GitHub provider; `terraform`'s CI (`infra/` provider) |
 | `ci_app_private_key_b64` | `tnoff-ci` (Contents + Workflows write, ruleset bypass) | `CI_APP_PRIVATE_KEY` Actions secret in every repo |
-| `flux_app_private_key_b64` | `tnoff-flux` (Contents read on `docker-apps`) | Operator-run `bootstrap/` only, never CI |
+| `flux_app_private_key_b64` | `tnoff-flux` (Contents read on `docker-apps`) | `bootstrap/`: the `.envrc` locally and the `bootstrap-plan` / `bootstrap-apply` Environment secrets in CI (never a repo-level secret) |
 | `backstage_app_private_key_b64` | `tnoff-backstage` (Contents + Metadata read) | `apps/` -> `backstage-github-app-credentials` |
 
 Procedure (all four):
@@ -157,8 +157,8 @@ Per-App steps:
   ```bash
   gh secret set CI_APP_PRIVATE_KEY --repo tnoff/terraform-admin < key.pem
   ```
-- **`tnoff-flux`:** apply `terraform/bootstrap` as the operator (live bastion
-  tunnel plus `oci-kms` context); it rewrites the `flux-system-github-app`
+- **`tnoff-flux`:** apply this stack (it updates the Environment secrets), then run
+  `terraform/bootstrap` (the CI `bootstrap` workflow, approving the apply); it rewrites the `flux-system-github-app`
   Secret. Check `flux get sources git flux-system` shows `Ready: True` with a
   recent update. Flux mints its own hourly tokens, so there is no expiry to
   chase.
@@ -383,7 +383,7 @@ federated and has no password, API key or token. Re-list the users with
   and `bootstrap/` renders `flux-system-https` from it. Flux now syncs from
   GitHub with the `tnoff-flux` App, so this token is the rollback path. To
   rotate, set `var.flux_deploy_token_expires_at` (`infra/variables.tf`) to a
-  new date, apply `infra/` (CI), then apply `bootstrap/` as the operator.
+  new date, apply `infra/` (CI), then run the `bootstrap` workflow and approve its apply.
 - **Grafana service-account tokens** are minted in-cluster by docker-apps'
   `grafana-sa-bootstrap` and are not terraform-managed.
 

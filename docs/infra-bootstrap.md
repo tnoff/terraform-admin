@@ -18,8 +18,9 @@ How `terraform-admin` bootstraps the OCI tenancy and hands credentials to the
   authenticates with.
 - **`terraform`** is the workload: Terragrunt stacks (`oci/`, `discord/`,
   `infra/`, `bootstrap/`, `apps/`, `dns/`) with remote state in the buckets
-  created here. Its CI plans on pull requests and applies on merge to `main`,
-  except `bootstrap/`, which is operator-applied through a bastion tunnel.
+  created here. Its CI plans on pull requests and applies on merge to `main`.
+  `bootstrap/` is the exception: it has no PR plan, and plans and applies only from `main`
+  behind the `bootstrap-plan` and `bootstrap-apply` GitHub Environments (the apply needs a reviewer).
 
 ## What this stack provisions
 
