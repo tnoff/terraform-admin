@@ -47,7 +47,11 @@ variable "workspaces" {
   # destroys the terraform_state_buckets/oci_identity_policy resources for
   # it -- the bucket itself must be emptied first (OCI object storage has no
   # force_destroy; a non-empty bucket fails to delete).
-  default = ["discord", "infra", "oci", "bootstrap", "apps", "dns"]
+  #
+  # `trust` (2026-11-24) holds the GitHub OIDC identity-propagation trust. It is its own
+  # stack because the PR plan identity cannot read a trust (see github-oidc.tf), so its
+  # PR plans run without a refresh; keeping that to one small state keeps the cost small.
+  default = ["discord", "infra", "oci", "bootstrap", "apps", "dns", "trust"]
 }
 
 variable "vault_name" {
