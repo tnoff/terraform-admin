@@ -6,13 +6,17 @@
 # It is applied from CI behind two Environments, so a pull request can never reach
 # its identities or its key:
 #
-#   bootstrap-plan    main only, no reviewer. The plan job runs here on a push to main.
-#   bootstrap-apply   main only, a required reviewer. The apply job waits for approval,
-#                     so the reviewer reads the plan job's output first.
+#   bootstrap-plan    main only. The plan job runs here on a push to main.
+#   bootstrap-apply   main only. The apply job runs only on a manual workflow_dispatch, so
+#                     the dispatch is the approval: only someone with write access can
+#                     start it, and they read the plan job's output first.
+#
+# There is no required reviewer: GitHub only offers that on private repos with a paid plan
+# (the PUT returns 422). Once tnoff/terraform is public (tnoff/terraform#114) add a
+# `reviewers` block to bootstrap-apply and drop the dispatch-only rule in bootstrap.yml.
 #
 # What an Environment gives a job:
-#   - the job does not start unless the ref passes the branch policy (and, for apply,
-#     a reviewer approves), so a pull request branch cannot get anything below;
+#   - the job does not start unless the ref passes the branch policy so a pull request branch cannot get anything below;
 #   - it receives the Environment's own secrets and variables, which no other job reads;
 #   - its OIDC token has sub = repo:<owner>@<id>/<repo>@<id>:environment:<name>, which is
 #     what the two bootstrap identities' trust rules match (github-oidc.tf).
@@ -34,18 +38,6 @@ resource "github_repository_environment" "bootstrap" {
 
   repository  = "terraform"
   environment = each.key
-
-  # A single maintainer, so self-review has to be allowed or an apply could never be
-  # approved. Revisit if a second reviewer is ever added.
-  prevent_self_review = false
-
-  dynamic "reviewers" {
-    for_each = each.key == "bootstrap-apply" ? [1] : []
-
-    content {
-      users = [var.oidc_github_owner_id]
-    }
-  }
 
   deployment_branch_policy {
     protected_branches     = false
