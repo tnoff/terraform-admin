@@ -17,8 +17,10 @@ How `terraform-admin` bootstraps the OCI tenancy and hands credentials to the
   bucket per workspace, and the credentials and settings the workload repo's CI
   authenticates with.
 - **`terraform`** is the workload: Terragrunt stacks (`oci/`, `discord/`,
-  `infra/`, `bootstrap/`, `apps/`, `dns/`) with remote state in the buckets
-  created here. Its CI plans on pull requests and applies on merge to `main`.
+  `infra/`, `bootstrap/`, `apps/`, `dns/`, `trust/`) with remote state in the buckets
+  created here. `oci/` owns the per-stack CI identities and `trust/` the identity-propagation
+  trusts and the in-cluster token-exchange app; this repo keeps only the GitHub token-exchange
+  app, because that is what CI logs in with. Its CI plans on pull requests and applies on merge to `main`.
   `bootstrap/` is the exception: it has no PR plan, and plans and applies only from `main`
   behind the `bootstrap-plan` and `bootstrap-apply` GitHub Environments (the apply runs only on a manual dispatch; a required reviewer waits on tnoff/terraform going public, tnoff/terraform#114).
 
@@ -104,7 +106,10 @@ trust, so any `TECHDOCS_S3_*` secrets left on it are unused.)
 3. Symlink the `.envrc` into `terraform` as above.
 4. In `terraform`, apply the stacks in order (`terragrunt run --all apply`).
    `apps/`, `dns/` and `bootstrap/` need a live bastion tunnel and the
-   `oci-kms` kubeconfig context.
+   `oci-kms` kubeconfig context. On a fresh tenancy CI cannot sign in until the identities
+   (`oci/`) and the trusts (`trust/`) exist, so apply those two locally first with the admin
+   key; `trust/` also applies through the trust it manages, and that local apply is its
+   recovery path.
 
 Day to day, workload changes are pull requests to `terraform`, module changes
 are pull requests to `terraform-modules` followed by a ref bump, and admin-tier
