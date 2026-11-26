@@ -368,19 +368,6 @@ resource "time_static" "backstage_mcp_token_rotated_at" {
   }
 }
 
-# The in-cluster ServiceAccount exchange app's client secret (k8s-oidc-trust.tf,
-# tnoff/terraform#191). Terraform-generated rather than operator-supplied, but it
-# changes whenever the app is replaced, which is exactly a rotation, so the same
-# hash-and-stamp trick tracks it for the Secret in terraform's apps/ stack.
-resource "terraform_data" "k8s_exchange_client_secret_version" {
-  triggers_replace = [sha256(oci_identity_domains_app.k8s_exchange.client_secret)]
-}
-resource "time_static" "k8s_exchange_client_secret_rotated_at" {
-  triggers = {
-    version = terraform_data.k8s_exchange_client_secret_version.id
-  }
-}
-
 # tnoff-terraform GitHub App private key. Operator-rotated like the other App
 # keys above; it is the credential infra/ manages GitHub with, and the one
 # input in this family that had no stamp, so it never reached the age report.
@@ -394,8 +381,8 @@ resource "time_static" "terraform_app_private_key_rotated_at" {
 }
 
 # The GitHub OIDC token-exchange app's client secret (oidc-trust.tf). Same
-# hash-and-stamp trick as k8s_exchange_client_secret above: terraform generates
-# it, and it changes exactly when the app is replaced, which is a rotation.
+# hash-and-stamp trick as the other generated secrets: terraform generates it, and it
+# changes exactly when the app is replaced, which is a rotation.
 resource "terraform_data" "oidc_exchange_client_secret_version" {
   triggers_replace = [sha256(oci_identity_domains_app.oidc_exchange.client_secret)]
 }

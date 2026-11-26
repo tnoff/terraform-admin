@@ -425,26 +425,6 @@ spec:
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: k8s-exchange-client-secret
-  description: >-
-    Client id and secret of the k8s-workload-exchange app (k8s-oidc-trust.tf), which
-    pods authenticate with at the identity domain's token endpoint when they trade a
-    ServiceAccount token for an OCI resource principal token. Reaches terraform's apps/
-    stack as TF_VAR_k8s_exchange_client_id / _client_secret, which creates the
-    rpst-exchange-creds Secret in each namespace that runs a federated workload. Useless
-    without a ServiceAccount token the hosted key set verifies. Rotated by replacing the app
-    (deactivate first, then terraform apply -replace, then re-render apps/); see
-    docs/secret-rotation.md, Token-exchange apps.
-spec:
-  type: credential
-  owner: group:default/admin
-  system: workload-federation
-  dependencyOf:
-    - component:default/rpst-sidecar
----
-apiVersion: backstage.io/v1alpha1
-kind: Resource
-metadata:
   name: oidc-exchange-client-secret
   description: >-
     Client id and secret of the terraform-oidc-spike-exchange app (oidc-exchange.tf), which CI jobs

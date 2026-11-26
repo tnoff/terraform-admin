@@ -51,7 +51,6 @@
 | [local_sensitive_file.terraform_admin_private_key](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
 | [oci_identity_api_key.mcp_readonly](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
 | [oci_identity_api_key.terraform_admin](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_api_key) | resource |
-| [oci_identity_domains_app.k8s_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
 | [oci_identity_domains_app.oidc_exchange](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_app) | resource |
 | [oci_identity_domains_group.human_lockout](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_group) | resource |
 | [oci_identity_domains_password_policy.human_lockout](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/identity_domains_password_policy) | resource |
@@ -90,7 +89,6 @@
 | [terraform_data.hathor_url_token_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.hathor_vpn_private_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.hathor_youtube_cookies_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
-| [terraform_data.k8s_exchange_client_secret_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.oidc_exchange_client_secret_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.openweather_api_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.ssh_public_key_version](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
@@ -121,7 +119,6 @@
 | [time_static.hathor_url_token_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.hathor_vpn_private_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.hathor_youtube_cookies_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
-| [time_static.k8s_exchange_client_secret_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.oidc_exchange_client_secret_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.openweather_api_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [time_static.ssh_public_key_rotated_at](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
@@ -199,8 +196,6 @@
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_k8s_exchange_client_id"></a> [k8s\_exchange\_client\_id](#output\_k8s\_exchange\_client\_id) | Client id of the in-cluster token-exchange app |
-| <a name="output_k8s_exchange_client_secret"></a> [k8s\_exchange\_client\_secret](#output\_k8s\_exchange\_client\_secret) | Client secret of the in-cluster token-exchange app. Already pushed to tnoff/terraform as TF\_VAR\_k8s\_exchange\_client\_secret via terraform\_ci\_vars, for apps/'s rpst-exchange-creds Secret; this output is for reading it locally. |
 | <a name="output_oci_namespace"></a> [oci\_namespace](#output\_oci\_namespace) | Object Storage namespace of the tenancy (and of the terraform-state-* buckets). Pushed to terraform as OCI\_NAMESPACE: the .envrc and the repo's Actions variables. |
 | <a name="output_oidc_domain_endpoint"></a> [oidc\_domain\_endpoint](#output\_oidc\_domain\_endpoint) | Identity domain URL the token exchange is POSTed to (<this>/oauth2/v1/token) |
 | <a name="output_oidc_exchange_client_id"></a> [oidc\_exchange\_client\_id](#output\_oidc\_exchange\_client\_id) | Client id of the token-exchange app |
