@@ -548,7 +548,6 @@ locals {
     TF_VAR_oidc_exchange_client_id     = oci_identity_domains_app.oidc_exchange.name
     TF_VAR_oidc_exchange_client_secret = oci_identity_domains_app.oidc_exchange.client_secret
 
-    # Trust rule -> service user id for every per-stack plan/apply identity (github-oidc.tf), as a
     # The in-cluster ServiceAccount exchange app (k8s-oidc-trust.tf, tnoff/terraform#191),
     # for terraform's apps/ stack to put in the Secret the rpst_sidecar containers mount.
     # The secret is only useful together with a ServiceAccount token the cluster trust

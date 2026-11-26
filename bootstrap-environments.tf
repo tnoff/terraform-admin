@@ -19,7 +19,7 @@
 #   - the job does not start unless the ref passes the branch policy, so a pull request branch cannot get anything below;
 #   - it receives the Environment's own secrets and variables, which no other job reads;
 #   - its OIDC token has sub = repo:<owner>@<id>/<repo>@<id>:environment:<name>, which is
-#     what the two bootstrap identities' trust rules match (github-oidc.tf).
+#     what the two bootstrap identities' trust rules match (tnoff/terraform oci/federation-stacks.tf).
 #
 # The Flux App key is therefore an Environment secret, NOT one of the repo-level secrets
 # in main.tf (any workflow job in the repo can read those). Both Environments hold it:

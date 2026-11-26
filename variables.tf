@@ -49,7 +49,7 @@ variable "workspaces" {
   # force_destroy; a non-empty bucket fails to delete).
   #
   # `trust` (2026-11-24) holds the GitHub OIDC identity-propagation trust. It is its own
-  # stack because the PR plan identity cannot read a trust (see github-oidc.tf), so its
+  # stack because the PR plan identity cannot read a trust (see tnoff/terraform oci/federation-stacks.tf), so its
   # PR plans run without a refresh; keeping that to one small state keeps the cost small.
   default = ["discord", "infra", "oci", "bootstrap", "apps", "dns", "trust"]
 }
