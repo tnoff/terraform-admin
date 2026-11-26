@@ -7,16 +7,15 @@
 # secret, pushed to tnoff/terraform as the OIDC_EXCHANGE_* secrets in main.tf). No
 # admin roles, per Oracle's least-privilege guidance; it is authorised by the trust.
 #
-# The TRUST itself is in tnoff/terraform's trust/ stack (OCI allows one per issuer,
-# and CI applies it). This repo keeps only what CI needs before it can run: the app
-# below, and the per-stack plan/apply service users in github-oidc.tf, whose rules it
-# publishes to that stack as TF_VAR_oidc_stack_rules.
+# The TRUST itself is in tnoff/terraform's trust/ stack (OCI allows one per issuer, and CI
+# applies it), and so are the per-stack plan/apply identities (oci/). This repo keeps only the
+# app below: it is what CI logs in WITH, so it stays with the credentials.
 #
 # The live app keeps its spike-era display name `terraform-oidc-spike-exchange`:
 # renaming it would recreate it and rotate the client secret mid-pipeline.
 # ==============================================================================
 
-# The identity domain the app and the service users live in. The tenancy has a
+# The identity domain the app lives in. The tenancy has a
 # single domain (Default); looking it up avoids hardcoding its endpoint.
 data "oci_identity_domains" "default" {
   compartment_id = var.oci_tenancy_ocid

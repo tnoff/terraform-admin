@@ -105,16 +105,6 @@ variable "mcp_readonly_private_key_path" {
 }
 
 # ==============================================================================
-# Cluster path for the federated CI identities (apps and dns; see github-oidc.tf)
-# ==============================================================================
-
-variable "cluster_ci_compartment_name" {
-  description = "Name of the compartment holding the OKE cluster and its bastion"
-  type        = string
-  default     = "apps"
-}
-
-# ==============================================================================
 # External Secrets — admin/ holds these and pushes them to `terraform`'s
 # GitHub Actions secrets and GitLab CI/CD variables (see terraform_ci_vars in
 # main.tf). Manually rotated by editing this stack's tfvars (or env vars) and
