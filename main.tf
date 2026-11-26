@@ -286,8 +286,6 @@ locals {
     # values terraform_ci_vars pushes to CI; the .envrc is built from this map, not that one.
     TF_VAR_oidc_exchange_client_id  = oci_identity_domains_app.oidc_exchange.name
     TF_VAR_oidc_exchange_domain_url = local.oidc_domain_endpoint
-    # The k8s-workloads trust (trust/) lists this app by client id.
-    TF_VAR_k8s_exchange_client_id = oci_identity_domains_app.k8s_exchange.name
 
     TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
     TF_VAR_cloudflare_account_id = var.cloudflare_account_id
@@ -547,14 +545,6 @@ locals {
     TF_VAR_oidc_exchange_domain_url    = local.oidc_domain_endpoint
     TF_VAR_oidc_exchange_client_id     = oci_identity_domains_app.oidc_exchange.name
     TF_VAR_oidc_exchange_client_secret = oci_identity_domains_app.oidc_exchange.client_secret
-
-    # The in-cluster ServiceAccount exchange app (k8s-oidc-trust.tf, tnoff/terraform#191),
-    # for terraform's apps/ stack to put in the Secret the rpst_sidecar containers mount.
-    # The secret is only useful together with a ServiceAccount token the cluster trust
-    # accepts, i.e. from a pod in this cluster.
-    TF_VAR_k8s_exchange_client_id                = oci_identity_domains_app.k8s_exchange.name
-    TF_VAR_k8s_exchange_client_secret            = oci_identity_domains_app.k8s_exchange.client_secret
-    TF_VAR_k8s_exchange_client_secret_rotated_at = time_static.k8s_exchange_client_secret_rotated_at.rfc3339
 
     TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
     TF_VAR_cloudflare_account_id = var.cloudflare_account_id

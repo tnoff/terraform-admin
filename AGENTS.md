@@ -50,21 +50,13 @@ only if it is not sensitive.
 The GitLab `terraform` mirror (`module.terraform_gitlab`) gets **no** CI
 variables: it is kept for Flux rollback, not to run CI.
 
-### Cluster ServiceAccount exchange app (`k8s-oidc-trust.tf`)
+### Cluster ServiceAccount trust and exchange app
 
-Only the exchange app is here: a confidential client with its own secret, separate from
-the GitHub one (`oidc-exchange.tf`). It lets in-cluster pods swap a projected
-ServiceAccount token for an OCI resource principal token (tnoff/terraform#191). The
-`k8s-workloads` trust that lists it is in tnoff/terraform `trust/`, and the hosted key set
-bucket (`k8s_oidc_jwks`) in `oci/`. Things that bite:
-
-- The trust takes the app's client id as `TF_VAR_k8s_exchange_client_id`. Replacing the app
-  (rotation) changes the id, so `trust/` must be applied after this stack, or new exchanges
-  fail until it is. See [secret rotation](docs/secret-rotation.md#token-exchange-apps).
-- OCI allows one trust per issuer string and the Kubernetes default issuer is the same for
-  every cluster, so per-workload policies in `terraform` `oci/` must match
-  `request.principal.ext_iss` as well as `ext_sub`. The policy variable is `ext_iss`, not
-  `var_ext_iss`.
+Not here any more. The `k8s-workloads` trust, its exchange app (`k8s-workload-exchange`) and the
+hosted key set bucket are in tnoff/terraform (`trust/` and `oci/`); see
+[in-cluster workload federation](https://github.com/tnoff/terraform/blob/main/docs/k8s-workload-federation.md).
+`k8s-oidc-trust.tf` here holds only the `removed` blocks that handed them over. The GitHub exchange
+app (`oidc-exchange.tf`) is different: it is CI's own login, so it stays here.
 
 ### Why this stack owns `terraform`'s repo settings and secrets
 

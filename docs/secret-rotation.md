@@ -14,7 +14,7 @@ Credentials fall into five classes, each with its own procedure:
 | [Operator-rotated secrets](#operator-rotated-secrets) | Discord tokens, Cloudflare tokens, vendor API keys, GitLab tokens, Grafana admin | Mint at the vendor, edit the input, re-apply this stack |
 | [GitHub App private keys](#github-app-private-keys) | `tnoff-terraform`, `tnoff-ci`, `tnoff-flux`, `tnoff-backstage` | New key in the App settings, edit the input, re-apply |
 | [OCI keys generated here](#oci-keys-generated-by-this-stack) | `terraform-admin`, `mcp-readonly-bot` | `terraform apply -replace` |
-| [Token-exchange apps](#token-exchange-apps) | `k8s-workload-exchange`, `terraform-oidc-spike-exchange` | Deactivate, then `apply -replace`, then re-render the consumer |
+| [Token-exchange apps](#token-exchange-apps) | `terraform-oidc-spike-exchange` (the in-cluster `k8s-workload-exchange` moved to tnoff/terraform) | Deactivate, then `apply -replace`, then apply `trust/` |
 | [Slot-managed credentials](#credentials-rotated-elsewhere) | OCI API keys (`cluster-autoscaler`, `oidc-jwks-publisher`), the local dev S3 key, Discord webhooks | Generation flags in the `terraform` repo |
 
 ## How a rotation reaches consumers
@@ -227,137 +227,40 @@ Add the public key under User Settings -> API Keys in the Console, then set
 
 ## Token-exchange apps
 
-Two confidential Identity Domains apps hold the only long-lived secrets on the federated
-paths. Each secret is useless on its own: an exchange also needs a token the matching
-trust accepts (a GitHub OIDC token, or a ServiceAccount token the hosted key set verifies).
+The one confidential Identity Domains app this stack holds, `terraform-oidc-spike-exchange`
+(`oidc-exchange.tf`), is CI's own login: its client id and secret are the `OIDC_EXCHANGE_*` Actions
+secrets every `terraform` job uses to get an OCI token. The secret is useless on its own: an exchange
+also needs a GitHub OIDC token the `github-actions-oidc-spike` trust (tnoff/terraform `trust/`)
+accepts. It stays here, not in CI, because if CI replaced it every job would fail to log in until the
+new secret reached GitHub, and CI could not repair itself.
 
-| App (display name) | Terraform | Trust that lists it | Where the secret goes |
-|---|---|---|---|
-| `k8s-workload-exchange` | `oci_identity_domains_app.k8s_exchange` (`k8s-oidc-trust.tf`) | `k8s-workloads` | `TF_VAR_k8s_exchange_client_*` Actions secrets, then `terraform` `apps/` writes `rpst-exchange-creds` in `monitoring`, `security-scanner`, `hathor`, `discord` and `backstage` |
-| `terraform-oidc-spike-exchange` | `oci_identity_domains_app.oidc_exchange` (`oidc-exchange.tf`) | `github-actions-oidc-spike` | `OIDC_EXCHANGE_*` Actions secrets on `terraform` |
+The in-cluster app, `k8s-workload-exchange`, moved to tnoff/terraform `trust/` next to the trust that
+lists it; its rotation runbook is in
+[Rotating the exchange app](https://github.com/tnoff/terraform/blob/main/docs/k8s-workload-federation.md#rotating-the-exchange-app).
 
-These are **not slot-managed**. A rotation replaces the app, so it has a gap: from the moment
-the old app stops working until the consumer is re-rendered, *new* exchanges fail with a 400
-or 401. Tokens already issued keep working (the sidecar asks for 180 minutes and refreshes
-every 90), so a gap of minutes goes unnoticed; do not leave one of hours.
+The secret is **not slot-managed**. A rotation replaces the app, so it has a gap: from the moment the
+old app stops working until the new secret reaches GitHub *and* the trust lists the new client id, every
+`terraform` job fails to log in. An active app cannot be deleted: Terraform's delete returned
+`400-BadErrorResponse` with no message. Deactivate it first. Until the delete succeeds, reactivating it
+is the rollback.
 
-An active app cannot be deleted: Terraform's delete returned `400-BadErrorResponse` with no
-message. Deactivate it first (the retry then succeeded). Until the delete succeeds,
-reactivating it is the rollback.
-
-First exercised 2026-10-28 (the drill in tnoff/terraform#217). The sidecars that retried
-during the gap logged 6 or 7 `401 invalid_client` failures and then issued a token, about
-5 minutes 40 seconds after the deactivation: the `Apply` run took about a minute and the
-kubelet needed another minute or two to refresh the mounted Secret.
-
-**The alert margin is thin.** `rpst-exchange-failing` fires on a sidecar's 8th consecutive failed
-exchange, which with the sidecar's backoff arrives roughly 3 to 4 minutes after its first failure
-(observed: attempts 4 to 8 at 01:47:45, 01:47:54, 01:48:16, 01:49:06 and 01:50:48, the last one a
-success). A sidecar is only affected if its 90-minute refresh falls inside the gap, so a gap of
-about 6 minutes is often silent but can page. Keep the gap short (have the `apps/` change reviewed
-and ready before step 3), and silence `rpst-exchange-failing` for the window if you want a quiet
-run.
-
-Never run `terraform state show` on these apps: it prints the client secret.
-
-### Rotating `k8s-workload-exchange`
-
-Look the ids up instead of copying them; nothing here is a fixed OCID. You need the CLI
-profile of a user that manages the identity domain.
-
-```bash
-# The identity domain's URL (the stack's local.oidc_domain_endpoint; the domain is named "Default")
-TENANCY=$(awk -F= '/^\[DEFAULT\]/{f=1;next} /^\[/{f=0} f&&/^tenancy/{gsub(/ /,"",$2);print $2;exit}' ~/.oci/config)
-DOMAIN_URL=$(oci iam domain list --compartment-id "$TENANCY" --all \
-  --query 'data[?"display-name"==`Default`].url | [0]' --raw-output)
-
-# The app's id and whether it is active
-oci identity-domains apps list --endpoint "$DOMAIN_URL" \
-  --filter 'displayName eq "k8s-workload-exchange"' \
-  --query 'data.resources[0].{id:id,active:active}'
-```
-
-1. **Preconditions.** A clean checkout of `main`, no `terraform` CI run in flight, and
-   `kubectl` pointed at the cluster. Record the baseline (metadata only, never the Secret data):
-
-   ```bash
-   for ns in monitoring security-scanner hathor discord backstage; do
-     kubectl -n $ns get secret rpst-exchange-creds \
-       -o custom-columns='NS:.metadata.namespace,ROTATED:.metadata.annotations.secret-age-tracker\.tnoff/last-rotated'
-   done
-   ```
-
-2. **Have the consumer change ready.** Open a one-line change under `terraform`'s `apps/` (a
-   comment is enough) so you can merge it the moment step 4 finishes. Merged earlier, it
-   re-renders the old credentials. See [How a rotation reaches
-   consumers](#how-a-rotation-reaches-consumers).
-
-3. **Deactivate the app** (cuts off new exchanges; this is where the gap starts):
-
-   ```bash
-   oci identity-domains app-status-changer put --endpoint "$DOMAIN_URL" \
-     --app-status-changer-id "$APP_ID" \
-     --schemas '["urn:ietf:params:scim:schemas:oracle:idcs:AppStatusChanger"]' \
-     --active false
-   ```
-
-   with `APP_ID` taken from the lookup above. The response should show `"active": false`.
-
-4. **Replace it, targeted:**
-
-   ```bash
-   bin/tf apply -replace=oci_identity_domains_app.k8s_exchange \
-     -target='github_actions_secret.terraform["TF_VAR_k8s_exchange_client_id"]' \
-     -target='github_actions_secret.terraform["TF_VAR_k8s_exchange_client_secret"]' \
-     -target='github_actions_secret.terraform["TF_VAR_k8s_exchange_client_secret_rotated_at"]'
-   ```
-
-   The confirmation should read 3 to add, 3 to destroy and 3 to change: the app,
-   `terraform_data.k8s_exchange_client_secret_version` and
-   `time_static.k8s_exchange_client_secret_rotated_at` replaced, and the three Actions secrets
-   updated. The `-target` list is deliberate: it keeps a rotation to the resources it names, so
-   an unrelated pending change in this stack cannot ride along with it.
-
-   The `k8s-workloads` trust is no longer in this stack. It lists the app by client id, so it is
-   stale until `trust/` is applied with the new id (step 5); new exchanges fail in the meantime.
-
-   Do not run a plain `plan` or `apply` between steps 3 and 4: it would recreate the
-   `time_static` with today's date while the secret is still the old one.
-
-5. **Update the trust and re-render the consumer.** Apply `trust/` in tnoff/terraform so the
-   `k8s-workloads` trust lists the new client id (an in-place `oauth_clients` update, from the new
-   `TF_VAR_k8s_exchange_client_id`): run its apply workflow, or `terragrunt apply` in `trust/` with this
-   repo's `.envrc`. Then merge the `apps/` change from step 2 and wait for `Apply` on `main` to finish
-   (`gh run list --repo tnoff/terraform --workflow apply.yml`).
-
-6. **Verify.**
-   - The five annotations from step 1 now show today's date.
-   - `kubectl -n monitoring get jobs | grep rpst-canary` shows a `Complete` run created after the merge.
-   - A sidecar logged a fresh exchange: `kubectl -n <namespace> logs <pod> -c rpst --since=15m | grep "rpst issued"`, and
-     no `RPST exchange failed` lines.
-   - Quiet: `rpst-exchange-failing`, `rpst-canary-stale`, `oci-exporter-poll-*`.
-   - `gh secret list --repo tnoff/terraform` shows the `TF_VAR_K8S_EXCHANGE_CLIENT_*` secrets updated.
-   - Sidecars only exchange when their token is due (about every 90 minutes), so ones that were
-     not mid-retry during the gap (Loki, Mimir, Tempo) prove nothing yet. Check their logs within
-     90 minutes: `kubectl -n monitoring logs <pod> -c rpst --since=100m | grep -E "rpst issued|exchange failed"`.
-
-7. **If it goes wrong.** Before the delete succeeds, reactivate the app (`--active true`) and
-   the old secret works again. After the replace, the old secret is gone: re-run steps 3 to 5
-   (another replace) rather than hunting for the old value. A sidecar that cannot exchange
-   keeps its last token and retries forever; its liveness probe restarts it once the token is
-   within a minute of expiry, which is roughly the time you have.
+Never run `terraform state show` on the app: it prints the client secret.
 
 ### Rotating `terraform-oidc-spike-exchange`
 
-Same shape, not exercised yet. Look the app up with `displayName eq "terraform-oidc-spike-exchange"`,
-deactivate it, then `bin/tf apply -replace=oci_identity_domains_app.oidc_exchange` with
-`-target` on the app's dependents. Two differences from the in-cluster app:
+Not exercised yet. Look the app up (the lookup is in the tnoff/terraform runbook linked above) with
+`displayName eq "terraform-oidc-spike-exchange"` and deactivate it, then replace it from this stack:
 
-- The trust it feeds is `github_actions`, which ignores its `impersonation_service_users`
-  rules (the provider cannot read them back), so its plan shows only what changed. Read the
-  plan before accepting it; do not apply a trust update you did not expect.
-- The consumers are the `OIDC_EXCHANGE_*` Actions secrets, read by every `terraform` job,
-  so run it when no CI is in flight and re-run the whole pipeline afterwards.
+```bash
+bin/tf apply -replace=oci_identity_domains_app.oidc_exchange
+```
+
+Read the plan before accepting it: it should name only the app, its version helper and stamp, and the
+Actions secrets and variables derived from them (the `OIDC_EXCHANGE_*` and `TF_VAR_oidc_exchange_*` values). Then, **from `trust/` in tnoff/terraform with this repo's `.envrc` loaded**,
+`terragrunt apply`: the GitHub trust lists the app by `TF_VAR_oidc_exchange_client_id`, so it is stale until
+then and every login fails in the meantime. Because every `terraform` job logs in through this app, run it
+when no CI is in flight and re-run the whole pipeline afterwards. The trust ignores its rules (the provider
+cannot read them back), so its plan shows only `oauth_clients`; do not apply a trust update you did not expect.
 
 ## Stored OCI credentials
 
@@ -372,7 +275,7 @@ federated and has no password, API key or token. Re-list the users with
 | `os-push-dev-bot` customer secret key (`dev_discord_push`) | none in the cluster or CI; a local development key | Generation slot, or delete the user if it is unused |
 | `terraform-admin` API key | `.envrc` on the operator's machine | [OCI keys generated by this stack](#oci-keys-generated-by-this-stack) |
 | `mcp-readonly-bot` API key | `~/.oci/config` for the OCI MCP | [OCI keys generated by this stack](#oci-keys-generated-by-this-stack) |
-| `k8s-workload-exchange` and `terraform-oidc-spike-exchange` client secrets | `rpst-exchange-creds`; `OIDC_EXCHANGE_*` | [Token-exchange apps](#token-exchange-apps) |
+| `terraform-oidc-spike-exchange` client secret | `OIDC_EXCHANGE_*` | [Token-exchange apps](#token-exchange-apps) |
 | The human login | the operator, with MFA | Not rotated here |
 
 ## Credentials rotated elsewhere
