@@ -34,7 +34,7 @@ locals {
     TF_VAR_oci_fingerprint  = oci_identity_api_key.terraform_admin.fingerprint
     TF_VAR_oci_api_key_b64  = base64encode(tls_private_key.terraform_admin.private_key_pem)
 
-    # What tnoff/terraform's oci/ stack needs to plan and apply the GitHub trust from a
+    # What tnoff/terraform's trust/ stack needs to plan and apply the GitHub trust from a
     # workstation (the trust is applied by -replace, which CI cannot do for itself). The same
     # values terraform_ci_vars pushes to CI; the .envrc is built from this map, not that one.
     TF_VAR_oidc_exchange_client_id  = oci_identity_domains_app.oidc_exchange.name
@@ -165,9 +165,10 @@ locals {
     # the backstage-github-app-credentials Secret.
     TF_VAR_backstage_app_private_key_rotated_at = time_static.backstage_app_private_key_rotated_at.rfc3339
 
-    # tnoff-flux App -- Flux's read credential for docker-apps, phase 7. Local
-    # .envrc ONLY: consumed by the operator-run bootstrap stack, and nothing
-    # in CI has any use for it.
+    # tnoff-flux App -- Flux's read credential for docker-apps, phase 7. In the local
+    # .envrc for a workstation run of the bootstrap stack. In CI the same values are
+    # Environment secrets and variables on bootstrap-plan / bootstrap-apply only
+    # (bootstrap-environments.tf), never repo-level ones.
     # See variables.tf for why this is a separate App from tnoff-ci.
     TF_VAR_flux_app_id              = var.flux_app_id
     TF_VAR_flux_app_installation_id = var.flux_app_installation_id

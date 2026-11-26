@@ -380,7 +380,7 @@ resource "time_static" "terraform_app_private_key_rotated_at" {
   }
 }
 
-# The GitHub OIDC token-exchange app's client secret (oidc-trust.tf). Same
+# The GitHub OIDC token-exchange app's client secret (oidc-exchange.tf). Same
 # hash-and-stamp trick as the other generated secrets: terraform generates it, and it
 # changes exactly when the app is replaced, which is a rotation.
 resource "terraform_data" "oidc_exchange_client_secret_version" {
