@@ -246,36 +246,6 @@ resource "oci_identity_policy" "admin_kms_object_storage" {
 }
 
 # ==============================================================================
-# Cluster path for the federated CI identities
-#
-# What reaching the private OKE API through the bastion takes, granted to the
-# apps and dns OIDC identities (github-oidc.tf, cluster_path = true) in the
-# cluster compartment. What they may do INSIDE the cluster is not decided here:
-# OKE gives them no implicit cluster-admin (`use clusters`, NOT `manage`, which OKE
-# turns into cluster-admin), so tnoff/terraform's bootstrap/ stack binds their IAM
-# groups to narrow Secret/ConfigMap/Service ClusterRoles. That binding is applied
-# by the operator, never by CI, so CI cannot widen its own access.
-#
-# The API-key users this section used to create (terraform-cluster-ci, -dns-ci,
-# -infra-ci, -discord-ci) were retired when every CI stack moved to OIDC
-# (tnoff/terraform#135).
-# ==============================================================================
-
-locals {
-  cluster_path_grants = [
-    "manage bastion-session",
-    "use bastion",
-    "read instances",
-    "read instance-agent-plugins",
-    "read vnic-attachments",
-    "read vnics",
-    "read subnets",
-    "read vcns",
-    "use clusters",
-  ]
-}
-
-# ==============================================================================
 # Values pushed to `terraform`'s GitHub Actions secrets/variables (see
 # terraform_github_secrets below), AND exported from .envrc for local dev. PEM goes via OCI_API_KEY_B64 (base64-encoded,
 # single-line) — multi-line PEMs through env vars are unreliable across
@@ -311,23 +281,11 @@ locals {
     TF_VAR_oci_fingerprint  = oci_identity_api_key.terraform_admin.fingerprint
     TF_VAR_oci_api_key_b64  = base64encode(tls_private_key.terraform_admin.private_key_pem)
 
-    # The OIDC identities' IAM groups (github-oidc.tf) that bootstrap/ binds in the cluster's
-    # RBAC: the dns and apps plan/apply groups, and the bootstrap plan group (read access for
-    # its own plan; the bootstrap apply identity is cluster-admin through `manage clusters`).
-    # bootstrap/ is applied from CI as well as from a workstation, so the same values are in
-    # terraform_ci_vars (as public variables: group OCIDs are not secrets).
-    TF_VAR_dns_plan_oidc_group_ocid       = oci_identity_domains_group.oidc["dns-plan"].ocid
-    TF_VAR_dns_apply_oidc_group_ocid      = oci_identity_domains_group.oidc["dns-apply"].ocid
-    TF_VAR_apps_plan_oidc_group_ocid      = oci_identity_domains_group.oidc["apps-plan"].ocid
-    TF_VAR_apps_apply_oidc_group_ocid     = oci_identity_domains_group.oidc["apps-apply"].ocid
-    TF_VAR_bootstrap_plan_oidc_group_ocid = oci_identity_domains_group.oidc["bootstrap-plan"].ocid
-
     # What tnoff/terraform's oci/ stack needs to plan and apply the GitHub trust from a
     # workstation (the trust is applied by -replace, which CI cannot do for itself). The same
     # values terraform_ci_vars pushes to CI; the .envrc is built from this map, not that one.
     TF_VAR_oidc_exchange_client_id  = oci_identity_domains_app.oidc_exchange.name
     TF_VAR_oidc_exchange_domain_url = local.oidc_domain_endpoint
-    TF_VAR_oidc_stack_rules         = jsonencode(local.oidc_stack_rules)
     # The k8s-workloads trust (trust/) lists this app by client id.
     TF_VAR_k8s_exchange_client_id = oci_identity_domains_app.k8s_exchange.name
 
@@ -591,21 +549,6 @@ locals {
     TF_VAR_oidc_exchange_client_secret = oci_identity_domains_app.oidc_exchange.client_secret
 
     # Trust rule -> service user id for every per-stack plan/apply identity (github-oidc.tf), as a
-    # JSON object. The GitHub trust itself is owned by terraform's trust/ stack, which merges these
-    # with oci/'s image-pusher and TechDocs rules; the identities stay here because they are what
-    # every stack signs in WITH. Not a secret (rules and user ids), so it is in
-    # terraform_github_public. Only trust/ declares the variable, so only its job receives it.
-    TF_VAR_oidc_stack_rules = jsonencode(local.oidc_stack_rules)
-
-    # The IAM groups bootstrap/ binds in the cluster's RBAC (see admin_secrets_bundle). Group OCIDs
-    # are identifiers, not credentials, so they are in terraform_github_public. Only bootstrap/
-    # declares these variables, so only its job receives them.
-    TF_VAR_dns_plan_oidc_group_ocid       = oci_identity_domains_group.oidc["dns-plan"].ocid
-    TF_VAR_dns_apply_oidc_group_ocid      = oci_identity_domains_group.oidc["dns-apply"].ocid
-    TF_VAR_apps_plan_oidc_group_ocid      = oci_identity_domains_group.oidc["apps-plan"].ocid
-    TF_VAR_apps_apply_oidc_group_ocid     = oci_identity_domains_group.oidc["apps-apply"].ocid
-    TF_VAR_bootstrap_plan_oidc_group_ocid = oci_identity_domains_group.oidc["bootstrap-plan"].ocid
-
     # The in-cluster ServiceAccount exchange app (k8s-oidc-trust.tf, tnoff/terraform#191),
     # for terraform's apps/ stack to put in the Secret the rpst_sidecar containers mount.
     # The secret is only useful together with a ServiceAccount token the cluster trust
@@ -920,12 +863,6 @@ locals {
     "TF_VAR_ci_app_private_key_rotated_at",
     "TF_VAR_terraform_app_private_key_rotated_at",
     "TF_VAR_oidc_exchange_client_secret_rotated_at",
-    "TF_VAR_oidc_stack_rules",
-    "TF_VAR_dns_plan_oidc_group_ocid",
-    "TF_VAR_dns_apply_oidc_group_ocid",
-    "TF_VAR_apps_plan_oidc_group_ocid",
-    "TF_VAR_apps_apply_oidc_group_ocid",
-    "TF_VAR_bootstrap_plan_oidc_group_ocid",
     "TF_VAR_gitlab_ci_service_account_id",
   ]
 
