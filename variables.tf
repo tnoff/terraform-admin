@@ -347,6 +347,12 @@ variable "hathor_youtube_cookies_b64" {
 # and manages rulesets. tnoff-ci pushes commits and would not survive being
 # given repo-admin; tnoff-flux reads one repo. Three Apps, three blast radii.
 #
+# Repository permissions the App needs: Administration (read and write) for repositories,
+# rulesets and Environments, and Actions (read) because GitHub requires it to GET an Environment
+# (without it the apply 403s with "Resource not accessible by integration"). A permission change
+# is not live until the installation request is accepted at
+# https://github.com/settings/installations/<id>.
+#
 # Known limitation, unresolved at the time of writing: it is not documented
 # whether an installation token can create a repository on a PERSONAL account
 # (POST /user/repos). All 23 repos already exist, so this only matters when

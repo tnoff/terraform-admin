@@ -16,7 +16,7 @@
 # `reviewers` block to bootstrap-apply and drop the dispatch-only rule in bootstrap.yml.
 #
 # What an Environment gives a job:
-#   - the job does not start unless the ref passes the branch policy so a pull request branch cannot get anything below;
+#   - the job does not start unless the ref passes the branch policy, so a pull request branch cannot get anything below;
 #   - it receives the Environment's own secrets and variables, which no other job reads;
 #   - its OIDC token has sub = repo:<owner>@<id>/<repo>@<id>:environment:<name>, which is
 #     what the two bootstrap identities' trust rules match (github-oidc.tf).
