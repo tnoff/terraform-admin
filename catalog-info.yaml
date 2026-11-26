@@ -34,7 +34,7 @@ spec:
 
 ---
 # Credentials this stack holds or originates, one Resource each. METADATA ONLY:
-# no value ever appears here. Derived from variables.tf and main.tf; when a
+# no value ever appears here. Derived from variables.tf and the admin-secrets-bundle.tf / ci-vars.tf bundles; when a
 # sensitive variable is added or retired there, add or remove its entry.
 #
 # type `credential` follows docker-apps' cloudflare-api-key, and the owner is

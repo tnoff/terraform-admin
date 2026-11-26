@@ -91,7 +91,7 @@ Procedure:
 
 Caveats:
 
-- **Eastbay contact email and number** are entered plain. `main.tf`
+- **Eastbay contact email and number** are entered plain. `ci-vars.tf`
   base64-encodes them before pushing, and `apps/` decodes them back.
 - **Grafana admin credentials** are only read by Grafana when it first
   initialises its database. Changing them updates the Kubernetes Secret but

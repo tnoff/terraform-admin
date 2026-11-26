@@ -26,7 +26,7 @@ How `terraform-admin` bootstraps the OCI tenancy and hands credentials to the
 
 ## What this stack provisions
 
-All in the tenancy root compartment (`main.tf`):
+All in the tenancy root compartment (`state-backend.tf`, `admin-user.tf`, `mcp-readonly.tf`):
 
 - A KMS vault and AES key that encrypt state at rest, with an IAM policy that
   lets Object Storage use the key.
@@ -67,7 +67,7 @@ before its backend can initialise.
 
 Two channels carry the same values:
 
-**CI.** `main.tf` builds one map, `local.terraform_ci_vars` (OCI auth, every
+**CI.** `ci-vars.tf` builds one map, `local.terraform_ci_vars` (OCI auth, every
 `TF_VAR_*` input the stacks need, and the `*_rotated_at` timestamps), and writes
 it to the `terraform` repo as `github_actions_secret.terraform` and
 `github_actions_variable.terraform`. Anything in `local.terraform_github_public`

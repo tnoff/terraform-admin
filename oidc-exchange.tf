@@ -4,7 +4,7 @@
 # Lets a GitHub Actions job exchange its signed OIDC token for a one-hour OCI
 # session token (UPST) instead of holding an API key. This file holds the one
 # confidential app the job authenticates to /oauth2/v1/token with (client id +
-# secret, pushed to tnoff/terraform as the OIDC_EXCHANGE_* secrets in main.tf). No
+# secret, pushed to tnoff/terraform as the OIDC_EXCHANGE_* secrets in ci-vars.tf). No
 # admin roles, per Oracle's least-privilege guidance; it is authorised by the trust.
 #
 # The TRUST itself is in tnoff/terraform's trust/ stack (OCI allows one per issuer, and CI

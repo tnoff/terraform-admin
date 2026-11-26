@@ -22,7 +22,7 @@
 #     what the two bootstrap identities' trust rules match (tnoff/terraform oci/federation-stacks.tf).
 #
 # The Flux App key is therefore an Environment secret, NOT one of the repo-level secrets
-# in main.tf (any workflow job in the repo can read those). Both Environments hold it:
+# in ci-vars.tf and github-ci-secrets.tf (any workflow job in the repo can read those). Both Environments hold it:
 # a plan decodes it to compare with the live Secret. Nothing else in CI needs it.
 #
 # The `techdocs` Environment (the TechDocs publish rule) was created by hand and is not
