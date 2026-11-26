@@ -307,24 +307,28 @@ oci identity-domains apps list --endpoint "$DOMAIN_URL" \
 
    ```bash
    bin/tf apply -replace=oci_identity_domains_app.k8s_exchange \
-     -target=oci_identity_domains_identity_propagation_trust.k8s_workloads \
      -target='github_actions_secret.terraform["TF_VAR_k8s_exchange_client_id"]' \
      -target='github_actions_secret.terraform["TF_VAR_k8s_exchange_client_secret"]' \
      -target='github_actions_secret.terraform["TF_VAR_k8s_exchange_client_secret_rotated_at"]'
    ```
 
-   The confirmation should read 3 to add, 3 to destroy and 4 to change: the app,
+   The confirmation should read 3 to add, 3 to destroy and 3 to change: the app,
    `terraform_data.k8s_exchange_client_secret_version` and
-   `time_static.k8s_exchange_client_secret_rotated_at` replaced; the `k8s-workloads` trust
-   updated **in place** (only `oauth_clients`); and the three Actions secrets updated. The
-   `-target` list is deliberate: it keeps a rotation to the resources it names, so an
-   unrelated pending change in this stack cannot ride along with it.
+   `time_static.k8s_exchange_client_secret_rotated_at` replaced, and the three Actions secrets
+   updated. The `-target` list is deliberate: it keeps a rotation to the resources it names, so
+   an unrelated pending change in this stack cannot ride along with it.
+
+   The `k8s-workloads` trust is no longer in this stack. It lists the app by client id, so it is
+   stale until `trust/` is applied with the new id (step 5); new exchanges fail in the meantime.
 
    Do not run a plain `plan` or `apply` between steps 3 and 4: it would recreate the
    `time_static` with today's date while the secret is still the old one.
 
-5. **Re-render the consumer.** Merge the `apps/` change from step 2 and wait for
-   `Apply` on `main` to finish (`gh run list --repo tnoff/terraform --workflow apply.yml`).
+5. **Update the trust and re-render the consumer.** Apply `trust/` in tnoff/terraform so the
+   `k8s-workloads` trust lists the new client id (an in-place `oauth_clients` update, from the new
+   `TF_VAR_k8s_exchange_client_id`): run its apply workflow, or `terragrunt apply` in `trust/` with this
+   repo's `.envrc`. Then merge the `apps/` change from step 2 and wait for `Apply` on `main` to finish
+   (`gh run list --repo tnoff/terraform --workflow apply.yml`).
 
 6. **Verify.**
    - The five annotations from step 1 now show today's date.
