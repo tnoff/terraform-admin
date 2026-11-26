@@ -61,9 +61,6 @@ bucket (`k8s_oidc_jwks`) in `oci/`. Things that bite:
 - The trust takes the app's client id as `TF_VAR_k8s_exchange_client_id`. Replacing the app
   (rotation) changes the id, so `trust/` must be applied after this stack, or new exchanges
   fail until it is. See [secret rotation](docs/secret-rotation.md#token-exchange-apps).
-- The trust and the bucket were created here first. The `removed` blocks in the file forget
-  them without destroying them; apply this stack before the tnoff/terraform side adopts them.
-  The `sanjose` provider alias stays until that has been applied.
 - OCI allows one trust per issuer string and the Kubernetes default issuer is the same for
   every cluster, so per-workload policies in `terraform` `oci/` must match
   `request.principal.ext_iss` as well as `ext_sub`. The policy variable is `ext_iss`, not

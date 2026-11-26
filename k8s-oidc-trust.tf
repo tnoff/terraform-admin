@@ -14,42 +14,6 @@
 # the id, so `trust/` must be applied afterwards (see docs/secret-rotation.md).
 # ==============================================================================
 
-# The trust and bucket were created here first. They are forgotten, not destroyed: the
-# live objects are adopted by tnoff/terraform (oci/ imports the bucket, trust/ the trust).
-# Apply this BEFORE merging those, so two stacks never own the same object.
-#
-# The `sanjose` provider alias stays until these removals have been applied: state still
-# records it for the forgotten bucket, and Terraform wants the configuration present to
-# process them. Delete it (and this block) in a follow-up.
-provider "oci" {
-  alias               = "sanjose"
-  region              = "us-sanjose-1"
-  config_file_profile = var.config_file_profile
-}
-removed {
-  from = oci_identity_domains_identity_propagation_trust.k8s_workloads
-
-  lifecycle {
-    destroy = false
-  }
-}
-
-removed {
-  from = module.oidc_jwks_bucket
-
-  lifecycle {
-    destroy = false
-  }
-}
-
-removed {
-  from = oci_objectstorage_object.oidc_jwks
-
-  lifecycle {
-    destroy = false
-  }
-}
-
 resource "oci_identity_domains_app" "k8s_exchange" {
   idcs_endpoint   = local.oidc_domain_endpoint
   schemas         = ["urn:ietf:params:scim:schemas:oracle:idcs:App"]
