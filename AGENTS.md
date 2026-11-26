@@ -50,32 +50,24 @@ only if it is not sensitive.
 The GitLab `terraform` mirror (`module.terraform_gitlab`) gets **no** CI
 variables: it is kept for Flux rollback, not to run CI.
 
-### Cluster ServiceAccount trust (`k8s-oidc-trust.tf`)
+### Cluster ServiceAccount exchange app (`k8s-oidc-trust.tf`)
 
-A second identity propagation trust, separate from the GitHub one (in
-tnoff/terraform `trust/`), with its own exchange app. It lets in-cluster pods swap a
-projected ServiceAccount token for an OCI resource principal token
-(tnoff/terraform#191). Things that bite:
+Only the exchange app is here: a confidential client with its own secret, separate from
+the GitHub one (`oidc-exchange.tf`). It lets in-cluster pods swap a projected
+ServiceAccount token for an OCI resource principal token (tnoff/terraform#191). The
+`k8s-workloads` trust that lists it is in tnoff/terraform `trust/`, and the hosted key set
+bucket (`k8s_oidc_jwks`) in `oci/`. Things that bite:
 
-- The trust fetches the hosted key set on every new exchange. That is the public
-  `k8s_oidc_jwks` bucket in `k8s-jwks-bucket.tf` (us-sanjose-1, hence the
-  `sanjose` provider alias), which the jwks-publisher CronJob keeps in sync with
-  the cluster; if the bucket is unreachable, new exchanges fail with a 401. The
-  bucket lives here, not in `terraform` `oci/`, so the trust and the bucket it
-  depends on are created in one apply. `oci/` still owns the publisher's bot, key,
-  network source and Secret, and its policy names the bucket by string.
-- Anyone who can overwrite `jwks.json` can mint identities. The only writer is the
-  publisher bot (overwrite only, cluster network only); Terraform seeds the object
-  and ignores later changes to it.
-- OCI allows one trust per issuer string and the Kubernetes default issuer is
-  the same for every cluster, so per-workload policies in `terraform` `oci/`
-  must match `request.principal.ext_iss` as well as `ext_sub`. The policy
-  variable is `ext_iss`, not `var_ext_iss`.
-- `subject_type` must be `Resource` and propagated claims need the `ext_`
-  prefix (max three); the API otherwise rejects the trust with
-  `invalidAttributes`.
-- Unlike the GitHub trust there are no per-user rules, so the drift problem
-  described in tnoff/terraform `trust/README.md` does not apply.
+- The trust takes the app's client id as `TF_VAR_k8s_exchange_client_id`. Replacing the app
+  (rotation) changes the id, so `trust/` must be applied after this stack, or new exchanges
+  fail until it is. See [secret rotation](docs/secret-rotation.md#token-exchange-apps).
+- The trust and the bucket were created here first. The `removed` blocks in the file forget
+  them without destroying them; apply this stack before the tnoff/terraform side adopts them.
+  The `sanjose` provider alias stays until that has been applied.
+- OCI allows one trust per issuer string and the Kubernetes default issuer is the same for
+  every cluster, so per-workload policies in `terraform` `oci/` must match
+  `request.principal.ext_iss` as well as `ext_sub`. The policy variable is `ext_iss`, not
+  `var_ext_iss`.
 
 ### Why this stack owns `terraform`'s repo settings and secrets
 
