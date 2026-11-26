@@ -328,6 +328,8 @@ locals {
     TF_VAR_oidc_exchange_client_id  = oci_identity_domains_app.oidc_exchange.name
     TF_VAR_oidc_exchange_domain_url = local.oidc_domain_endpoint
     TF_VAR_oidc_stack_rules         = jsonencode(local.oidc_stack_rules)
+    # The k8s-workloads trust (trust/) lists this app by client id.
+    TF_VAR_k8s_exchange_client_id = oci_identity_domains_app.k8s_exchange.name
 
     TF_VAR_cloudflare_api_token  = var.cloudflare_api_token
     TF_VAR_cloudflare_account_id = var.cloudflare_account_id
