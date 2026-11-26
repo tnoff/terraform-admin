@@ -10,7 +10,7 @@
 # The TRUST itself is in tnoff/terraform's trust/ stack (OCI allows one per issuer,
 # and CI applies it). This repo keeps only what CI needs before it can run: the app
 # below, and the per-stack plan/apply service users in github-oidc.tf, whose rules it
-# publishes to that stack as TF_VAR_oidc_stack_rules. See moved-to-terraform.tf.
+# publishes to that stack as TF_VAR_oidc_stack_rules.
 #
 # The live app keeps its spike-era display name `terraform-oidc-spike-exchange`:
 # renaming it would recreate it and rotate the client secret mid-pipeline.
