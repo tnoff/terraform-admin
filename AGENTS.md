@@ -52,11 +52,10 @@ variables: it is kept for Flux rollback, not to run CI.
 
 ### Cluster ServiceAccount trust and exchange app
 
-Not here any more. The `k8s-workloads` trust, its exchange app (`k8s-workload-exchange`) and the
-hosted key set bucket are in tnoff/terraform (`trust/` and `oci/`); see
+Not here. The `k8s-workloads` trust, its exchange app (`k8s-workload-exchange`) and the hosted key
+set bucket are in tnoff/terraform (`trust/` and `oci/`); see
 [in-cluster workload federation](https://github.com/tnoff/terraform/blob/main/docs/k8s-workload-federation.md).
-`k8s-oidc-trust.tf` here holds only the `removed` blocks that handed them over. The GitHub exchange
-app (`oidc-exchange.tf`) is different: it is CI's own login, so it stays here.
+The GitHub exchange app (`oidc-exchange.tf`) is different: it is CI's own login, so it stays here.
 
 ### Why this stack owns `terraform`'s repo settings and secrets
 
