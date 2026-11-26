@@ -252,7 +252,11 @@ locals {
         workspaces   = ["bootstrap"]
         cluster_path = true
         read_extra   = ["infra"]
-        rule         = "sub eq ${local.oidc_repo_subject}:environment:bootstrap-plan"
+        # bootstrap/ binds the other stacks' IAM groups in the cluster's RBAC and looks them up
+        # by name, so it needs to read groups (ids and names only). Environment-gated, so no
+        # pull request reaches it.
+        tenancy_grants = ["read groups"]
+        rule           = "sub eq ${local.oidc_repo_subject}:environment:bootstrap-plan"
       }
       apply = {
         description        = "Federated service user for bootstrap/ applies (main only, bootstrap-apply Environment with a required reviewer): manage clusters"
@@ -261,6 +265,7 @@ locals {
         cluster_path       = true
         read_extra         = ["infra"]
         compartment_grants = ["manage clusters"]
+        tenancy_grants     = ["read groups"]
         rule               = "sub eq ${local.oidc_repo_subject}:environment:bootstrap-apply"
       }
     }
