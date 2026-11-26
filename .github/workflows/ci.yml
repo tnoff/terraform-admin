@@ -70,12 +70,12 @@ jobs:
   #   lives in a module pulled from terraform-modules via a git:: source.
   #
   #   checkov's bundled HCL parser (python-hcl2, not HashiCorp's own) could
-  #   not read main.tf at all before this PR -- a real upstream bug with `&&`
+  #   not read main.tf (now split across several files) at all before this PR -- a real upstream bug with `&&`
   #   starting a continuation line inside a for-expression's `if` clause. The
   #   two occurrences (terraform_github_secrets/terraform_github_variables)
   #   are reformatted onto one line each in this same PR, verified both
   #   `terraform fmt`-clean and semantically identical. Without that fix
-  #   checkov silently sees almost nothing in this repo -- main.tf is
+  #   checkov silently sees almost nothing in this repo -- that file was
   #   essentially all of it.
   #
   #   CKV_GIT_3 (vulnerability alerts disabled) -- checks the DEPRECATED

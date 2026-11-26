@@ -87,5 +87,5 @@ the in-cluster cert-manager Secret (merged in #137), so rotate it with the
 ## Module sources
 
 Modules come from `github.com/tnoff/terraform-modules`, pinned by commit SHA.
-When bumping, bump every `?ref=` in `main.tf` together; Renovate treats each
+When bumping, bump every `?ref=` in the `.tf` files together (`grep -rn '?ref=' *.tf`); Renovate treats each
 independently.

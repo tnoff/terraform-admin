@@ -109,7 +109,7 @@ variable "mcp_readonly_private_key_path" {
 # ==============================================================================
 # External Secrets — admin/ holds these and pushes them to `terraform`'s
 # GitHub Actions secrets and GitLab CI/CD variables (see terraform_ci_vars in
-# main.tf). Manually rotated by editing this stack's tfvars (or env vars) and
+# ci-vars.tf). Manually rotated by editing this stack's tfvars (or env vars) and
 # re-applying.
 #
 # Exception: discord_bot_token is NOT pushed anywhere from here -- see its
@@ -204,13 +204,13 @@ variable "discord_vpn_private_key" {
 }
 
 variable "eastbay_contact_email" {
-  description = "Contact email address shown on the EastbayMassageAndLymph website. Not secret in the confidentiality sense (it's public-facing business info), sealed alongside the site's real secrets historically -- kept sensitive here for consistency with the rest of website-secrets, not because it needs protecting. Enter it plain -- main.tf base64-encodes it before pushing to CI (GitLab's masked-variable check rejects any value containing '@', which every email address has) and apps/'s module.eastbay_website_creds base64decode()s it back for the Secret."
+  description = "Contact email address shown on the EastbayMassageAndLymph website. Not secret in the confidentiality sense (it's public-facing business info), sealed alongside the site's real secrets historically -- kept sensitive here for consistency with the rest of website-secrets, not because it needs protecting. Enter it plain -- ci-vars.tf base64-encodes it before pushing to CI (GitLab's masked-variable check rejects any value containing '@', which every email address has) and apps/'s module.eastbay_website_creds base64decode()s it back for the Secret."
   type        = string
   sensitive   = true
 }
 
 variable "eastbay_contact_number" {
-  description = "Contact phone number shown on the EastbayMassageAndLymph website. Same non-secret-but-bundled reasoning as eastbay_contact_email. Enter it plain -- main.tf base64-encodes it before pushing to CI (a formatted phone number routinely fails GitLab's masked-variable charset check) and apps/'s module.eastbay_website_creds base64decode()s it back."
+  description = "Contact phone number shown on the EastbayMassageAndLymph website. Same non-secret-but-bundled reasoning as eastbay_contact_email. Enter it plain -- ci-vars.tf base64-encodes it before pushing to CI (a formatted phone number routinely fails GitLab's masked-variable charset check) and apps/'s module.eastbay_website_creds base64decode()s it back."
   type        = string
   sensitive   = true
 }

@@ -345,7 +345,7 @@ resource "time_static" "flux_app_private_key_rotated_at" {
 #
 # One value, not two. An earlier draft combined this with a client secret; there
 # is no client secret, because GitHub App API auth never uses one -- see the
-# comment on the bundle entry in main.tf.
+# comment on the bundle entry in ci-vars.tf.
 resource "terraform_data" "backstage_app_private_key_version" {
   triggers_replace = [sha256(var.backstage_app_private_key_b64)]
 }
