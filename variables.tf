@@ -37,8 +37,9 @@ variable "workspaces" {
   description = "List of workspace names to create state buckets for (admin state stays local)"
   type        = list(string)
   # Order mirrors the apply layering (oci/infra foundation -> bootstrap ->
-  # apps/dns). `bootstrap` is the operator-run cluster-foundation stack
-  # (terraform/bootstrap) — its backend is terraform-state-bootstrap, and
+  # apps/dns). `bootstrap` is the cluster-foundation stack (terraform/bootstrap),
+  # applied from CI on `main` behind the bootstrap Environments (and locally for
+  # a first bring-up) — its backend is terraform-state-bootstrap, and
   # this list also drives the objectstorage KMS-use policy below.
   #
   # `oci-alarms` removed 2026-09-20: the workspace it backed was retired
@@ -48,8 +49,9 @@ variable "workspaces" {
   # it -- the bucket itself must be emptied first (OCI object storage has no
   # force_destroy; a non-empty bucket fails to delete).
   #
-  # `trust` (2026-11-24) holds the GitHub OIDC identity-propagation trust. It is its own
-  # stack because the PR plan identity cannot read a trust (see tnoff/terraform oci/federation-stacks.tf), so its
+  # `trust` (2026-11-24) holds the identity-propagation trusts (GitHub and the in-cluster
+  # ServiceAccount one) and the in-cluster token-exchange app. It is its own stack because the
+  # PR plan identity cannot read a trust (see tnoff/terraform oci/federation-stacks.tf), so its
   # PR plans run without a refresh; keeping that to one small state keeps the cost small.
   default = ["discord", "infra", "oci", "bootstrap", "apps", "dns", "trust"]
 }
