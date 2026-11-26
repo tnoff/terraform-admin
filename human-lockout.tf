@@ -31,7 +31,7 @@ resource "oci_identity_domains_group" "human_lockout" {
   }
 
   # members and the dynamic-group schema are not returned on read, so every plan
-  # showed them as changes (see the note above the users in github-oidc.tf). The
+  # showed them as changes (see the note above the users in tnoff/terraform oci/federation-stacks.tf). The
   # member is the human account, which this stack does not manage.
   lifecycle {
     ignore_changes = [schemas, members]
