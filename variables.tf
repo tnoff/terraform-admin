@@ -420,6 +420,22 @@ variable "ci_app_private_key_b64" {
   sensitive   = true
 }
 
+variable "changelog_app_id" {
+  type        = number
+  description = "App ID of the changelog GitHub App (contents write only, no workflows). It is the only ruleset bypass actor, because assemble-changelog is the only workflow that pushes straight to a protected `main`; tnoff-ci keeps everything else (renovate, bump-version, tag, trigger-bump-dispatch) without a bypass. Exported so terraform/infra can name it as the bypass actor (actor_type Integration). Not a secret."
+}
+
+variable "changelog_app_client_id" {
+  type        = string
+  description = "Client ID of the changelog GitHub App (Iv23li... form), for actions/create-github-app-token's `client-id` input. Distinct from changelog_app_id, which the ruleset bypass actor keys on. Not a secret."
+}
+
+variable "changelog_app_private_key_b64" {
+  type        = string
+  description = "Base64 of the changelog GitHub App private key PEM, single line, for the same reason as ci_app_private_key_b64. Produce with `base64 -w0 <app>.private-key.pem`; terraform/infra base64decodes it when writing the CHANGELOG_APP_PRIVATE_KEY Actions secret, on the repos that run assemble-changelog only."
+  sensitive   = true
+}
+
 variable "gitlab_api_key" {
   description = "GitLab personal access token for admin user"
   type        = string
