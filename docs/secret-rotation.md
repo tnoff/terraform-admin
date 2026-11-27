@@ -126,16 +126,17 @@ Caveats:
 
 ## GitHub App private keys
 
-Four Apps, deliberately separate so each has its own blast radius.
+Five Apps, deliberately separate so each has its own blast radius.
 
 | Input | App | Where it ends up |
 |---|---|---|
 | `terraform_app_private_key_b64` | `tnoff-terraform` (repo admin) | This stack's own GitHub provider; `terraform`'s CI (`infra/` provider) |
 | `ci_app_private_key_b64` | `tnoff-ci` (Contents + Workflows write, ruleset bypass) | `CI_APP_PRIVATE_KEY` Actions secret in every repo |
+| `changelog_app_private_key_b64` | changelog App (Contents write only; the only ruleset bypass actor once tnoff-ci's is removed) | `CHANGELOG_APP_PRIVATE_KEY` Actions secret on the repos that run `assemble-changelog` only |
 | `flux_app_private_key_b64` | `tnoff-flux` (Contents read on `docker-apps`) | `bootstrap/`: the `.envrc` locally and the `bootstrap-plan` / `bootstrap-apply` Environment secrets in CI (never a repo-level secret) |
 | `backstage_app_private_key_b64` | `tnoff-backstage` (Contents + Metadata read) | `apps/` -> `backstage-github-app-credentials` |
 
-Procedure (all four):
+Procedure (all five):
 
 1. In the App's settings (`https://github.com/settings/apps/<app>`) generate a
    new private key. Leave the old one active.

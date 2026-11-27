@@ -127,6 +127,15 @@ locals {
     TF_VAR_ci_app_client_id       = var.ci_app_client_id
     TF_VAR_ci_app_private_key_b64 = var.ci_app_private_key_b64
 
+    # The changelog App: contents write only, and the only ruleset bypass
+    # actor. assemble-changelog is the one workflow that pushes straight to a
+    # protected `main`, so it is the one that needs the bypass; tnoff-ci above
+    # no longer does. Only infra/ declares these, to write CHANGELOG_APP_* onto
+    # the repos that run assemble-changelog.
+    TF_VAR_changelog_app_id              = var.changelog_app_id
+    TF_VAR_changelog_app_client_id       = var.changelog_app_client_id
+    TF_VAR_changelog_app_private_key_b64 = var.changelog_app_private_key_b64
+
     # tnoff-terraform App -- the identity infra/ manages GitHub with, replacing
     # the human admin PAT. Needs to reach CI as well as .envrc: apply:infra runs
     # the github provider on a hosted runner.
@@ -210,6 +219,7 @@ locals {
     TF_VAR_gitlab_api_key_rotated_at                = time_static.gitlab_api_key_rotated_at.rfc3339
     TF_VAR_ssh_public_key_rotated_at                = time_static.ssh_public_key_rotated_at.rfc3339
     TF_VAR_ci_app_private_key_rotated_at            = time_static.ci_app_private_key_rotated_at.rfc3339
+    TF_VAR_changelog_app_private_key_rotated_at     = time_static.changelog_app_private_key_rotated_at.rfc3339
     TF_VAR_terraform_app_private_key_rotated_at     = time_static.terraform_app_private_key_rotated_at.rfc3339
     TF_VAR_oidc_exchange_client_secret_rotated_at   = time_static.oidc_exchange_client_secret_rotated_at.rfc3339
 
