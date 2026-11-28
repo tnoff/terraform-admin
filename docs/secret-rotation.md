@@ -126,17 +126,19 @@ Caveats:
 
 ## GitHub App private keys
 
-Five Apps, deliberately separate so each has its own blast radius.
+Six Apps, deliberately separate so each has its own blast radius.
 
 | Input | App | Where it ends up |
 |---|---|---|
 | `terraform_app_private_key_b64` | `tnoff-terraform` (repo admin) | This stack's own GitHub provider; `terraform`'s CI (`infra/` provider) |
-| `ci_app_private_key_b64` | `tnoff-ci` (Contents + Workflows write, ruleset bypass) | `CI_APP_PRIVATE_KEY` Actions secret in every repo |
-| `changelog_app_private_key_b64` | changelog App (Contents write only; the only ruleset bypass actor once tnoff-ci's is removed) | `CHANGELOG_APP_PRIVATE_KEY` Actions secret on the repos that run `assemble-changelog` only |
+| `ci_app_private_key_b64` | `tnoff-ci` (Contents + Workflows write; installed on selected repos, not `terraform` or `terraform-admin`; no ruleset bypass) | `CI_APP_PRIVATE_KEY` Actions secret in every repo it is installed on |
+| `changelog_app_private_key_b64` | changelog App (Contents write only; the only ruleset bypass actor) | `CHANGELOG_APP_PRIVATE_KEY` Actions secret on the repos that run `assemble-changelog` only |
 | `flux_app_private_key_b64` | `tnoff-flux` (Contents read on `docker-apps`) | `bootstrap/`: the `.envrc` locally and the `bootstrap-plan` / `bootstrap-apply` Environment secrets in CI (never a repo-level secret) |
 | `backstage_app_private_key_b64` | `tnoff-backstage` (Contents + Metadata read) | `apps/` -> `backstage-github-app-credentials` |
 
-Procedure (all five):
+The sixth, the Renovate App for this repo only, is not an input here (the bootstrap stack cannot own its own repo): its `RENOVATE_APP_CLIENT_ID` and `RENOVATE_APP_PRIVATE_KEY` are hand-set secrets on `tnoff/terraform-admin`.
+
+Procedure (the five above):
 
 1. In the App's settings (`https://github.com/settings/apps/<app>`) generate a
    new private key. Leave the old one active.
@@ -300,6 +302,18 @@ federated and has no password, API key or token. Re-list the users with
 
 ## Cadence
 
-There is no enforced schedule. The secret-age tracker reports each
-credential's age from the timestamps and annotations described above; rotate
-before it flags one, and immediately on suspected exposure.
+Nothing enforces a schedule. The secret-age tracker reports each credential's
+age from the timestamps and annotations described above. Target cadence,
+decided 2026-11-28 (tnoff/terraform#341):
+
+| Credential | Rotate every |
+|---|---|
+| GitHub App private keys (`tnoff-terraform`, `tnoff-ci`, changelog, `tnoff-flux`, `tnoff-backstage`, Renovate for this repo) | 12 months |
+| `OIDC_EXCHANGE_CLIENT_SECRET` (token-exchange app client secret) | 12 months |
+| Everything else operator-rotated | when the tracker flags it, or the vendor expires it |
+
+Rotate sooner on suspected exposure, and whenever a repo that held a copy of a
+key is made public or loses its ruleset. A key rotation touches every repo
+that holds a copy (the tnoff-ci key is written by `terraform/infra`, so land a
+change under `infra/` for it to re-apply), which is why the cadence is yearly
+rather than tighter until those copies move to Vault.
