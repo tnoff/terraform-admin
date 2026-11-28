@@ -35,6 +35,10 @@ jobs:
   #     outside the App's installation (tox-dev/tox, open-telemetry).
   renovate:
     name: Renovate
+    # Paused 2026-11-27 (tnoff/terraform#341): the tnoff-ci App no longer
+    # installs on this repo, so the token mint would fail every Sunday. Renovate
+    # returns with a repo-scoped App once main is protected by a ruleset.
+    if: false
     uses: tnoff/github-workflows/.github/workflows/renovate.yml@d535fd6383e71e4faa84ad87babbda246822014a  # renovate-v1.1.8
     secrets:
       app_client_id: ${{ secrets.CI_APP_CLIENT_ID }}
