@@ -152,11 +152,14 @@ Per-App steps:
   rotation timestamp in `rotation-tracking.tf`.
 - **`tnoff-ci`:** `terraform_repo` here updates `terraform`'s copy. Every other
   repo's `CI_APP_PRIVATE_KEY` is written by `terraform/infra`, so land a
-  change under `infra/` for it to re-apply. **This repo's own `CI_APP_*`
-  secrets are hand-managed** (the bootstrap stack cannot own its own repo):
+  change under `infra/` for it to re-apply. This repo has no `CI_APP_*`
+  secrets: tnoff-ci is not installed here.
+- **Renovate App (this repo only):** its `RENOVATE_APP_CLIENT_ID` and
+  `RENOVATE_APP_PRIVATE_KEY` secrets are hand-managed (the bootstrap stack
+  cannot own its own repo):
 
   ```bash
-  gh secret set CI_APP_PRIVATE_KEY --repo tnoff/terraform-admin < key.pem
+  gh secret set RENOVATE_APP_PRIVATE_KEY --repo tnoff/terraform-admin < key.pem
   ```
 - **`tnoff-flux`:** apply this stack (it updates the Environment secrets), then run
   `terraform/bootstrap` (the CI `bootstrap` workflow, approving the apply); it rewrites the `flux-system-github-app`

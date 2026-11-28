@@ -65,7 +65,7 @@ stack is applied locally, outside CI, so it can always repair what CI stands on.
 `terraform/infra` therefore releases `terraform` and does not manage this repo
 at all (a stack owning its own housing is the bootstrap paradox). Consequences:
 
-- This repo's `CI_APP_*` Actions secrets are managed by nothing; rotate them by
+- This repo's `RENOVATE_APP_*` Actions secrets (the repo-scoped Renovate App) are managed by nothing; rotate them by
   hand (see [secret rotation](https://github.com/tnoff/terraform-admin/blob/main/docs/secret-rotation.md#github-app-private-keys)).
 - `terraform`'s TechDocs publish needs no stored secret: it signs in through the
   GitHub OIDC trust (the identity is in tnoff/terraform `oci/techdocs-publishers.tf`). Any `TECHDOCS_S3_*` secrets still
