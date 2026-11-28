@@ -80,8 +80,12 @@ In `terraform`'s workflows the `.github/actions/terragrunt` composite action
 exports `TF_VAR_*` and `OCI_*` secrets and variables as environment variables.
 It lowercases the `TF_VAR_` suffix (GitHub upper-cases secret names and
 terraform's lookup is case-sensitive), base64-decodes `OCI_API_KEY_B64` to a
-file, and exports `OCI_PRIVATE_KEY_PATH`. The workflows pass the whole
-`secrets`/`vars` context, so a new `TF_VAR_` added here needs no workflow edit.
+file, and exports `OCI_PRIVATE_KEY_PATH`. The `vars` context is passed whole, but
+the secrets are not: each apply job names the secrets its stack needs
+(tnoff/terraform#341), so a new secret `TF_VAR_` added here also needs a line in
+`terraform`'s `ci/stack-secrets.json` and `python3 ci/check-stack-secrets.py --write`
+(see the "Adding a secret" note in that repo's AGENTS.md). Until that lands the
+stack sees the variable unset. The plan matrix still passes everything.
 
 **Local.** The apply writes `generated-output/.envrc` with export lines for the
 same values, plus `OCI_PRIVATE_KEY_PATH` pointing at the PEM on disk. Symlink it
