@@ -16,6 +16,9 @@ locals {
 
     TF_VAR_oci_tenancy_ocid = var.oci_tenancy_ocid
 
+    # The runtime secrets vault, for oci/'s eso-reader policy (tnoff/terraform#341). An OCID, not a secret.
+    TF_VAR_runtime_secrets_vault_ocid = module.runtime_secrets_vault.vault.id
+
     # The GitHub OIDC token-exchange app (tnoff/terraform#135, oidc-exchange.tf). Not
     # OCI_*-prefixed, so the terragrunt action does not export it to the job's
     # environment: the login action takes it as an input. The secret is only useful

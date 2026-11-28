@@ -56,6 +56,12 @@ variable "workspaces" {
   default = ["discord", "infra", "oci", "bootstrap", "apps", "dns", "trust"]
 }
 
+variable "runtime_secrets_vault_name" {
+  description = "Name prefix for the runtime secrets vault and its key (tnoff/terraform#341)"
+  type        = string
+  default     = "runtime-secrets"
+}
+
 variable "vault_name" {
   description = "Name prefix for the vault and KMS key"
   type        = string

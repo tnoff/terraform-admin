@@ -26,6 +26,7 @@
 locals {
   terraform_github_public = [
     "OCI_NAMESPACE",
+    "TF_VAR_runtime_secrets_vault_ocid",
     "TF_VAR_ssh_public_key",
     "TF_VAR_cloudflare_account_id",
     "TF_VAR_ci_app_id",
