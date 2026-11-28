@@ -93,7 +93,7 @@ cd ~/Code/terraform && direnv allow
 ```
 
 Never edit the CI secrets or variables for `tnoff/terraform` by hand; the next
-apply here overwrites them. The exception is this repo's own `CI_APP_*` secrets,
+apply here overwrites them. The exception is this repo's own `RENOVATE_APP_*` secrets,
 which this stack does not manage. (`terraform`'s TechDocs publish uses the OIDC
 trust, so any `TECHDOCS_S3_*` secrets left on it are unused.)
 
