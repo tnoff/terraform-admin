@@ -33,6 +33,37 @@ module "terraform_state_vault" {
 }
 
 # ==============================================================================
+# Runtime secrets vault (tnoff/terraform#341)
+# ==============================================================================
+# Holds the values that exist only to become Kubernetes Secrets. Written here
+# (oci_vault_secret, applied locally), read in-cluster by External Secrets
+# Operator as the `eso-reader` user in tnoff/terraform oci/. A separate vault
+# from the state one so its IAM and key are not coupled to state encryption.
+
+module "runtime_secrets_vault" {
+  source = "git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault?ref=1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972"
+
+  compartment_ocid    = var.oci_tenancy_ocid
+  display_name        = var.runtime_secrets_vault_name
+  key_shape_length    = 32
+  key_shape_algorithm = "AES"
+  freeform_tags = {
+    "Purpose"   = "runtime-secrets"
+    "ManagedBy" = "terraform"
+  }
+}
+
+output "runtime_secrets_vault_id" {
+  description = "OCID of the runtime secrets vault. Pushed to terraform as the TF_VAR_runtime_secrets_vault_ocid Actions variable, for the eso-reader policy in oci/."
+  value       = module.runtime_secrets_vault.vault.id
+}
+
+output "runtime_secrets_key_id" {
+  description = "OCID of the AES key that encrypts the runtime secrets (used by oci_vault_secret)."
+  value       = module.runtime_secrets_vault.kms_key.id
+}
+
+# ==============================================================================
 # Object Storage Buckets (one per workspace)
 # ==============================================================================
 

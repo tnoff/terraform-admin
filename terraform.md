@@ -27,6 +27,7 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
+| <a name="module_runtime_secrets_vault"></a> [runtime\_secrets\_vault](#module\_runtime\_secrets\_vault) | git::https://github.com/tnoff/terraform-modules.git//oci/secret-vault | 1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972 |
 | <a name="module_terraform_gitlab"></a> [terraform\_gitlab](#module\_terraform\_gitlab) | git::https://github.com/tnoff/terraform-modules.git//gitlab/repo | 1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972 |
 | <a name="module_terraform_repo"></a> [terraform\_repo](#module\_terraform\_repo) | git::https://github.com/tnoff/terraform-modules.git//github/repo | 1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972 |
 | <a name="module_terraform_state_buckets"></a> [terraform\_state\_buckets](#module\_terraform\_state\_buckets) | git::https://github.com/tnoff/terraform-modules.git//oci/object-storage-bucket | 1e3c9cb8b8e75868ea5fe9c4f6be588f3f353972 |
@@ -186,6 +187,7 @@
 | <a name="input_oci_region"></a> [oci\_region](#input\_oci\_region) | OCI region | `string` | `"us-ashburn-1"` | no |
 | <a name="input_oci_tenancy_ocid"></a> [oci\_tenancy\_ocid](#input\_oci\_tenancy\_ocid) | OCID of the tenancy (all resources created in root compartment) | `string` | n/a | yes |
 | <a name="input_openweather_api_key"></a> [openweather\_api\_key](#input\_openweather\_api\_key) | Free-tier OpenWeather API key, shared by all three MagicMirror sites. Pushed to terraform's CI and consumed by apps/'s module.openweather\_api\_key, which creates the mirror-openweather-key Secret in each of the mirror-sanjose/mirror-dublin/mirror-concord namespaces directly -- previously hand-sealed into each site's mirror-api-keys SealedSecret (docker-apps), a triple-seal-on-rotation risk in the same shape as discord\_bot\_token, just caught before an incident rather than after one. See docs/projects/sealed-secrets-terraform-admin-migration.md. See bart\_api\_key below for the same treatment applied to the other mirror-api-keys entry. | `string` | n/a | yes |
+| <a name="input_runtime_secrets_vault_name"></a> [runtime\_secrets\_vault\_name](#input\_runtime\_secrets\_vault\_name) | Name prefix for the runtime secrets vault and its key (tnoff/terraform#341) | `string` | `"runtime-secrets"` | no |
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | SSH public key for OKE worker nodes | `string` | n/a | yes |
 | <a name="input_state_bucket_prefix"></a> [state\_bucket\_prefix](#input\_state\_bucket\_prefix) | Prefix for state bucket names | `string` | `"terraform-state"` | no |
 | <a name="input_terraform_admin_group_name"></a> [terraform\_admin\_group\_name](#input\_terraform\_admin\_group\_name) | Name of the Terraform admin group | `string` | `"terraform-administrators"` | no |
@@ -205,4 +207,6 @@
 | <a name="output_oidc_domain_endpoint"></a> [oidc\_domain\_endpoint](#output\_oidc\_domain\_endpoint) | Identity domain URL the token exchange is POSTed to (<this>/oauth2/v1/token) |
 | <a name="output_oidc_exchange_client_id"></a> [oidc\_exchange\_client\_id](#output\_oidc\_exchange\_client\_id) | Client id of the token-exchange app |
 | <a name="output_oidc_exchange_client_secret"></a> [oidc\_exchange\_client\_secret](#output\_oidc\_exchange\_client\_secret) | Client secret of the token-exchange app. Already pushed to tnoff/terraform as OIDC\_EXCHANGE\_CLIENT\_SECRET via terraform\_ci\_vars; this output is for reading it locally. |
+| <a name="output_runtime_secrets_key_id"></a> [runtime\_secrets\_key\_id](#output\_runtime\_secrets\_key\_id) | OCID of the AES key that encrypts the runtime secrets (used by oci\_vault\_secret). |
+| <a name="output_runtime_secrets_vault_id"></a> [runtime\_secrets\_vault\_id](#output\_runtime\_secrets\_vault\_id) | OCID of the runtime secrets vault. Pushed to terraform as the TF\_VAR\_runtime\_secrets\_vault\_ocid Actions variable, for the eso-reader policy in oci/. |
 <!-- END_TF_DOCS -->
